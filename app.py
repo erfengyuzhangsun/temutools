@@ -824,9 +824,9 @@ Temu 店铺风险评估报告
         st.markdown("""
         📞 **需要帮助？**
         
-        微信客服：`temu_tools_helper`
+        微信客服：`溥可倾灵-Temu 利润管家客服`
         
-        邮箱：support@temu-tools.com
+        邮箱：`484478363@qq.com`
         
         工作时间：9:00-21:00
         """)
