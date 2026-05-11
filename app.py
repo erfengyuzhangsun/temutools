@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from io import StringIO
+from datetime import datetime
 from calculator import ProfitCalculator
 from risk_monitor import RiskMonitor
 from config import CATEGORY_COMMISSION_RATES, PRICING_PLANS, PROFIT_WARNING_THRESHOLD
@@ -212,7 +213,7 @@ if st.session_state['first_visit'] and st.session_state['results_df'] is None:
             </div>
             """, unsafe_allow_html=True)
         
-        if st.button("✅ 我知道了，开始使用", use_container_width=True):
+        if st.button("✅ 我知道了，开始使用", width='stretch'):
             st.session_state['first_visit'] = False
             st.rerun()
     
@@ -233,9 +234,9 @@ with st.sidebar:
             df = pd.read_csv(stringio)
             
             st.success(f"✅ 成功读取 **{len(df)}** 条订单数据")
-            st.dataframe(df.head(3), use_container_width=True)
+            st.dataframe(df.head(3), width='stretch')
             
-            if st.button("🚀 开始分析", use_container_width=True, type="primary"):
+            if st.button("🚀 开始分析", width='stretch', type="primary"):
                 with st.spinner("🔄 正在计算利润并分析风险..."):
                     calculator = ProfitCalculator()
                     results_df, summary = calculator.process_csv(df)
@@ -259,7 +260,7 @@ with st.sidebar:
     
     st.header("⚙️ 快速测试")
     
-    if st.button("📊 使用示例数据", use_container_width=True):
+    if st.button("📊 使用示例数据", width='stretch'):
         sample_data = {
             '订单号': [f'ORD202605{i:03d}' for i in range(1, 21)],
             'SKU': ['SKU_BL001', 'SKU_3C001', 'SKU_CZ001', 'SKU_MZ001', 'SKU_WJ001',
@@ -558,7 +559,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
             
             styled_df = filtered_df[display_columns].style.map(highlight_warning, subset=['是否预警'])
             
-            st.dataframe(styled_df, use_container_width=True, height=400)
+            st.dataframe(styled_df, width='stretch', height=400)
             
             csv_filtered = filtered_df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(
@@ -587,7 +588,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
                     return ''
                 
                 styled_sku = sku_summary.style.map(highlight_sku_status, subset=['状态'])
-                st.dataframe(styled_sku, use_container_width=True)
+                st.dataframe(styled_sku, width='stretch')
                 
                 csv_sku = sku_summary.to_csv(index=False).encode('utf-8-sig')
                 st.download_button(
@@ -600,12 +601,12 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
             with col_sku_chart:
                 st.markdown("#### 🏆 TOP 5 盈利 SKU")
                 top5_profit = sku_summary.head(5)[['商品名称', '总利润', '利润率']]
-                st.dataframe(top5_profit, use_container_width=True)
+                st.dataframe(top5_profit, width='stretch')
                 
                 st.markdown("#### ⚠️ 需关注的 SKU")
                 warning_skus = sku_summary[sku_summary['状态'].str.contains('🔴|⚠️')][['商品名称', '利润率', '状态']]
                 if not warning_skus.empty:
-                    st.dataframe(warning_skus, use_container_width=True)
+                    st.dataframe(warning_skus, width='stretch')
                 else:
                     st.success("✅ 所有 SKU 状态良好")
         
@@ -619,7 +620,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
             col_cat_table, col_cat_chart = st.columns([2, 1])
             
             with col_cat_table:
-                st.dataframe(cat_summary, use_container_width=True)
+                st.dataframe(cat_summary, width='stretch')
             
             with col_cat_chart:
                 st.bar_chart(cat_summary.set_index('类目')['总利润'])
@@ -650,7 +651,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
                     return [''] * len(row)
                 
                 display_risk_df = risk_df[['指标名称', '当前值', '安全阈值', '危险阈值', '状态', '紧急程度', '可能处罚']]
-                st.dataframe(display_risk_df, use_container_width=True)
+                st.dataframe(display_risk_df, width='stretch')
             
             with col_penalty:
                 st.markdown("#### 💸 月度罚款风险预测")
@@ -683,7 +684,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
                 st.subheader("🚨 最新预警记录")
                 
                 alerts_df = pd.DataFrame(risk_report['预警记录'])
-                st.dataframe(alerts_df, use_container_width=True)
+                st.dataframe(alerts_df, width='stretch')
             
             st.markdown("---")
             
@@ -750,7 +751,7 @@ Temu 店铺风险评估报告
             data=csv_full,
             file_name='temu_profit_report.csv',
             mime='text/csv',
-            use_container_width=True
+            width='stretch'
         )
     
     with col_export2:
@@ -774,7 +775,7 @@ Temu 店铺风险评估报告
                 data=output,
                 file_name=f'temu_report_{datetime.now().strftime("%Y%m%d")}.xlsx',
                 mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                use_container_width=True
+                width='stretch'
             )
         except Exception as e:
             st.error(f"Excel导出失败：{str(e)}")
@@ -790,7 +791,7 @@ Temu 店铺风险评估报告
         """, unsafe_allow_html=True)
     
     with col_export4:
-        if st.button("🔄 重新分析", use_container_width=True):
+        if st.button("🔄 重新分析", width='stretch'):
             for key in ['results_df', 'summary', 'calculator', 'risk_report', 'monitor']:
                 if key in st.session_state:
                     del st.session_state[key]
