@@ -323,6 +323,71 @@ def show_landing_page():
         """, unsafe_allow_html=True)
     
     st.markdown("---")
+    st.markdown("## 💳 开通方式")
+    
+    col_pay1, col_pay2, col_pay3 = st.columns([1, 2, 1])
+    
+    with col_pay2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    padding: 3rem; border-radius: 20px; text-align: center; 
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+            <h3 style="margin-bottom: 1.5rem; color: #333;">📱 扫码付款，立即开通</h3>
+            
+            <div style="display: flex; justify-content: center; gap: 3rem; margin: 2rem 0;">
+                <div style="text-align: center;">
+                    <div style="width: 200px; height: 200px; background: white; 
+                                border: 3px solid #07C160; border-radius: 15px; 
+                                display: flex; align-items: center; justify-content: center;
+                                margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="text-align: center; color: #999;">
+                            <div style="font-size: 3rem;">📱</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">微信收款码</div>
+                            <div style="font-size: 0.8rem; color: #07C160; font-weight: bold;">（替换为实际图片）</div>
+                        </div>
+                    </div>
+                    <p style="font-weight: bold; color: #07C160; font-size: 1.1rem;">
+                        💚 微信支付
+                    </p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="width: 200px; height: 200px; background: white; 
+                                border: 3px solid #1677FF; border-radius: 15px; 
+                                display: flex; align-items: center; justify-content: center;
+                                margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="text-align: center; color: #999;">
+                            <div style="font-size: 3rem;">📱</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">支付宝收款码</div>
+                            <div style="font-size: 0.8rem; color: #1677FF; font-weight: bold;">（替换为实际图片）</div>
+                        </div>
+                    </div>
+                    <p style="font-weight: bold; color: #1677FF; font-size: 1.1rem;">
+                        💙 支付宝
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 1.5rem; border-radius: 12px; 
+                        margin-top: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                <h4 style="color: #333; margin-bottom: 1rem;">📋 开通流程</h4>
+                <div style="text-align: left; line-height: 2.2; color: #555;">
+                    <strong>步骤 1：</strong>选择套餐，扫码付款<br>
+                    <strong>步骤 2：</strong>保存付款截图<br>
+                    <strong>步骤 3：</strong>发送截图到微信客服 <span style="color: #07C160; font-weight: bold;">temu_tools_helper</span><br>
+                    <strong>步骤 4：</strong>客服确认后开通账号（10分钟内）
+                </div>
+            </div>
+            
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 10px; 
+                        margin-top: 1.5rem; border-left: 4px solid #ffc107;">
+                <strong>⏰ 服务时间：</strong>周一至周六 9:00-21:00<br>
+                <strong>💡 提示：</strong>付款后请备注你的联系方式（手机号/微信号）
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
     st.markdown("## 💬 用户评价")
     
     col_t1, col_t2 = st.columns(2)

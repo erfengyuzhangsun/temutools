@@ -169,6 +169,55 @@ if 'summary' not in st.session_state:
 if 'risk_report' not in st.session_state:
     st.session_state['risk_report'] = None
 
+if 'first_visit' not in st.session_state:
+    st.session_state['first_visit'] = True
+
+if st.session_state['first_visit'] and st.session_state['results_df'] is None:
+    with st.expander("👋 欢迎使用 Temu 利润管家！点击查看使用指南", expanded=True):
+        col_guide1, col_guide2, col_guide3 = st.columns(3)
+        
+        with col_guide1:
+            st.markdown("""
+            <div style="background: #e7f3ff; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #007bff;">
+                <h4>📂 第一步：导入数据</h4>
+                <ol style="font-size: 0.9rem; line-height: 1.8;">
+                    <li>从 Temu 商家后台导出订单 CSV</li>
+                    <li>点击左侧"上传文件"按钮</li>
+                    <li>或点击"使用示例数据"体验</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_guide2:
+            st.markdown("""
+            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ffc107;">
+                <h4>⚙️ 第二步：开始分析</h4>
+                <ol style="font-size: 0.9rem; line-height: 1.8;">
+                    <li>上传文件后点击"开始分析"</li>
+                    <li>等待 10-30 秒完成计算</li>
+                    <li>查看风险仪表盘和利润报告</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col_guide3:
+            st.markdown("""
+            <div style="background: #d4edda; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #28a745;">
+                <h4>📊 第三步：查看报告</h4>
+                <ol style="font-size: 0.9rem; line-height: 1.8;">
+                    <li>顶部查看店铺健康评分</li>
+                    <li>切换 Tab 查看详细报表</li>
+                    <li>导出 Excel/CSV 进行分析</li>
+                </ol>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        if st.button("✅ 我知道了，开始使用", use_container_width=True):
+            st.session_state['first_visit'] = False
+            st.rerun()
+    
+    st.markdown("---")
+
 with st.sidebar:
     st.header("📂 数据导入")
     
@@ -692,35 +741,94 @@ Temu 店铺风险评估报告
     
     st.markdown("---")
     
-    col_export1, col_export2, col_export3 = st.columns(3)
+    col_export1, col_export2, col_export3, col_export4 = st.columns(4)
     
     with col_export1:
         csv_full = results_df.to_csv(index=False).encode('utf-8-sig')
         st.download_button(
-            label="📥 导出完整利润报表 (CSV)",
+            label="📥 导出 CSV",
             data=csv_full,
-            file_name='temu_full_profit_report.csv',
+            file_name='temu_profit_report.csv',
             mime='text/csv',
             use_container_width=True
         )
     
     with col_export2:
+        try:
+            import io
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                results_df.to_excel(writer, sheet_name='利润明细', index=False)
+                
+                summary_df = pd.DataFrame([summary])
+                summary_df.to_excel(writer, sheet_name='汇总数据', index=False)
+                
+                if risk_report:
+                    indicators_df = pd.DataFrame(risk_report['详细指标'])
+                    indicators_df.to_excel(writer, sheet_name='风险指标', index=False)
+            
+            output.seek(0)
+            
+            st.download_button(
+                label="📊 导出 Excel",
+                data=output,
+                file_name=f'temu_report_{datetime.now().strftime("%Y%m%d")}.xlsx',
+                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                use_container_width=True
+            )
+        except Exception as e:
+            st.error(f"Excel导出失败：{str(e)}")
+    
+    with col_export3:
         st.markdown(f"""
         <div style="padding: 1rem; background-color: #e7f3ff; border-radius: 10px; text-align: center;">
-            <h4>📊 数据统计</h4>
-            <p>共分析 <strong>{summary['total_orders']}</strong> 个订单</p>
-            <p>总收入 ¥<strong>{summary['total_revenue']:,.2f}</strong></p>
-            <p>总利润 ¥<strong>{summary['total_profit']:,.2f}</strong></p>
-            {"<p>⚠️ 预计罚款 ¥<strong>" + f"{risk_report['预计月罚款']:,.2f}" + "</strong>" if risk_report and risk_report['预计月罚款'] > 0 else ""}
+            <h4>📈 数据概览</h4>
+            <p style="margin: 0;"><strong>{summary['total_orders']}</strong> 单</p>
+            <p style="margin: 0;">收入 ¥<strong>{summary['total_revenue']:,.0f}</strong></p>
+            <p style="margin: 0;">利润 ¥<strong>{summary['total_profit']:,.0f}</strong></p>
         </div>
         """, unsafe_allow_html=True)
     
-    with col_export3:
+    with col_export4:
         if st.button("🔄 重新分析", use_container_width=True):
             for key in ['results_df', 'summary', 'calculator', 'risk_report', 'monitor']:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()
+    
+    st.markdown("---")
+    
+    col_tip1, col_tip2, col_tip3 = st.columns(3)
+    
+    with col_tip1:
+        st.info("""
+        💡 **使用提示**
+        
+        - 数据仅在本地处理，不会上传
+        - 建议每周分析一次订单数据
+        - 关注利润率低于5%的SKU
+        """)
+    
+    with col_tip2:
+        st.success("""
+        ✅ **功能特性**
+        
+        - 10+项费用精确拆分
+        - 6大风险指标实时监控
+        - SKU级深度利润分析
+        - 一键导出完整报表
+        """)
+    
+    with col_tip3:
+        st.markdown("""
+        📞 **需要帮助？**
+        
+        微信客服：`temu_tools_helper`
+        
+        邮箱：support@temu-tools.com
+        
+        工作时间：9:00-21:00
+        """)
 
 else:
     st.markdown("""
