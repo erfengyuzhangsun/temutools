@@ -8,8 +8,16 @@ def show_landing_page():
         layout="wide"
     )
     
-    query_params = st.query_params
-    selected_plan = query_params.get("plan", [""])[0] if "plan" in query_params else ""
+    try:
+        query_params = st.query_params
+        selected_plan = query_params.get("plan", [""])[0] if "plan" in query_params else ""
+    except Exception as e:
+        selected_plan = ""
+    
+    if 'order_submitted' not in st.session_state:
+        st.session_state['order_submitted'] = False
+    if 'order_info' not in st.session_state:
+        st.session_state['order_info'] = {}
     
     st.markdown("""
     <style>
@@ -429,7 +437,7 @@ def show_landing_page():
     st.markdown("---")
     
     # ==================== 6️⃣ 💰 定价方案 + 💳 收款码 ====================
-    st.markdown("## 💎 选择适合你的套餐", help=None, anchor="pricing")
+    st.markdown("## 💎 选择适合你的套餐")
     
     col_p1, col_p2, col_p3 = st.columns(3)
     
@@ -517,7 +525,7 @@ def show_landing_page():
         try:
             st.image("https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/WeChat_20260512015412.png", width=230, caption="微信扫码付款")
         except Exception as e:
-            st.error(f"微信收款码加载失败：{str(e)}")
+            st.warning("⚠️ 微信收款码加载失败，请刷新页面或联系客服")
         st.markdown("</div>", unsafe_allow_html=True)
     
     with col_qr2:
@@ -525,7 +533,7 @@ def show_landing_page():
         try:
             st.image("https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/paypal_20260512015446.jpg", width=230, caption="支付宝扫码付款")
         except Exception as e:
-            st.error(f"支付宝收款码加载失败：{str(e)}")
+            st.warning("⚠️ 支付宝收款码加载失败，请刷新页面或联系客服")
         st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("""
@@ -624,6 +632,11 @@ def show_landing_page():
             </p>
         </div>
         """, unsafe_allow_html=True)
+        
+        if st.button("📝 提交新订单", use_container_width=True, type="secondary"):
+            st.session_state['order_submitted'] = False
+            st.session_state['order_info'] = {}
+            st.rerun()
     
     st.markdown("</div>", unsafe_allow_html=True)
     
