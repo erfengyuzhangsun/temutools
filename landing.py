@@ -348,10 +348,9 @@ def show_landing_page():
 
             try:
                 st.image(
-                    "WeChat_20260512015412.png",
+                    "https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/WeChat_20260512015412.png",
                     width=250,
-                    caption="微信扫码付款",
-                    width_mode="fixed"
+                    caption="微信扫码付款"
                 )
             except Exception as e:
                 st.error(f"微信收款码加载失败：{str(e)}")
@@ -368,10 +367,9 @@ def show_landing_page():
 
             try:
                 st.image(
-                    "paypal_20260512015446.jpg",
+                    "https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/paypal_20260512015446.jpg",
                     width=250,
-                    caption="支付宝扫码付款",
-                    width_mode="fixed"
+                    caption="支付宝扫码付款"
                 )
             except Exception as e:
                 st.error(f"支付宝收款码加载失败：{str(e)}")
