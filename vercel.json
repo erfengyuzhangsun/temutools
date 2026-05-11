@@ -1,1 +1,1 @@
-{"version": 2, "builds": [{"src": "app.py", "use": "@vercel/python"}], "routes": [{"src": "/(.*)", "dest": "app.py"}], "env": {"STREAMLIT_SERVER_PORT": "3000", "STREAMLIT_SERVER_ADDRESS": "0.0.0.0"}}
+{"version": 2, "builds": [{"src": "api/index.py", "use": "@vercel/python@5"}], "routes": [{"src": "/(.*)", "dest": "api/index.py"}], "env": {"PYTHON_VERSION": "3.13"}}
