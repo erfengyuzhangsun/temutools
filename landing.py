@@ -625,7 +625,7 @@ def show_landing_page():
             <p style="margin: 0.5rem 0; color: #155724; font-size: 1rem; line-height: 1.8;">
                 感谢您选择 <strong>{order.get('plan', 'Temu 商家风控与利润管家')}</strong>！<br>
                 我们将在 <strong style="color: #dc3545;">10分钟内</strong> 通过手机号 <strong>{order.get('phone', '')}</strong> 联系您<br>
-                如需加急开通，请添加微信：<strong style="color: #07C160;">temu_tools_helper</strong>
+                如需加急开通，请添加微信：<strong style="color: #07C160;">溥可倾灵-Temu 利润管家客服</strong>
             </p>
             <p style="margin: 1rem 0 0 0; color: #666; font-size: 0.9rem;">
                 ⏰ 订单时间：{order.get('timestamp', '')}
@@ -729,7 +729,7 @@ def show_landing_page():
             ("Q: 支持哪些数据格式？", "A: 支持从 Temu 商家后台直接导出的 CSV 文件，包含订单明细和结算数据"),
             ("Q: 数据安全吗？", "A: ✅ **绝对安全！** 所有数据仅在您的本地浏览器处理，**不会上传到我们的服务器**。您的数据完全由您自己掌控。"),
             ("Q: 费用规则会更新吗？", "A: ✅ 是的！我们**每周更新** Temu 最新费用规则，确保计算结果始终准确。这是我们的核心竞争力之一！"),
-            ("Q: 如何联系客服？", "A: 微信：**temu_tools_helper** 或邮箱：**484478363@qq.com**，工作时间内 10 分钟内回复")
+            ("Q: 如何联系客服？", "A: 微信：**溥可倾灵-Temu 利润管家客服** 或邮箱：**484478363@qq.com**，工作时间内 10 分钟内回复")
         ]
         
         for question, answer in faq_data:
@@ -747,7 +747,7 @@ def show_landing_page():
         st.markdown("### 📞 联系我们")
         
         contact_data = [
-            ("💬 微信客服", "temu_tools_helper", '添加好友后发送「咨询」即可', "#07C160"),
+            ("💬 微信客服", "溥可倾灵-Temu 利润管家客服", '添加好友后发送「咨询」即可', "#07C160"),
             ("📧 邮箱联系", "484478363@qq.com", "24小时内回复", "#667eea"),
             ("⏰ 工作时间", "周一至周六 9:00 - 21:00", "节假日可能延迟回复", "#333")
         ]
