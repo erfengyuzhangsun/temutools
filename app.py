@@ -556,7 +556,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
                              '基础佣金', '支付处理费', '绩效附加费', '退货损耗', '运费罚款',
                              '总扣费', '实际到账', '利润', '利润率%', '是否预警']
             
-            styled_df = filtered_df[display_columns].style.applymap(highlight_warning, subset=['是否预警'])
+            styled_df = filtered_df[display_columns].style.map(highlight_warning, subset=['是否预警'])
             
             st.dataframe(styled_df, use_container_width=True, height=400)
             
@@ -586,7 +586,7 @@ if st.session_state['results_df'] is not None and st.session_state['summary'] is
                         return 'background-color: #fff3cd'
                     return ''
                 
-                styled_sku = sku_summary.style.applymap(highlight_sku_status, subset=['状态'])
+                styled_sku = sku_summary.style.map(highlight_sku_status, subset=['状态'])
                 st.dataframe(styled_sku, use_container_width=True)
                 
                 csv_sku = sku_summary.to_csv(index=False).encode('utf-8-sig')
