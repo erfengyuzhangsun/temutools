@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 query_params = st.query_params
-current_page = query_params.get("page", ["app"])[0] if "page" in query_params else "app"
+current_page = query_params.get("page", ["landing"])[0] if "page" in query_params else "landing"
 
 if current_page == "landing":
     import landing
