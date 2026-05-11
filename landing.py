@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 
 def show_landing_page():
     st.set_page_config(
@@ -6,6 +7,9 @@ def show_landing_page():
         page_icon="💰",
         layout="wide"
     )
+    
+    query_params = st.query_params
+    selected_plan = query_params.get("plan", [""])[0] if "plan" in query_params else ""
     
     st.markdown("""
     <style>
@@ -425,7 +429,7 @@ def show_landing_page():
     st.markdown("---")
     
     # ==================== 6️⃣ 💰 定价方案 + 💳 收款码 ====================
-    st.markdown("## 💎 选择适合你的套餐")
+    st.markdown("## 💎 选择适合你的套餐", help=None, anchor="pricing")
     
     col_p1, col_p2, col_p3 = st.columns(3)
     
@@ -437,7 +441,7 @@ def show_landing_page():
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; color: #555; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 利润计算功能<br>✅ 基础费用拆分<br>✅ CSV数据导入<br>✅ 导出基础报表<br>❌ 风险预警系统<br>❌ 高级数据分析
             </ul>
-            <button class="cta-button-secondary">选择基础版</button>
+            <a href="?page=landing&plan=basic#payment" class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block;">选择基础版</a>
         </div>
         """, unsafe_allow_html=True)
     
@@ -450,7 +454,7 @@ def show_landing_page():
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 所有基础版功能<br>✅ 完整风险预警系统<br>✅ 6大指标实时监控<br>✅ 高级数据分析报告<br>✅ SKU级深度分析<br>✅ 优先客服支持
             </ul>
-            <button class="cta-button-primary" style="background: white !important; color: #667eea !important;">⭐ 立即开通</button>
+            <a href="?page=landing&plan=pro#payment" class="cta-button-primary" style="background: white !important; color: #667eea !important; display: inline-block; text-decoration: none;">⭐ 立即开通</a>
         </div>
         """, unsafe_allow_html=True)
     
@@ -463,12 +467,12 @@ def show_landing_page():
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; color: #555; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 所有专业版功能<br>✅ 终身免费更新<br>✅ 新功能优先体验<br>✅ 专属客户经理<br>✅ 定制化需求支持<br>✅ API接口权限
             </ul>
-            <button class="cta-button-secondary" style="background: #28a745 !important;">购买终身版</button>
+            <a href="?page=landing&plan=lifetime#payment" class="cta-button-secondary" style="background: #28a745 !important; color: white !important; display: inline-block; text-decoration: none;">购买终身版</a>
         </div>
         """, unsafe_allow_html=True)
     
     # ==================== 💳 扫码付款区域 ====================
-    st.markdown("<div class='payment-section'>", unsafe_allow_html=True)
+    st.markdown("<div class='payment-section' id='payment'>", unsafe_allow_html=True)
     
     st.markdown("""
     <h2 style="text-align: center; color: #333; margin-bottom: 0.2rem; font-size: 1.35rem;">📱 扫码付款，立即开通</h2>
@@ -480,6 +484,31 @@ def show_landing_page():
         <span class="guarantee-badge">✅ 7天无理由退款保证 | 不满意全额退款</span>
     </div>
     """, unsafe_allow_html=True)
+    
+    if selected_plan:
+        plan_info = {
+            "basic": {"name": "基础版", "price": "¥39.9/月", "color": "#6c757d"},
+            "pro": {"name": "专业版（⭐推荐）", "price": "¥79.2/季度（原价¥99）", "color": "#667eea"},
+            "lifetime": {"name": "终身版", "price": "¥399 一次付费", "color": "#28a745"}
+        }
+        
+        plan = plan_info.get(selected_plan, plan_info["pro"])
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, {plan['color']}15 0%, {plan['color']}08 100%); 
+                    border: 2px solid {plan['color']}; 
+                    padding: 1rem; 
+                    border-radius: 12px; 
+                    margin-bottom: 1.5rem;
+                    text-align: center;">
+            <h3 style="margin: 0 0 0.5rem 0; color: {plan['color']}; font-size: 1.15rem;">
+                ✅ 您选择的是：<strong>{plan['name']}</strong>
+            </h3>
+            <p style="margin: 0; color: {plan['color']}; font-size: 1.3rem; font-weight: bold;">
+                💰 {plan['price']}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     col_qr1, col_qr2 = st.columns(2)
     
@@ -528,6 +557,73 @@ def show_landing_page():
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.markdown("""<h3 style="color: #333; margin-top: 1.5rem; margin-bottom: 1rem; text-align: center; font-size: 1.15rem;">📝 付款后请填写您的联系方式</h3>""", unsafe_allow_html=True)
+    
+    with st.form("payment_form"):
+        col_form1, col_form2 = st.columns(2)
+        
+        with col_form1:
+            contact_name = st.text_input("👤 您的姓名 *", placeholder="张三")
+            phone = st.text_input("📱 手机号码 *", placeholder="13800138000")
+        
+        with col_form2:
+            wechat = st.text_input("💬 微信号", placeholder="可选，方便我们联系您")
+            
+            plan_options = ["基础版 - ¥39.9/月", "专业版 - ¥79.2/季度（推荐）", "终身版 - ¥399"]
+            default_plan = 1 if not selected_plan else (
+                0 if selected_plan == "basic" else (1 if selected_plan == "pro" else 2)
+            )
+            selected_plan_form = st.selectbox(
+                "📦 选择套餐 *",
+                plan_options,
+                index=default_plan
+            )
+        
+        notes = st.text_area("📝 备注（可选）", placeholder="如有特殊需求请在此说明...")
+        
+        submitted = st.form_submit_button(
+            "✅ 我已付款，提交订单",
+            use_container_width=True,
+            type="primary"
+        )
+        
+        if submitted:
+            if not contact_name or not phone:
+                st.error("❌ 请填写姓名和手机号！")
+            else:
+                st.session_state['order_submitted'] = True
+                st.session_state['order_info'] = {
+                    'name': contact_name,
+                    'phone': phone,
+                    'wechat': wechat,
+                    'plan': selected_plan_form,
+                    'notes': notes,
+                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+    
+    if st.session_state.get('order_submitted'):
+        order = st.session_state.get('order_info', {})
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); 
+                    border: 2px solid #28a745; 
+                    padding: 1.5rem; 
+                    border-radius: 12px; 
+                    margin-top: 1.5rem;
+                    text-align: center;">
+            <h3 style="margin: 0 0 1rem 0; color: #28a745; font-size: 1.4rem;">
+                🎉 订单提交成功！
+            </h3>
+            <p style="margin: 0.5rem 0; color: #155724; font-size: 1rem; line-height: 1.8;">
+                感谢您选择 <strong>{order.get('plan', 'Temu 商家风控与利润管家')}</strong>！<br>
+                我们将在 <strong style="color: #dc3545;">10分钟内</strong> 通过手机号 <strong>{order.get('phone', '')}</strong> 联系您<br>
+                如需加急开通，请添加微信：<strong style="color: #07C160;">temu_tools_helper</strong>
+            </p>
+            <p style="margin: 1rem 0 0 0; color: #666; font-size: 0.9rem;">
+                ⏰ 订单时间：{order.get('timestamp', '')}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
     
