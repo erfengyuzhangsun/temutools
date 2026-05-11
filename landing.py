@@ -345,17 +345,17 @@ def show_landing_page():
                 </p>
             </div>
             """, unsafe_allow_html=True)
-            
+
             try:
                 st.image(
                     "WeChat_20260512015412.png",
                     width=250,
                     caption="微信扫码付款",
-                    use_container_width=False
+                    width_mode="fixed"
                 )
             except Exception as e:
                 st.error(f"微信收款码加载失败：{str(e)}")
-                st.markdown("� 微信收款码（图片加载失败）")
+                st.markdown("📱 微信收款码（图片加载失败）")
         
         with col_qr2:
             st.markdown("""
@@ -365,17 +365,17 @@ def show_landing_page():
                 </p>
             </div>
             """, unsafe_allow_html=True)
-            
+
             try:
                 st.image(
                     "paypal_20260512015446.jpg",
                     width=250,
                     caption="支付宝扫码付款",
-                    use_container_width=False
+                    width_mode="fixed"
                 )
             except Exception as e:
                 st.error(f"支付宝收款码加载失败：{str(e)}")
-                st.markdown("� 支付宝收款码（图片加载失败）")
+                st.markdown("📱 支付宝收款码（图片加载失败）")
         
         st.markdown("</div>", unsafe_allow_html=True)
         
@@ -465,8 +465,8 @@ def show_landing_page():
     with col_faq2:
         st.markdown("### 📞 联系我们")
         st.markdown("""
-        **微信客服：** temu_tools_helper  
-        **邮箱：** support@temu-tools.com  
+        **微信客服：** temu_tools_helper
+        **邮箱：** 484478363@qq.com
         **工作时间：** 周一至周六 9:00-21:00
         
         ---
