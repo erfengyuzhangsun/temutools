@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime
-from db import save_landing_order
+from db import save_landing_order, initialize_database
 
 PLAN_PRICES = {
     "基础版 - ¥39.9/月": 39.9,
@@ -9,6 +9,12 @@ PLAN_PRICES = {
 }
 
 def show_landing_page():
+    if 'db_initialized' not in st.session_state:
+        try:
+            initialize_database()
+            st.session_state['db_initialized'] = True
+        except Exception:
+            pass
     st.set_page_config(
         page_title="Temu 商家风控与利润管家 - 产品首页",
         page_icon="💰",
