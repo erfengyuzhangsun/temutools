@@ -121,7 +121,7 @@ def show_login_page():
     st.markdown("""
     <div style="text-align: center; margin-top: 1rem;">
         <p style="color: #999; font-size: 0.85rem;">
-            还没有访问密码？请联系微信：<strong>溥可倾灵-Temu 利润管家客服</strong>
+            还没有访问密码？请联系微信：<strong>returnHuangMuNing</strong>
         </p>
     </div>
     """, unsafe_allow_html=True)

@@ -901,7 +901,7 @@ Temu 店铺风险评估报告
         st.markdown("""
         📞 **需要帮助？**
         
-        微信客服：`溥可倾灵-Temu 利润管家客服`
+        微信客服：`returnHuangMuNing`
         
         邮箱：`484478363@qq.com`
         
