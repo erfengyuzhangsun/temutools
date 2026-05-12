@@ -551,7 +551,38 @@ def export_user_data(user_id: int) -> Dict[str, pd.DataFrame]:
     return result
 
 
+def ensure_orders_table():
+    if DB_MODE == "sqlite":
+        sql = """
+            CREATE TABLE IF NOT EXISTS temu_orders (
+                order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contact_name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                wechat TEXT DEFAULT '',
+                plan_name TEXT NOT NULL,
+                amount REAL NOT NULL DEFAULT 0.0,
+                notes TEXT,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+    else:
+        sql = """CREATE TABLE IF NOT EXISTS temu_orders (
+            order_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+            contact_name VARCHAR(100) NOT NULL,
+            phone VARCHAR(50) NOT NULL,
+            wechat VARCHAR(100) DEFAULT '',
+            plan_name VARCHAR(100) NOT NULL,
+            amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            notes TEXT,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"""
+    execute_query(sql)
+
+
 def save_landing_order(contact_name: str, phone: str, wechat: str, plan_name: str, amount: float, notes: str = "") -> int:
+    ensure_orders_table()
     return execute_query(
         """INSERT INTO temu_orders (contact_name, phone, wechat, plan_name, amount, notes, status)
            VALUES (?, ?, ?, ?, ?, ?, 'pending')""",
@@ -560,6 +591,7 @@ def save_landing_order(contact_name: str, phone: str, wechat: str, plan_name: st
 
 
 def list_all_orders() -> List[Dict]:
+    ensure_orders_table()
     return execute_query(
         """SELECT order_id, contact_name, phone, wechat, plan_name, amount, notes, status, created_at
            FROM temu_orders ORDER BY created_at DESC""",
@@ -568,6 +600,7 @@ def list_all_orders() -> List[Dict]:
 
 
 def list_pending_orders() -> List[Dict]:
+    ensure_orders_table()
     return execute_query(
         """SELECT order_id, contact_name, phone, wechat, plan_name, amount, notes, status, created_at
            FROM temu_orders WHERE status = 'pending' ORDER BY created_at DESC""",
@@ -576,6 +609,7 @@ def list_pending_orders() -> List[Dict]:
 
 
 def mark_order_completed(order_id: int):
+    ensure_orders_table()
     execute_query(
         "UPDATE temu_orders SET status = 'completed' WHERE order_id = ?",
         (order_id,)
@@ -583,6 +617,7 @@ def mark_order_completed(order_id: int):
 
 
 def delete_order(order_id: int):
+    ensure_orders_table()
     execute_query(
         "DELETE FROM temu_orders WHERE order_id = ?",
         (order_id,)
