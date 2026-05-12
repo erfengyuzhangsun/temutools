@@ -1,10 +1,43 @@
 import streamlit as st
 import pandas as pd
 from io import StringIO
-from datetime import datetime
+from datetime import datetime, date
 from calculator import ProfitCalculator
 from risk_monitor import RiskMonitor
 from config import CATEGORY_COMMISSION_RATES, PRICING_PLANS, PROFIT_WARNING_THRESHOLD
+
+from db import initialize_database, get_or_create_shop, save_profit_stats, save_sku_profits, save_risk_metrics
+from auth import is_authenticated, get_current_user, get_user_id, get_user_info, logout, show_login_page
+from admin import show_admin_panel, is_admin
+from logger import log_action, log_error, logger
+
+
+def save_analysis_to_db(user_id, summary, results_df, risk_report):
+    try:
+        shop_id = get_or_create_shop(user_id)
+        save_profit_stats(user_id, shop_id, summary)
+        sku_df = results_df.groupby(['SKU', '商品名称', '类目']).agg({
+            '订单号': 'count', '买家支付': 'sum', '成本价': 'sum',
+            '利润': 'sum', '总扣费': 'sum'
+        }).reset_index()
+        sku_df.columns = ['SKU', '商品名称', '类目', '订单数', '买家支付', '成本价', '利润', '总扣费']
+        sku_df['利润率'] = (sku_df['利润'] / sku_df['成本价'].replace(0, 0.01) * 100).round(2)
+        save_sku_profits(user_id, shop_id, sku_df)
+        save_risk_metrics(user_id, shop_id, risk_report)
+        log_action("分析结果已保存到数据库", user_id)
+        return True
+    except Exception as e:
+        log_error(f"保存分析结果失败: {e}", user_id)
+        return False
+
+
+if 'db_initialized' not in st.session_state:
+    try:
+        initialize_database()
+        st.session_state['db_initialized'] = True
+        log_action("数据库初始化完成")
+    except Exception as e:
+        log_error(f"数据库初始化失败: {e}")
 
 st.set_page_config(
     page_title="Temu 商家风控与利润管家",
@@ -19,6 +52,10 @@ current_page = query_params.get("page", ["landing"])[0] if "page" in query_param
 if current_page == "landing":
     import landing
     landing.show_landing_page()
+    st.stop()
+
+if not is_authenticated():
+    show_login_page()
     st.stop()
 
 st.markdown("""
@@ -220,6 +257,24 @@ if st.session_state['first_visit'] and st.session_state['results_df'] is None:
     st.markdown("---")
 
 with st.sidebar:
+    user_info = get_user_info()
+    if user_info:
+        plan_names = {'basic': '基础版', 'pro': '专业版', 'lifetime': '终身版'}
+        plan_display = plan_names.get(user_info.get('plan_type', ''), user_info.get('plan_type', ''))
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+                    padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;
+                    border: 1px solid #667eea30;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                <span style="font-size: 1.2rem;">👤</span>
+                <span style="font-weight: bold; color: #333; font-size: 0.9rem;">{user_info.get('wechat_nickname', '用户')}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #667eea; font-weight: 500;">
+                {plan_display}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.header("📂 数据导入")
     
     uploaded_file = st.file_uploader(
@@ -251,6 +306,11 @@ with st.sidebar:
                     st.session_state['original_df'] = df
                     st.session_state['risk_report'] = risk_report
                     st.session_state['monitor'] = monitor
+
+                    user_id = get_user_id()
+                    if user_id:
+                        save_analysis_to_db(user_id, summary, results_df, risk_report)
+
                     st.rerun()
                     
         except Exception as e:
@@ -323,6 +383,11 @@ with st.sidebar:
             st.session_state['calculator'] = calculator
             st.session_state['risk_report'] = risk_report
             st.session_state['monitor'] = monitor
+
+            user_id = get_user_id()
+            if user_id:
+                save_analysis_to_db(user_id, summary, results_df, risk_report)
+
             st.rerun()
     
     st.markdown("---")
@@ -333,6 +398,18 @@ with st.sidebar:
     3️⃣ 查看风险仪表盘 + 利润报告  
     4️⃣ 导出报表进行进一步分析
     """)
+
+    st.markdown("---")
+    with st.expander("⚙️ 管理", expanded=False):
+        if st.button("🔐 管理员控制台", use_container_width=True):
+            st.session_state['show_admin'] = not st.session_state.get('show_admin', False)
+        if st.button("🚪 退出登录", use_container_width=True, type="secondary"):
+            logout()
+            st.rerun()
+
+if st.session_state.get('show_admin', False):
+    show_admin_panel()
+    st.stop()
 
 if st.session_state['results_df'] is not None and st.session_state['summary'] is not None:
     results_df = st.session_state['results_df']
