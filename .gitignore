@@ -19,3 +19,4 @@ build/
 *.egg-info/
 *.db
 logs/
+Trae*.md
