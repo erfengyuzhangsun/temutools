@@ -4,7 +4,7 @@ from datetime import datetime, date
 from db import (
     list_all_users, add_user, extend_user_expiry, toggle_user_active,
     delete_expired_user_data, export_user_data, get_user_history_stats,
-    get_user_history_risks
+    get_user_history_risks, list_all_orders, mark_order_completed, delete_order
 )
 from auth import get_current_user, get_user_id
 
@@ -78,7 +78,7 @@ def show_admin_panel():
             st.session_state['is_admin'] = False
             st.rerun()
 
-    tab_add, tab_list, tab_maintain = st.tabs(["➕ 添加用户", "📋 用户列表", "🔧 系统维护"])
+    tab_add, tab_list, tab_orders, tab_maintain = st.tabs(["➕ 添加用户", "📋 用户列表", "📦 订单管理", "🔧 系统维护"])
 
     with tab_add:
         st.markdown("### 添加新付费用户")
@@ -191,6 +191,56 @@ def show_admin_panel():
                         st.error(f"清除失败：{str(e)}")
         else:
             st.info("暂无用户数据")
+
+    with tab_orders:
+        st.markdown("### 📦 待处理订单")
+        pending = list_all_orders()
+        if pending:
+            order_data = []
+            for o in pending:
+                status_display = "🕐 待处理" if o.get('status') == 'pending' else "✅ 已处理"
+                order_data.append({
+                    'ID': o.get('order_id'),
+                    '姓名': o.get('contact_name', ''),
+                    '手机号': o.get('phone', ''),
+                    '微信号': o.get('wechat', ''),
+                    '套餐': o.get('plan_name', ''),
+                    '金额(¥)': o.get('amount', 0),
+                    '备注': (str(o.get('notes', ''))[:30] + '...') if o.get('notes') and len(str(o.get('notes', ''))) > 30 else str(o.get('notes', '')),
+                    '状态': status_display,
+                    '时间': str(o.get('created_at', ''))[:19],
+                })
+            df_orders = pd.DataFrame(order_data)
+            st.dataframe(df_orders, use_container_width=True, hide_index=True)
+
+            st.markdown("---")
+            st.markdown("### 订单操作")
+
+            pending_ids = [o['order_id'] for o in pending if o.get('status') == 'pending']
+            if pending_ids:
+                col_o1, col_o2 = st.columns(2)
+                with col_o1:
+                    complete_id = st.number_input("标记为已处理（输入订单ID）", min_value=1, key="complete_order")
+                    if st.button("✅ 标记已处理", use_container_width=True):
+                        try:
+                            mark_order_completed(complete_id)
+                            st.success(f"订单 {complete_id} 已标记为已处理")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"操作失败：{str(e)}")
+                with col_o2:
+                    delete_id = st.number_input("删除订单（输入订单ID）", min_value=1, key="delete_order")
+                    if st.button("🗑️ 删除订单", use_container_width=True, type="secondary"):
+                        try:
+                            delete_order(delete_id)
+                            st.success(f"订单 {delete_id} 已删除")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"删除失败：{str(e)}")
+            else:
+                st.success("🎉 所有订单已处理完毕！")
+        else:
+            st.info("暂无订单数据")
 
     with tab_maintain:
         st.markdown("### 系统维护")

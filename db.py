@@ -222,6 +222,19 @@ def get_table_schemas():
                 UNIQUE KEY uk_user_shop_date (user_id, shop_id, record_date)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """,
+        "temu_orders": """
+            CREATE TABLE IF NOT EXISTS temu_orders (
+                order_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                contact_name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+                phone VARCHAR(50) NOT NULL COMMENT '手机号',
+                wechat VARCHAR(100) DEFAULT '' COMMENT '微信号',
+                plan_name VARCHAR(100) NOT NULL COMMENT '套餐名称',
+                amount DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '订单金额',
+                notes TEXT COMMENT '备注',
+                status VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT '状态: pending待处理/completed已处理',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """,
     }
 
 
@@ -536,3 +549,41 @@ def export_user_data(user_id: int) -> Dict[str, pd.DataFrame]:
         if risks:
             result[f"{name}_风险记录"] = pd.DataFrame(risks)
     return result
+
+
+def save_landing_order(contact_name: str, phone: str, wechat: str, plan_name: str, amount: float, notes: str = "") -> int:
+    return execute_query(
+        """INSERT INTO temu_orders (contact_name, phone, wechat, plan_name, amount, notes, status)
+           VALUES (?, ?, ?, ?, ?, ?, 'pending')""",
+        (contact_name, phone, wechat, plan_name, amount, notes)
+    )
+
+
+def list_all_orders() -> List[Dict]:
+    return execute_query(
+        """SELECT order_id, contact_name, phone, wechat, plan_name, amount, notes, status, created_at
+           FROM temu_orders ORDER BY created_at DESC""",
+        fetch=True
+    )
+
+
+def list_pending_orders() -> List[Dict]:
+    return execute_query(
+        """SELECT order_id, contact_name, phone, wechat, plan_name, amount, notes, status, created_at
+           FROM temu_orders WHERE status = 'pending' ORDER BY created_at DESC""",
+        fetch=True
+    )
+
+
+def mark_order_completed(order_id: int):
+    execute_query(
+        "UPDATE temu_orders SET status = 'completed' WHERE order_id = ?",
+        (order_id,)
+    )
+
+
+def delete_order(order_id: int):
+    execute_query(
+        "DELETE FROM temu_orders WHERE order_id = ?",
+        (order_id,)
+    )

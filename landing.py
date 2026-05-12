@@ -1,5 +1,12 @@
 import streamlit as st
 from datetime import datetime
+from db import save_landing_order
+
+PLAN_PRICES = {
+    "基础版 - ¥39.9/月": 39.9,
+    "专业版 - ¥79.2/季度（推荐）": 79.2,
+    "终身版 - ¥399": 399.0,
+}
 
 def show_landing_page():
     st.set_page_config(
@@ -609,6 +616,18 @@ def show_landing_page():
                     'notes': notes,
                     'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
+                order_amount = PLAN_PRICES.get(selected_plan_form, 0.0)
+                try:
+                    save_landing_order(
+                        contact_name=contact_name,
+                        phone=phone,
+                        wechat=wechat or "",
+                        plan_name=selected_plan_form,
+                        amount=order_amount,
+                        notes=notes or ""
+                    )
+                except Exception as e:
+                    print(f"保存订单失败: {e}")
     
     if st.session_state.get('order_submitted'):
         order = st.session_state.get('order_info', {})
