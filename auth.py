@@ -97,8 +97,8 @@ def show_login_page():
 
     st.markdown("""
     <div class="login-container">
-        <div style="font-size: 3rem; margin-bottom: 0.5rem;">💰</div>
-        <div class="login-title">Temu 商家风控与利润管家</div>
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🤖</div>
+        <div class="login-title">Temu全托管自动化运营平台</div>
         <div class="login-subtitle">请输入访问密码以继续使用</div>
     </div>
     """, unsafe_allow_html=True)

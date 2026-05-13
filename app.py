@@ -58,15 +58,19 @@ if 'db_initialized' not in st.session_state:
         log_error(f"数据库初始化失败: {e}")
 
 st.set_page_config(
-    page_title="Temu 商家风控与利润管家",
-    page_icon="💰",
+    page_title="Temu全托管自动化运营平台",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-query_params = st.query_params
-raw_page = query_params.get("page", ["landing"])
-current_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
+if "page" not in st.session_state:
+    query_params = st.query_params
+    raw_page = query_params.get("page", ["app"])
+    initial_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
+    st.session_state["page"] = initial_page
+
+current_page = st.session_state["page"]
 
 if current_page == "landing":
     import landing
@@ -95,6 +99,212 @@ MODULE_PAGES = {
     "product_research": product_research_ui.show_page,
     "supplier": supplier_ui.show_page,
 }
+
+if 'calculator' not in st.session_state:
+    st.session_state['calculator'] = ProfitCalculator()
+
+if 'results_df' not in st.session_state:
+    st.session_state['results_df'] = None
+
+if 'summary' not in st.session_state:
+    st.session_state['summary'] = None
+
+if 'risk_report' not in st.session_state:
+    st.session_state['risk_report'] = None
+
+if 'first_visit' not in st.session_state:
+    st.session_state['first_visit'] = True
+
+if st.session_state.get('_needs_rerun', False):
+    st.session_state['_needs_rerun'] = False
+    st.rerun()
+    st.stop()
+
+with st.sidebar:
+    user_info = get_user_info()
+    if user_info:
+        plan_names = {'basic': '基础版', 'pro': '专业版', 'lifetime': '终身版'}
+        plan_display = plan_names.get(user_info.get('plan_type', ''), user_info.get('plan_type', ''))
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+                    padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;
+                    border: 1px solid #667eea30;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
+                <span style="font-size: 1.2rem;">👤</span>
+                <span style="font-weight: bold; color: #333; font-size: 0.9rem;">{user_info.get('wechat_nickname', '用户')}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #667eea; font-weight: 500;">
+                {plan_display}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 🧭 功能导航")
+
+    def nav_button(label, page, page_icon):
+        current = st.session_state.get("page", "app")
+        is_active = current == page
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
+            st.session_state["page"] = page
+            st.rerun()
+
+    with st.expander("📊 核心工具", expanded=True):
+        nav_button("利润分析", "app", "💰")
+        nav_button("多店铺大屏", "dashboard", "📊")
+        nav_button("API数据同步", "api_sync", "🔄")
+        nav_button("核价自动化", "pricing", "💵")
+        nav_button("定时任务", "scheduler", "⏰")
+
+    with st.expander("📦 运营管理", expanded=False):
+        nav_button("库存管理", "inventory", "📦")
+        nav_button("数据分析", "analysis", "📈")
+        nav_button("智能调价", "pricing_adj", "🏷️")
+        nav_button("财务对账", "finance", "💳")
+        nav_button("标签发货", "shipping", "📋")
+
+    with st.expander("🛡️ 风控 & 自动化", expanded=False):
+        nav_button("消息售后", "message", "💬")
+        nav_button("活动报名", "activity", "🎯")
+        nav_button("风控体检", "risk_inspection", "🔍")
+        nav_button("批量运营", "batch_ops", "📋")
+        nav_button("差评监控", "review_monitor", "⭐")
+        nav_button("选品辅助", "product_research", "🔬")
+        nav_button("供应商管理", "supplier", "🏭")
+
+    st.markdown("---")
+    st.header("📂 数据导入")
+    
+    uploaded_file = st.file_uploader(
+        "上传 Temu 订单 CSV 文件",
+        type=['csv'],
+        help="支持从 Temu 商家后台导出的订单数据"
+    )
+    
+    if uploaded_file:
+        try:
+            stringio = StringIO(uploaded_file.getvalue().decode('utf-8'))
+            df = pd.read_csv(stringio)
+            
+            st.success(f"✅ 成功读取 **{len(df)}** 条订单数据")
+            st.dataframe(df.head(3), width='stretch')
+            
+            if st.button("🚀 开始分析", width='stretch', type="primary"):
+                with st.spinner("🔄 正在计算利润并分析风险..."):
+                    calculator = ProfitCalculator()
+                    results_df, summary = calculator.process_csv(df)
+                    
+                    monitor = RiskMonitor()
+                    monitor.calculate_risk_from_csv(df)
+                    risk_report = monitor.generate_risk_report()
+                    
+                    st.session_state['results_df'] = results_df
+                    st.session_state['summary'] = summary
+                    st.session_state['calculator'] = calculator
+                    st.session_state['original_df'] = df
+                    st.session_state['risk_report'] = risk_report
+                    st.session_state['monitor'] = monitor
+
+                    user_id = get_user_id()
+                    if user_id:
+                        save_analysis_to_db(user_id, summary, results_df, risk_report)
+
+                    st.rerun()
+                    
+        except Exception as e:
+            st.error(f"❌ 文件处理失败：{str(e)}")
+    
+    st.markdown("---")
+    
+    st.header("⚙️ 快速测试")
+    
+    if st.button("📊 使用示例数据", width='stretch'):
+        sample_data = {
+            '订单号': [f'ORD202605{i:03d}' for i in range(1, 21)],
+            'SKU': ['SKU_BL001', 'SKU_3C001', 'SKU_CZ001', 'SKU_MZ001', 'SKU_WJ001',
+                   'SKU_BL002', 'SKU_3C002', 'SKU_CZ002', 'SKU_SP001', 'SKU_WJ002',
+                   'SKU_BL003', 'SKU_3C003', 'SKU_MZ002', 'SKU_CZ003', 'SKU_WJ003',
+                   'SKU_BL004', 'SKU_3C004', 'SKU_CZ004', 'SKU_MZ003', 'SKU_SP002'],
+            '商品名称': [
+                '北欧风简约收纳盒套装', '无线蓝牙耳机Pro版', '夏季轻薄透气运动T恤',
+                '玻尿酸保湿精华液30ml', '儿童益智积木玩具100片', '多功能厨房置物架',
+                '智能手表运动版', '韩版宽松休闲卫衣', '有机坚果礼盒500g', '婴儿早教布书套装',
+                'ins风桌面收纳架', 'Type-C快充数据线3条装', '烟酰胺美白面膜10片',
+                '复古高腰牛仔裤女', '乐高式拼装汽车模型', '不锈钢厨房锅铲套装五件套',
+                '便携式蓝牙音箱迷你小音响', '冰丝防晒衣女夏季防紫外线外套',
+                '氨基酸洗面奶温和清洁控油两支装', '进口零食大礼包混合装500g'
+            ],
+            '买家支付金额': [68.5, 159.0, 89.9, 45.8, 125.0, 52.0, 299.0, 78.0, 98.0, 168.0,
+                          35.9, 29.9, 88.0, 129.0, 189.0, 46.8, 79.0, 65.9, 56.0, 78.9],
+            '平台运费': [8.0, 12.0, 6.0, 5.0, 10.0, 6.0, 15.0, 5.0, 7.0, 12.0,
+                       5.0, 3.0, 5.0, 6.0, 10.0, 5.0, 6.0, 5.0, 4.0, 6.0],
+            '结算价': [32.0, 85.0, 42.0, 22.0, 58.0, 28.0, 155.0, 38.0, 48.0, 92.0,
+                     18.0, 15.0, 42.0, 62.0, 98.0, 24.0, 42.0, 32.0, 28.0, 38.0],
+            '类目': ['家居百货', '3C数码', '服装鞋包', '美妆个护', '玩具母婴',
+                   '家居百货', '3C数码', '服装鞋包', '食品饮料', '玩具母婴',
+                   '家居百货', '3C数码', '服装鞋包', '美妆个护', '玩具母婴',
+                   '家居百货', '3C数码', '服装鞋包', '美妆个护', '食品饮料'],
+            '发货时间': ['2026-05-01 10:30:00', '2026-05-02 09:15:00', '2026-05-02 11:40:00',
+                        '2026-05-03 08:20:00', '2026-05-03 14:50:00', '2026-05-04 09:00:00',
+                        '2026-05-04 16:30:00', '2026-05-05 10:10:00', '2026-05-05 13:45:00',
+                        '2026-05-06 08:30:00', '2026-05-06 11:20:00', '2026-05-07 09:45:00',
+                        '2026-05-07 15:10:00', '2026-05-08 10:00:00', '2026-05-08 14:25:00',
+                        '2026-05-09 08:50:00', '2026-05-09 11:30:00', '2026-05-10 09:15:00',
+                        '2026-05-10 13:40:00', '2026-05-11 08:20:00'],
+            '确认收货时间': ['2026-05-15 14:20:00', '2026-05-09 16:45:00', '2026-05-09 10:30:00',
+                            '2026-05-10 13:15:00', '2026-05-10 17:30:00', '2026-05-11 11:20:00',
+                            '2026-05-11 15:40:00', '2026-05-12 09:25:00', '2026-05-12 16:50:00',
+                            '2026-05-13 12:10:00', '2026-05-13 14:35:00', '2026-05-14 10:55:00',
+                            '2026-05-14 16:40:00', '2026-05-15 11:30:00', '2026-05-15 15:50:00',
+                            '2026-05-16 13:20:00', '2026-05-16 14:45:00', '2026-05-17 10:30:00',
+                            '2026-05-17 15:55:00', '2026-05-18 12:10:00'],
+            '退货状态': ['否', '否', '是', '否', '否', '否', '否', '是', '否', '否',
+                        '否', '否', '否', '否', '否', '否', '否', '否', '否', '否'],
+            '成本价': [25.0, 72.0, 35.0, 18.0, 48.0, 22.0, 138.0, 30.0, 40.0, 75.0,
+                     14.0, 12.0, 35.0, 52.0, 82.0, 19.0, 34.0, 26.0, 22.0, 32.0],
+            '店铺评分': [4.8, 4.9, 4.6, 4.8, 4.5, 4.3, 4.9, 4.4, 4.8, 4.7,
+                       4.6, 4.9, 4.7, 4.3, 4.6, 4.5, 4.8, 4.5, 4.7, 4.8]
+        }
+        
+        df = pd.DataFrame(sample_data)
+        
+        with st.spinner("🔄 正在生成示例数据并分析..."):
+            calculator = ProfitCalculator()
+            results_df, summary = calculator.process_csv(df)
+            
+            monitor = RiskMonitor()
+            monitor.calculate_risk_from_csv(df)
+            risk_report = monitor.generate_risk_report()
+            
+            st.session_state['results_df'] = results_df
+            st.session_state['summary'] = summary
+            st.session_state['calculator'] = calculator
+            st.session_state['risk_report'] = risk_report
+            st.session_state['monitor'] = monitor
+
+            user_id = get_user_id()
+            if user_id:
+                save_analysis_to_db(user_id, summary, results_df, risk_report)
+
+            st.rerun()
+    
+    st.markdown("---")
+    st.markdown("### 📌 使用说明")
+    st.info("""
+    1️⃣ 从 Temu 商家后台导出订单 CSV  
+    2️⃣ 上传文件并点击"开始分析"  
+    3️⃣ 查看风险仪表盘 + 利润报告  
+    4️⃣ 导出报表进行进一步分析
+    """)
+
+    st.markdown("---")
+    with st.expander("⚙️ 管理", expanded=False):
+        if st.button("🔐 管理员控制台", use_container_width=True):
+            st.session_state['show_admin'] = not st.session_state.get('show_admin', False)
+        if st.button("🚪 退出登录", use_container_width=True, type="secondary"):
+            logout()
+            st.rerun()
 
 if current_page in MODULE_PAGES:
     MODULE_PAGES[current_page]()
@@ -133,7 +343,7 @@ st.markdown("""
 </style>
 
 <div class="nav-bar">
-    <a href="?page=app" class="nav-brand">💰 Temu 利润管家</a>
+    <a href="?page=app" class="nav-brand">🤖 Temu全托管自动化运营平台</a>
     <div class="nav-links">
         <a href="?page=app">📊 分析工具</a>
         <a href="?page=landing">🏠 返回首页</a>
@@ -234,31 +444,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<p class="main-header">💰 Temu 商家风控与利润管家</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">精确到分的费用拆分 | 实时亏损预警 | 智能罚款预测 | 风险仪表盘</p>', unsafe_allow_html=True)
-
-if 'calculator' not in st.session_state:
-    st.session_state['calculator'] = ProfitCalculator()
-
-if 'results_df' not in st.session_state:
-    st.session_state['results_df'] = None
-
-if 'summary' not in st.session_state:
-    st.session_state['summary'] = None
-
-if 'risk_report' not in st.session_state:
-    st.session_state['risk_report'] = None
-
-if 'first_visit' not in st.session_state:
-    st.session_state['first_visit'] = True
-
-if st.session_state.get('_needs_rerun', False):
-    st.session_state['_needs_rerun'] = False
-    st.rerun()
-    st.stop()
+st.markdown('<p class="main-header">🤖 Temu全托管自动化运营平台</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">全流程自动化运营 | 核价·库存·调价·活动·发货·售后一站式管理</p>', unsafe_allow_html=True)
 
 if st.session_state['first_visit'] and st.session_state['results_df'] is None:
-    with st.expander("👋 欢迎使用 Temu 利润管家！点击查看使用指南", expanded=True):
+    with st.expander("👋 欢迎使用 Temu全托管自动化运营平台！点击查看使用指南", expanded=True):
         col_guide1, col_guide2, col_guide3 = st.columns(3)
         
         with col_guide1:
@@ -302,193 +492,6 @@ if st.session_state['first_visit'] and st.session_state['results_df'] is None:
             st.session_state['_needs_rerun'] = True
     
     st.markdown("---")
-
-with st.sidebar:
-    user_info = get_user_info()
-    if user_info:
-        plan_names = {'basic': '基础版', 'pro': '专业版', 'lifetime': '终身版'}
-        plan_display = plan_names.get(user_info.get('plan_type', ''), user_info.get('plan_type', ''))
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-                    padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;
-                    border: 1px solid #667eea30;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem;">
-                <span style="font-size: 1.2rem;">👤</span>
-                <span style="font-weight: bold; color: #333; font-size: 0.9rem;">{user_info.get('wechat_nickname', '用户')}</span>
-            </div>
-            <div style="font-size: 0.8rem; color: #667eea; font-weight: 500;">
-                {plan_display}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("### 🧭 功能导航")
-
-    def nav_button(label, page, page_icon):
-        current = st.query_params.get("page", ["app"])
-        current_page_val = current[0] if isinstance(current, (list, tuple)) else current
-        is_active = current_page_val == page
-        btn_type = "primary" if is_active else "secondary"
-        if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
-            st.query_params["page"] = page
-            st.rerun()
-
-    with st.expander("📊 核心工具", expanded=True):
-        nav_button("利润分析", "app", "💰")
-        nav_button("多店铺大屏", "dashboard", "📊")
-        nav_button("API数据同步", "api_sync", "🔄")
-        nav_button("核价自动化", "pricing", "💵")
-        nav_button("定时任务", "scheduler", "⏰")
-
-    with st.expander("📦 运营管理", expanded=False):
-        nav_button("库存管理", "inventory", "📦")
-        nav_button("数据分析", "analysis", "📈")
-        nav_button("智能调价", "pricing_adj", "🏷️")
-        nav_button("财务对账", "finance", "💳")
-        nav_button("标签发货", "shipping", "📋")
-
-    with st.expander("🛡️ 风控 & 服务", expanded=False):
-        nav_button("消息售后", "message", "💬")
-        nav_button("活动报名", "activity", "🎯")
-        nav_button("风控体检", "risk_inspection", "🔍")
-        nav_button("批量运营", "batch_ops", "📋")
-        nav_button("差评监控", "review_monitor", "⭐")
-        nav_button("选品辅助", "product_research", "🔬")
-        nav_button("供应商管理", "supplier", "🏭")
-
-    st.markdown("---")
-    st.header("📂 数据导入")
-    
-    uploaded_file = st.file_uploader(
-        "上传 Temu 订单 CSV 文件",
-        type=['csv'],
-        help="支持从 Temu 商家后台导出的订单数据"
-    )
-    
-    if uploaded_file:
-        try:
-            stringio = StringIO(uploaded_file.getvalue().decode('utf-8'))
-            df = pd.read_csv(stringio)
-            
-            st.success(f"✅ 成功读取 **{len(df)}** 条订单数据")
-            st.dataframe(df.head(3), width='stretch')
-            
-            if st.button("🚀 开始分析", width='stretch', type="primary"):
-                with st.spinner("🔄 正在计算利润并分析风险..."):
-                    calculator = ProfitCalculator()
-                    results_df, summary = calculator.process_csv(df)
-                    
-                    monitor = RiskMonitor()
-                    monitor.calculate_risk_from_csv(df)
-                    risk_report = monitor.generate_risk_report()
-                    
-                    st.session_state['results_df'] = results_df
-                    st.session_state['summary'] = summary
-                    st.session_state['calculator'] = calculator
-                    st.session_state['original_df'] = df
-                    st.session_state['risk_report'] = risk_report
-                    st.session_state['monitor'] = monitor
-
-                    user_id = get_user_id()
-                    if user_id:
-                        save_analysis_to_db(user_id, summary, results_df, risk_report)
-
-                    st.rerun()
-                    
-        except Exception as e:
-            st.error(f"❌ 文件处理失败：{str(e)}")
-    
-    st.markdown("---")
-    
-    st.header("⚙️ 快速测试")
-    
-    if st.button("📊 使用示例数据", width='stretch'):
-        sample_data = {
-            '订单号': [f'ORD202605{i:03d}' for i in range(1, 21)],
-            'SKU': ['SKU_BL001', 'SKU_3C001', 'SKU_CZ001', 'SKU_MZ001', 'SKU_WJ001',
-                   'SKU_BL002', 'SKU_3C002', 'SKU_CZ002', 'SKU_SP001', 'SKU_WJ002',
-                   'SKU_BL003', 'SKU_3C003', 'SKU_MZ002', 'SKU_CZ003', 'SKU_WJ003',
-                   'SKU_BL004', 'SKU_3C004', 'SKU_CZ004', 'SKU_MZ003', 'SKU_SP002'],
-            '商品名称': [
-                '北欧风简约收纳盒套装', '无线蓝牙耳机Pro版', '夏季轻薄透气运动T恤',
-                '玻尿酸保湿精华液30ml', '儿童益智积木玩具100片', '多功能厨房置物架',
-                '智能手表运动版', '韩版宽松休闲卫衣', '有机坚果礼盒500g', '婴儿早教布书套装',
-                'ins风桌面收纳架', 'Type-C快充数据线3条装', '烟酰胺美白面膜10片',
-                '复古高腰牛仔裤女', '乐高式拼装汽车模型', '不锈钢厨房锅铲套装五件套',
-                '便携式蓝牙音箱迷你小音响', '冰丝防晒衣女夏季防紫外线外套',
-                '氨基酸洗面奶温和清洁控油两支装', '进口零食大礼包混合装500g'
-            ],
-            '买家支付金额': [68.5, 159.0, 89.9, 45.8, 125.0, 52.0, 299.0, 78.0, 98.0, 168.0,
-                          35.9, 29.9, 88.0, 129.0, 189.0, 46.8, 79.0, 65.9, 56.0, 78.9],
-            '平台运费': [8.0, 12.0, 6.0, 5.0, 10.0, 6.0, 15.0, 5.0, 7.0, 12.0,
-                       5.0, 3.0, 5.0, 6.0, 10.0, 5.0, 6.0, 5.0, 4.0, 6.0],
-            '结算价': [32.0, 85.0, 42.0, 22.0, 58.0, 28.0, 155.0, 38.0, 48.0, 92.0,
-                     18.0, 15.0, 42.0, 62.0, 98.0, 24.0, 42.0, 32.0, 28.0, 38.0],
-            '类目': ['家居百货', '3C数码', '服装鞋包', '美妆个护', '玩具母婴',
-                   '家居百货', '3C数码', '服装鞋包', '食品饮料', '玩具母婴',
-                   '家居百货', '3C数码', '美妆个护', '服装鞋包', '玩具母婴',
-                   '家居百货', '3C数码', '服装鞋包', '美妆个护', '食品饮料'],
-            '发货时间': ['2026-05-01 10:30:00', '2026-05-02 09:15:00', '2026-05-02 11:40:00',
-                        '2026-05-03 08:20:00', '2026-05-03 14:50:00', '2026-05-04 09:00:00',
-                        '2026-05-04 16:30:00', '2026-05-05 10:10:00', '2026-05-05 13:45:00',
-                        '2026-05-06 08:30:00', '2026-05-06 11:20:00', '2026-05-07 09:45:00',
-                        '2026-05-07 15:10:00', '2026-05-08 10:00:00', '2026-05-08 14:25:00',
-                        '2026-05-09 08:50:00', '2026-05-09 11:30:00', '2026-05-10 09:15:00',
-                        '2026-05-10 13:40:00', '2026-05-11 08:20:00'],
-            '确认收货时间': ['2026-05-15 14:20:00', '2026-05-09 16:45:00', '2026-05-09 10:30:00',
-                            '2026-05-10 13:15:00', '2026-05-10 17:30:00', '2026-05-11 11:20:00',
-                            '2026-05-11 15:40:00', '2026-05-12 09:25:00', '2026-05-12 16:50:00',
-                            '2026-05-13 12:10:00', '2026-05-13 14:35:00', '2026-05-14 10:55:00',
-                            '2026-05-14 16:40:00', '2026-05-15 11:30:00', '2026-05-15 15:50:00',
-                            '2026-05-16 13:20:00', '2026-05-16 14:45:00', '2026-05-17 10:30:00',
-                            '2026-05-17 15:55:00', '2026-05-18 12:10:00'],
-            '退货状态': ['否', '否', '是', '否', '否', '否', '否', '是', '否', '否',
-                        '否', '否', '否', '否', '否', '否', '否', '否', '否', '否'],
-            '成本价': [25.0, 72.0, 35.0, 18.0, 48.0, 22.0, 138.0, 30.0, 40.0, 75.0,
-                     14.0, 12.0, 35.0, 52.0, 82.0, 19.0, 34.0, 26.0, 22.0, 32.0],
-            '店铺评分': [4.8, 4.9, 4.6, 4.8, 4.5, 4.3, 4.9, 4.4, 4.8, 4.7,
-                       4.6, 4.9, 4.7, 4.3, 4.6, 4.5, 4.8, 4.5, 4.7, 4.8]
-        }
-        
-        df = pd.DataFrame(sample_data)
-        
-        with st.spinner("🔄 正在生成示例数据并分析..."):
-            calculator = ProfitCalculator()
-            results_df, summary = calculator.process_csv(df)
-            
-            monitor = RiskMonitor()
-            monitor.calculate_risk_from_csv(df)
-            risk_report = monitor.generate_risk_report()
-            
-            st.session_state['results_df'] = results_df
-            st.session_state['summary'] = summary
-            st.session_state['calculator'] = calculator
-            st.session_state['risk_report'] = risk_report
-            st.session_state['monitor'] = monitor
-
-            user_id = get_user_id()
-            if user_id:
-                save_analysis_to_db(user_id, summary, results_df, risk_report)
-
-            st.rerun()
-    
-    st.markdown("---")
-    st.markdown("### 📌 使用说明")
-    st.info("""
-    1️⃣ 从 Temu 商家后台导出订单 CSV  
-    2️⃣ 上传文件并点击"开始分析"  
-    3️⃣ 查看风险仪表盘 + 利润报告  
-    4️⃣ 导出报表进行进一步分析
-    """)
-
-    st.markdown("---")
-    with st.expander("⚙️ 管理", expanded=False):
-        if st.button("🔐 管理员控制台", use_container_width=True):
-            st.session_state['show_admin'] = not st.session_state.get('show_admin', False)
-        if st.button("🚪 退出登录", use_container_width=True, type="secondary"):
-            logout()
-            st.rerun()
 
 if st.session_state.get('show_admin', False):
     show_admin_panel()
@@ -994,24 +997,24 @@ Temu 店铺风险评估报告
 else:
     st.markdown("""
     <div style="text-align: center; padding: 4rem 2rem;">
-        <h2>👋 欢迎使用 Temu 商家风控与利润管家</h2>
+        <h2>👋 欢迎使用 Temu全托管自动化运营平台</h2>
         <p style="font-size: 1.2rem; color: #666; margin: 2rem 0;">
-            上传您的 Temu 订单 CSV 文件，即刻获取精确到分的利润分析和专业级风险预警
+            上传您的 Temu 订单 CSV 文件，即刻获取精确到分的利润分析和全流程自动化运营支持
         </p>
         <div style="background-color: #f8f9fa; padding: 2rem; border-radius: 15px; max-width: 900px; margin: 2rem auto;">
             <h3>✨ 核心功能亮点</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; text-align: left;">
                 <div>
-                    <h4>💰 精确利润计算</h4>
+                    <h4>🤖 全流程自动化</h4>
                     <ul style="font-size: 1rem; line-height: 1.8; color: #555;">
-                        <li>✅ 自动识别 CSV 字段格式</li>
-                        <li>✅ 5 大项费用精确拆分</li>
-                        <li>✅ SKU 维度汇总分析</li>
-                        <li>✅ 多维度数据筛选</li>
+                        <li>✅ 自动核价处理，不漏单、不亏损</li>
+                        <li>✅ 库存智能预警，防断货、防积压</li>
+                        <li>✅ 智能自动调价，跟价不亏本</li>
+                        <li>✅ 活动自动报名，不错过大促流量</li>
                     </ul>
                 </div>
                 <div>
-                    <h4>⚠️ 智能风险预警</h4>
+                    <h4>📊 数据分析与风控</h4>
                     <ul style="font-size: 1rem; line-height: 1.8; color: #555;">
                         <li>✅ 6 项核心指标实时监控</li>
                         <li>✅ 多级预警系统（黄/红）</li>
@@ -1024,7 +1027,7 @@ else:
         <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 15px; max-width: 800px; margin: 2rem auto;">
             <h3 style="color: white;">🎯 为什么选择我们？</h3>
             <p style="font-size: 1.1rem; margin: 1rem 0;">
-                费用规则<strong>每周更新</strong> · 精确到<strong>分</strong>的计算 · 帮助卖家避免<strong>隐形亏损</strong>
+                全流程<strong>自动化运营</strong> · 每天仅需<strong>5分钟</strong> · 核价·库存·调价·活动·发货·售后<strong>一站式搞定</strong>
             </p>
         </div>
         <p style="color: #999; margin-top: 2rem;">
@@ -1036,7 +1039,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 1rem; color: #999; font-size: 0.9rem;">
-    <p>💡 <strong>Temu 商家风控与利润管家</strong> | 基于 2026 年 5 月最新费用规则</p>
-    <p>费用规则每周更新 · 帮助卖家精准算账 · 避免隐形亏损 · 预防平台罚款</p>
+    <p>💡 <strong>Temu全托管自动化运营平台</strong> | 基于 2026 年 5 月最新费用规则</p>
+    <p>核价·库存·调价·活动·发货·售后全流程自动化 · 每天5分钟，告别熬夜运营</p>
 </div>
 """, unsafe_allow_html=True)

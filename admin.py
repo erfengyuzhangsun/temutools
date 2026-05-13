@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 from datetime import datetime, date
 from db import (
@@ -8,7 +9,7 @@ from db import (
 )
 from auth import get_current_user, get_user_id
 
-ADMIN_PASSWORD = "admin888"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 def is_admin() -> bool:
