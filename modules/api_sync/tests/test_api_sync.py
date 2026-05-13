@@ -348,7 +348,7 @@ class TestApiSyncSecurity:
         from common.crypto import CryptoUtils
 
         crypto = CryptoUtils()
-        api_key = "sk_live_abcdefghijklmnopqrstuvwx"
+        api_key = "TEST_API_KEY_FOR_UNIT_TEST_ONLY"
         encrypted = crypto.encrypt(api_key)
         decrypted = crypto.decrypt(encrypted)
 
