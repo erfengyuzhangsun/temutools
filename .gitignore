@@ -13,10 +13,8 @@ env/
 .DS_Store
 Thumbs.db
 
-# CSV数据（保留示例数据）
+# CSV数据
 *.csv
-!temu_orders_sample.csv
-!sample_orders.csv
 
 # Streamlit
 .streamlit/
