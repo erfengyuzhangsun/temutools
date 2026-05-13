@@ -11,6 +11,23 @@ from auth import is_authenticated, get_current_user, get_user_id, get_user_info,
 from admin import show_admin_panel, is_admin
 from logger import log_action, log_error, logger
 
+from modules.api_sync import ui as api_sync_ui
+from modules.pricing import ui as pricing_ui
+from modules.scheduler import ui as scheduler_ui
+from modules.inventory import ui as inventory_ui
+from modules.analysis import ui as analysis_ui
+from modules.pricing_adj import ui as pricing_adj_ui
+from modules.finance import ui as finance_ui
+from modules.dashboard import ui as dashboard_ui
+from modules.message import ui as message_ui
+from modules.shipping import ui as shipping_ui
+from modules.activity import ui as activity_ui
+from modules.risk_inspection import ui as risk_inspection_ui
+from modules.batch_ops import ui as batch_ops_ui
+from modules.review_monitor import ui as review_monitor_ui
+from modules.product_research import ui as product_research_ui
+from modules.supplier import ui as supplier_ui
+
 
 def save_analysis_to_db(user_id, summary, results_df, risk_report):
     try:
@@ -47,7 +64,8 @@ st.set_page_config(
 )
 
 query_params = st.query_params
-current_page = query_params.get("page", ["landing"])[0] if "page" in query_params else "landing"
+raw_page = query_params.get("page", ["landing"])
+current_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
 
 if current_page == "landing":
     import landing
@@ -56,6 +74,29 @@ if current_page == "landing":
 
 if not is_authenticated():
     show_login_page()
+    st.stop()
+
+MODULE_PAGES = {
+    "api_sync": api_sync_ui.show_page,
+    "pricing": pricing_ui.show_page,
+    "scheduler": scheduler_ui.show_page,
+    "inventory": inventory_ui.show_page,
+    "analysis": analysis_ui.show_page,
+    "pricing_adj": pricing_adj_ui.show_page,
+    "finance": finance_ui.show_page,
+    "dashboard": dashboard_ui.show_page,
+    "message": message_ui.show_page,
+    "shipping": shipping_ui.show_page,
+    "activity": activity_ui.show_page,
+    "risk_inspection": risk_inspection_ui.show_page,
+    "batch_ops": batch_ops_ui.show_page,
+    "review_monitor": review_monitor_ui.show_page,
+    "product_research": product_research_ui.show_page,
+    "supplier": supplier_ui.show_page,
+}
+
+if current_page in MODULE_PAGES:
+    MODULE_PAGES[current_page]()
     st.stop()
 
 st.markdown("""
@@ -275,6 +316,42 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
 
+    st.markdown("---")
+    st.markdown("### 🧭 功能导航")
+
+    def nav_button(label, page, page_icon):
+        current = st.query_params.get("page", ["app"])
+        current_page_val = current[0] if isinstance(current, (list, tuple)) else current
+        is_active = current_page_val == page
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
+            st.query_params["page"] = page
+            st.rerun()
+
+    with st.expander("📊 核心工具", expanded=True):
+        nav_button("利润分析", "app", "💰")
+        nav_button("多店铺大屏", "dashboard", "📊")
+        nav_button("API数据同步", "api_sync", "🔄")
+        nav_button("核价自动化", "pricing", "💵")
+        nav_button("定时任务", "scheduler", "⏰")
+
+    with st.expander("📦 运营管理", expanded=False):
+        nav_button("库存管理", "inventory", "📦")
+        nav_button("数据分析", "analysis", "📈")
+        nav_button("智能调价", "pricing_adj", "🏷️")
+        nav_button("财务对账", "finance", "💳")
+        nav_button("标签发货", "shipping", "📋")
+
+    with st.expander("🛡️ 风控 & 服务", expanded=False):
+        nav_button("消息售后", "message", "💬")
+        nav_button("活动报名", "activity", "🎯")
+        nav_button("风控体检", "risk_inspection", "🔍")
+        nav_button("批量运营", "batch_ops", "📋")
+        nav_button("差评监控", "review_monitor", "⭐")
+        nav_button("选品辅助", "product_research", "🔬")
+        nav_button("供应商管理", "supplier", "🏭")
+
+    st.markdown("---")
     st.header("📂 数据导入")
     
     uploaded_file = st.file_uploader(

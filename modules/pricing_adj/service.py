@@ -37,19 +37,22 @@ class PricingAdjustmentService:
         return ServiceResult(success=True,data={"logs":logs,"count":len(logs)})
 
     def _get_current_price(self, shop_id: int, sku: str) -> float:
-        from db import execute_query
+        from db import execute_query, DB_MODE
         rows=execute_query("SELECT settlement_price FROM temu_sync_orders WHERE user_id=? AND shop_id=? AND sku=? ORDER BY synced_at DESC LIMIT 1",(self.user_id,shop_id,sku),fetch=True)
-        return float(rows[0]["settlement_price"]) if rows else 0.0
+        if not rows: return 0.0
+        return float(rows[0].get("settlement_price",0))
 
     def _get_cost_price(self, shop_id: int, sku: str) -> float:
         from db import execute_query
         rows=execute_query("SELECT cost_price FROM temu_sku_profit WHERE user_id=? AND shop_id=? AND sku_code=?",(self.user_id,shop_id,sku),fetch=True)
-        return float(rows[0]["cost_price"]) if rows else 0.0
+        if not rows: return 0.0
+        return float(rows[0].get("cost_price",0))
 
     def _get_competitor_price(self, sku: str) -> float:
         from db import execute_query
         rows=execute_query("SELECT price FROM temu_competitor_prices WHERE sku=? ORDER BY collected_at DESC LIMIT 1",(sku,),fetch=True)
-        return float(rows[0]["price"]) if rows else 0.0
+        if not rows: return 0.0
+        return float(rows[0].get("price",0))
 
     def _save_adjustment(self, shop_id: int, sku: str, old: float, new_p: float, reason: str):
         from db import execute_query

@@ -146,7 +146,8 @@ class ProductResearchService:
         margin=profit/cost*100 if cost>0 else 0
         return R(True,data={"estimated_profit":round(profit,2),"estimated_margin":round(margin,1),"cost":cost,"shipping":shipping,"platform_fee":round(platform_fee,2),"suggested_price":suggested_price})
     def check_infringement(self,title:str)->Any:
-        brands=["nike","adidas","gucci","lv","chanel","apple","samsung"]
+        brands=["nike","adidas","gucci","lv","chanel","apple","samsung",
+                "耐克","阿迪达斯","古驰","路易威登","香奈儿","苹果","三星"]
         found=[b for b in brands if b.lower() in title.lower()]
         if found:
             return R(True,data={"risk":"high","infringing_brands":found,"suggestion":f"移除品牌词:{','.join(found)}"})

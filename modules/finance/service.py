@@ -53,7 +53,9 @@ class FinanceService:
             (self.user_id,shop_id,s.get("period_start"),s.get("period_end"),float(s.get("total_revenue",0)),float(s.get("total_deductions",0)),float(s.get("net_payout",0)),s.get("status","pending"),s.get("settlement_date")))
 
     def _query_monthly_settlements(self, shop_id: int, month: str) -> list:
-        from db import execute_query
+        from db import execute_query, DB_MODE
+        if DB_MODE == "mysql":
+            return execute_query("SELECT * FROM temu_settlements WHERE user_id=? AND shop_id=? AND DATE_FORMAT(period_start,'%Y-%m')=?",(self.user_id,shop_id,month),fetch=True) or []
         return execute_query("SELECT * FROM temu_settlements WHERE user_id=? AND shop_id=? AND strftime('%Y-%m',period_start)=?",(self.user_id,shop_id,month),fetch=True) or []
 
     def _get_recent_settlements(self, shop_id: int) -> list:

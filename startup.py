@@ -2,12 +2,23 @@
 启动入口 — 先初始化全部数据库表，再启动Streamlit应用
 
 用法:
-  python startup.py            # 初始化 + 启动应用
-  python startup.py --init-only  # 只初始化数据库，不启动
+  python startup.py                # 初始化 + 启动应用
+  python startup.py --init-only    # 只初始化数据库，不启动
+  python startup.py --no-init      # 跳过初始化，直接启动应用
 """
 import os
 import sys
 import subprocess
+
+
+def load_env():
+    try:
+        from dotenv import load_dotenv
+        env_path = os.path.join(os.path.dirname(__file__), ".env")
+        if os.path.exists(env_path):
+            load_dotenv(env_path)
+    except ImportError:
+        pass
 
 
 def init_database():
@@ -43,8 +54,13 @@ def main():
     print("=" * 50)
     print()
 
-    init_database()
-    print()
+    load_env()
+
+    if "--no-init" not in sys.argv:
+        init_database()
+        print()
+    else:
+        print("跳过数据库初始化")
 
     if "--init-only" in sys.argv:
         print("数据库初始化完成，跳过应用启动")
