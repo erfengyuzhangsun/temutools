@@ -1,0 +1,1 @@
+MODULE_CONFIG={"auto_refresh_interval":{"default":60,"min":5,"max":3600,"type":"int","description":"大屏自动刷新间隔(秒)"},"alert_display_max":{"default":50,"min":10,"max":200,"type":"int","description":"告警列表最大展示数"}}

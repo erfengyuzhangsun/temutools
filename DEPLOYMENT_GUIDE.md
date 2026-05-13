@@ -1,284 +1,280 @@
-# 🚀 Temu 利润管家 - 部署指南
+# Temu全托管运营平台 - 部署指南
 
-## ⚠️ Vercel 部署问题说明
-
-### ❌ 当前问题
-Vercel 无法直接部署 Streamlit 应用，因为：
-- Streamlit 不是标准的 WSGI/ASGI 框架
-- Vercel 默认寻找 `app`、`application` 或 `handler` 对象
-- Streamlit 使用自己的运行机制
-
-### ✅ 推荐解决方案：Streamlit Cloud（官方平台）
-
-**为什么选择 Streamlit Cloud？**
-- ✅ 100% 原生支持 Streamlit
-- ✅ 完全免费（个人项目）
-- ✅ 2分钟快速部署
-- ✅ 自动 HTTPS
-- ✅ 无需修改代码
+> 版本：v1.0 | 支持 Windows / Linux / Mac
 
 ---
 
-## 📋 方案一：Streamlit Cloud 部署（推荐⭐⭐⭐⭐⭐）
-
-### 步骤 1：准备 GitHub 仓库 ✅ 已完成
-
-你的代码已经在 GitHub 上：
-```
-https://github.com/erfengyuzhangsun/temutools.git
-```
-
-### 步骤 2：注册 Streamlit Cloud 账号
-
-1. 访问 **https://share.streamlit.io**
-2. 点击 **"Sign up"**（注册）
-3. 选择 **"Sign up with GitHub"**（使用 GitHub 登录）
-4. 授权 Streamlit 访问你的 GitHub 仓库
-
-### 步骤 3：创建新应用
-
-1. 登录后，点击 **"+ New app"** 按钮
-2. 在部署页面填写信息：
-
-   **Deploy an app:**
-   
-   | 字段 | 填写内容 |
-   |------|----------|
-   | Repository | `erfengyuzhangsun/temutools` |
-   | Branch | `main` |
-   | Main file path | `app.py` |
-
-3. 点击 **"Deploy"** 按钮
-
-### 步骤 4：等待部署完成
-
-- ⏱️ 首次部署约需 **2-5 分钟**
-- 📊 你会看到实时构建日志
-- ✅ 成功后会显示：**"Your app is live!"**
-
-### 步骤 5：访问你的应用
-
-部署成功后，你会得到一个 URL：
-```
-https://temutools-xxx.streamlit.app
-```
-
-**示例：**
-```
-https://temu-profit-manager.streamlit.app
-```
+## 目录
+1. [环境要求](#1-环境要求)
+2. [Windows 一键部署](#2-windows-一键部署)
+3. [Linux/Mac 一键部署](#3-linuxmac-一键部署)
+4. [手动部署（生产环境）](#4-手动部署生产环境)
+5. [MySQL 配置（可选）](#5-mysql-配置可选)
+6. [启停管理](#6-启停管理)
+7. [升级指南](#7-升级指南)
+8. [常见问题](#8-常见问题)
 
 ---
 
-## 🔧 高级配置（可选）
+## 1. 环境要求
 
-### 自定义子域名
+| 组件 | 最低要求 | 推荐 |
+|------|---------|------|
+| Python | 3.10+ | 3.12+ |
+| 内存 | 1GB | 2GB+ |
+| 磁盘 | 500MB | 1GB+ |
+| 操作系统 | Windows 10+/Ubuntu 20.04+ | - |
 
-1. 在 Streamlit Cloud Dashboard 中点击你的应用
-2. 进入 **Settings** → **Domain**
-3. 输入你想要的子域名，例如：`temu-tools`
-4. 最终地址变为：`https://temu-tools.streamlit.app`
+## 2. Windows 一键部署
 
-### 设置环境变量（如果需要）
+**方法1：双击运行 `deploy.bat`**
 
-1. 进入 **Settings** → **Secrets**
-2. 添加环境变量（如果未来需要 API Key 等）
-
----
-
-## 📱 方案二：Vercel 部署（备选方案）
-
-> ⚠️ **警告：此方案较复杂，需要额外代码适配**
-> 
-> 如果你一定要使用 Vercel，请按照以下步骤操作：
-
-### 方法 A：使用 Streamlit + FastAPI 包装器
-
-#### 1. 安装额外依赖
-
-在 `requirements.txt` 中添加：
-```txt
-streamlit>=1.28.0
-pandas>=2.0.0
-numpy>=1.24.0
-openpyxl>=3.1.0
-fastapi>=0.104.0
-uvicorn>=0.24.0
+```batch
+# 脚本会自动完成：
+# 1. 检查Python环境
+# 2. 创建虚拟环境
+# 3. 安装所有依赖
+# 4. 初始化数据库
+# 5. 启动应用
+# 6. 自动打开浏览器
 ```
 
-#### 2. 创建 API 服务器
-
-创建文件 `api/server.py`：
-
-```python
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-import subprocess
-import threading
-import time
-import requests
-
-app = FastAPI()
-
-# 启动 Streamlit 进程
-def start_streamlit():
-    cmd = [
-        "streamlit", "run", "app.py",
-        "--server.port", "8501",
-        "--server.address", "127.0.0.1"
-    ]
-    subprocess.Popen(cmd)
-
-# 在后台启动 Streamlit
-threading.Thread(target=start_streamlit, daemon=True).start()
-
-# 等待 Streamlit 启动
-time.sleep(5)
-
-@app.get("/")
-async def root():
-    try:
-        response = requests.get("http://127.0.0.1:8501")
-        return HTMLResponse(content=response.text)
-    except:
-        return HTMLResponse(content="<h1>Starting...</h1>")
-```
-
-#### 3. 更新 vercel.json
-
-```json
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/server.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/server.py"
-    }
-  ]
-}
-```
-
-#### 4. 部署到 Vercel
+**方法2：命令行**
 
 ```bash
-git add .
-git commit -m "Add Vercel deployment support"
-git push origin main
+deploy.bat
 ```
 
-> ⚠️ **注意：此方法可能存在性能问题，不推荐用于生产环境**
+部署完成后访问：http://localhost:8501  
+默认密码：`admin123`
 
----
+## 3. Linux/Mac 一键部署
 
-## 🎯 快速决策指南
-
-| 你的需求 | 推荐方案 | 理由 |
-|----------|----------|------|
-| 快速上线（今天） | **Streamlit Cloud** | 2分钟搞定 |
-| 完全免费 | **Streamlit Cloud** | 无限流量免费 |
-| 自定义域名 | **Vercel** | 支持绑定域名 |
-| 企业级需求 | **Vercel/AWS** | 更多控制权 |
-| 个人项目/SaaS | **Streamlit Cloud** | 够用且简单 |
-
----
-
-## ✅ 部署检查清单
-
-### Streamlit Cloud 部署前确认：
-
-- [x] GitHub 仓库已创建并推送代码
-- [x] 主文件名为 `app.py`
-- [x] `requirements.txt` 存在且正确
-- [x] `.streamlit/config.toml` 配置文件已添加
-- [x] 所有依赖项都在 requirements.txt 中列出
-
-### 部署后验证：
-
-- [ ] 访问应用 URL 能正常打开
-- [ ] 上传 CSV 文件功能正常
-- [ ] 利润计算结果准确
-- [ ] 收款码图片显示正常
-- [ ] 导出功能可用
-- [ ] 移动端显示正常
-
----
-
-## 🆘 故障排除
-
-### 问题 1：部署失败 - ModuleNotFoundError
-
-**原因：** 缺少依赖包
-
-**解决：**
 ```bash
-# 检查 requirements.txt 是否包含所有包
+chmod +x deploy.sh
+./deploy.sh
+```
+
+## 4. 手动部署（生产环境）
+
+```bash
+# 1. 创建虚拟环境
+python -m venv venv
+
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# 2. 安装依赖
+pip install --upgrade pip
 pip install -r requirements.txt
-# 如果缺少包，添加到 requirements.txt 并重新提交
+pip install cryptography pytest pytest-asyncio
+
+# 3. 初始化数据库（首次运行自动完成）
+python -c "from db import initialize_database; initialize_database()"
+
+# 4. 启动应用（生产推荐使用 nohup / supervisor）
+# Streamlit 主应用
+python -m streamlit run app.py \
+    --server.port 8501 \
+    --server.address 0.0.0.0 \
+    --server.headless true \
+    --browser.gatherUsageStats false
+
+# FastAPI 代理（可选）
+python -m uvicorn api.index:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 2
 ```
 
-### 问题 2：图片无法显示
+### 使用 Supervisor（Linux 生产环境）
 
-**原因：** 收款码图片路径错误
+```ini
+# /etc/supervisor/conf.d/temu.conf
+[program:temu]
+command=/path/to/venv/bin/python -m streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+directory=/path/to/temu_tools
+user=www-data
+autostart=true
+autorestart=true
+stopwaitsecs=10
+stdout_logfile=/var/log/temu_stdout.log
+stderr_logfile=/var/log/temu_stderr.log
+```
 
-**解决：**
-确保图片文件已提交到 GitHub：
+## 5. MySQL 配置（可选）
+
+默认使用SQLite（零配置）。如需切换MySQL RDS：
+
+### 方案A：全新安装直连MySQL
+
 ```bash
-git add WeChat_20260512015412.png paypal_20260512015446.jpg
-git commit -m "Add payment QR codes"
-git push origin main
+# 1. 安装MySQL并创建数据库
+mysql -u root -p
+CREATE DATABASE temu_tools CHARACTER SET utf8mb4;
+CREATE USER 'temu'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON temu_tools.* TO 'temu'@'localhost';
+FLUSH PRIVILEGES;
+
+# 2. 配置环境变量
+export DB_MODE=mysql
+export MYSQL_HOST=localhost
+export MYSQL_PORT=3306
+export MYSQL_USER=temu
+export MYSQL_PASSWORD=your_password
+export MYSQL_DATABASE=temu_tools
+
+# 3. 启动（自动建表）
+python startup.py
 ```
 
-### 问题 3：页面加载缓慢
+### 方案B：从SQLite零停机迁移到MySQL RDS（重点）
 
-**原因：** 首次加载需要安装依赖
+如果已在使用SQLite并积累了大量数据，以下流程**无需停服**：
 
-**解决：**
-- 耐心等待 2-5 分钟
-- 后续访问会快很多（有缓存）
+```
+时间轴:  ──── SQLite运行 ────┬──── 双写期 ────┬──── 纯MySQL ────▶
+                            │               │
+                           全量迁移         切流
+```
 
-### 问题 4：中文乱码
+```bash
+# ─── 第1步：查看迁移计划 ───
+python scripts/migrate_to_mysql_v2.py plan
 
-**原因：** 编码问题
+# ─── 第2步：全量迁移（建表+导数据） ───
+python scripts/migrate_to_mysql_v2.py migrate \
+    --host=your-rds-endpoint.xxx.rds.amazonaws.com \
+    --port=3306 \
+    --user=temu \
+    --password=your_password \
+    --database=temu_tools
 
-**解决：**
-已在代码中使用 UTF-8 BOM 编码导出，应该不会有此问题。
+# 迁移完成后，输出示例：
+#   ✅ 成功创建 31/31 张表
+#   ✅ 迁移: 15234/15234 行
+#   耗时: 2.3 秒
 
----
+# ─── 第3步：数据一致性校验 ───
+python scripts/migrate_to_mysql_v2.py verify \
+    --host=your-rds-endpoint.xxx.rds.amazonaws.com \
+    --user=temu \
+    --password=your_password
 
-## 📞 技术支持
+# 校验通过输出：
+#   ✅ temu_users: SQLite=2 = MySQL=2
+#   ✅ temu_sync_orders: SQLite=500 = MySQL=500
+#   ...
+#   🎉 全部 31 张表数据一致！
 
-如果遇到其他问题：
+# ─── 第4步：生成环境变量配置 ───
+python scripts/migrate_to_mysql_v2.py switch-config \
+    --host=your-rds-endpoint.xxx.rds.amazonaws.com \
+    --user=temu \
+    --password=your_password
 
-1. **查看日志：** Streamlit Cloud Dashboard → 你的应用 → Logs
-2. **官方文档：** https://docs.streamlit.io/streamlit-cloud
-3. **社区论坛：** https://discuss.streamlit.io
-4. **微信客服：** temu_tools_helper
+# ─── 第5步：设置环境变量，重启应用 ───
+# Windows PowerShell:
+$env:DB_MODE='mysql'
+$env:MYSQL_HOST='your-rds-endpoint.xxx.rds.amazonaws.com'
+$env:MYSQL_USER='temu'
+$env:MYSQL_PASSWORD='your_password'
+$env:MYSQL_DATABASE='temu_tools'
 
----
+# 重启（从MySQL读取数据）
+python startup.py
 
-## 🎉 下一步
+# ─── 第6步（可选）：验证新系统运行正常后，备份SQLite文件 ───
+cp temu_tools.db temu_tools.db.backup_$(date +%Y%m%d)
+```
 
-部署成功后：
+### 迁移工具支持的表（31张全量）
 
-1. ✅ 测试所有功能
-2. ✅ 分享链接给朋友测试
-3. ✅ 开始推广营销
-4. ✅ 收集用户反馈
+```
+原有系统(7):  users, shops, profit_stats, sku_profit, risk_metrics, orders
+P0模块(5):    shop_credentials, sync_orders, sync_history, pricing_logs, pricing_config
+P0调度(2):    scheduler_tasks, scheduler_logs
+P1模块(6):    inventory, inventory_alerts, shop_metrics, alert_rules, price_adjustments, competitor_prices
+P1财务(2):    settlements, reconciliation_logs
+P2/P3(11):    messages, reply_templates, shipping_labels, shipping_manifests,
+              activities, sensitive_words, inspection_records, reviews,
+              suppliers, supplier_products, product_research
+```
 
-**祝你部署顺利！🚀**
+## 6. 启停管理
 
----
+### 启动
+```bash
+# Windows
+start.bat
 
-<div align="center">
+# Linux (后台运行)
+nohup ./deploy.sh > /dev/null 2>&1 &
+```
 
-**推荐立即行动：👉 访问 https://share.streamlit.io 开始部署！**
+### 停止
+```bash
+# 查找进程
+ps aux | grep streamlit
+# 停止
+kill <PID>
 
-*预计耗时：5分钟 | 难度：⭐ 极简*
+# 或 Windows
+taskkill /F /IM python.exe
+```
 
-</div>
+### 查看日志
+```bash
+tail -f logs/temu_*.log
+```
+
+## 7. 升级指南
+
+```bash
+# 1. 备份数据
+cp temu_tools.db temu_tools.db.bak
+
+# 2. 拉取最新代码
+git pull
+
+# 3. 安装新依赖
+pip install -r requirements.txt
+
+# 4. 重启应用
+# 停止旧进程 -> 启动新进程
+```
+
+## 8. 常见问题
+
+### Q: 端口被占用？
+```bash
+# 修改端口
+python -m streamlit run app.py --server.port 8502
+```
+
+### Q: 数据库文件在哪？
+- SQLite 模式：项目根目录 `temu_tools.db`
+- MySQL 模式：按 MySQL 配置连接
+
+### Q: 如何重置管理员密码？
+```bash
+python -c "
+from db import execute_query;
+execute_query(\"UPDATE temu_users SET access_password='admin123' WHERE user_id=1\");
+print('密码已重置为: admin123')
+"
+```
+
+### Q: 如何切换为英文界面？
+当前版本为中文界面，后续版本将支持多语言。
+
+### Q: 测试命令？
+```bash
+# 运行全部测试（约2分钟）
+python -m pytest modules/api_sync/tests/test_api_sync.py modules/pricing/tests/test_pricing.py modules/scheduler/tests/test_scheduler.py tests/ -v
+
+# 快速验证核心功能
+python test_calculator.py
+```

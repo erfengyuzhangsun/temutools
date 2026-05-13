@@ -1,22 +1,48 @@
+# Python 缓存
 __pycache__/
 *.pyc
 *.pyo
+
+# 环境配置
 .env
 .venv
 venv/
 env/
+
+# 系统文件
 .DS_Store
+Thumbs.db
+
+# CSV数据（保留示例数据）
 *.csv
 !temu_orders_sample.csv
 !sample_orders.csv
+
+# Streamlit
 .streamlit/
+
+# 日志
 *.log
+logs/
+
+# 测试缓存
 .pytest_cache/
 htmlcov/
 .coverage
+
+# 构建产物
 dist/
 build/
 *.egg-info/
+
+# 数据库（本地SQLite，生产用MySQL）
 *.db
-logs/
+
+# IDE配置
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Trae IDE 提示词文件（用户本地保留，不入库）
 Trae*.md
