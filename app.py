@@ -252,6 +252,11 @@ if 'risk_report' not in st.session_state:
 if 'first_visit' not in st.session_state:
     st.session_state['first_visit'] = True
 
+if st.session_state.get('_needs_rerun', False):
+    st.session_state['_needs_rerun'] = False
+    st.rerun()
+    st.stop()
+
 if st.session_state['first_visit'] and st.session_state['results_df'] is None:
     with st.expander("👋 欢迎使用 Temu 利润管家！点击查看使用指南", expanded=True):
         col_guide1, col_guide2, col_guide3 = st.columns(3)
@@ -294,7 +299,7 @@ if st.session_state['first_visit'] and st.session_state['results_df'] is None:
         
         if st.button("✅ 我知道了，开始使用", width='stretch'):
             st.session_state['first_visit'] = False
-            st.rerun()
+            st.session_state['_needs_rerun'] = True
     
     st.markdown("---")
 

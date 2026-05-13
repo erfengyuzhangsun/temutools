@@ -1,5 +1,6 @@
 import json
 import logging
+import httpx
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 from common.retry import async_retry, RetryConfig
@@ -50,10 +51,28 @@ class TemuApiClient:
         self.api_key = api_key
         self.api_secret = api_secret
         self._http_client = None
+        self._load_credentials_if_needed()
+
+    def _load_credentials_if_needed(self):
+        if self.api_key and self.api_secret:
+            return
+        try:
+            from db import execute_query
+            rows = execute_query(
+                "SELECT encrypted_api_key, encrypted_api_secret FROM temu_shop_credentials "
+                "WHERE shop_id = ?",
+                (self.shop_id,), fetch=True,
+            )
+            if rows:
+                from common.crypto import CryptoUtils
+                crypto = CryptoUtils()
+                self.api_key = crypto.decrypt(rows[0]["encrypted_api_key"])
+                self.api_secret = crypto.decrypt(rows[0]["encrypted_api_secret"])
+        except Exception:
+            pass
 
     async def _ensure_client(self):
         if self._http_client is None:
-            import httpx
             self._http_client = httpx.AsyncClient(timeout=30.0)
 
     async def close(self):
