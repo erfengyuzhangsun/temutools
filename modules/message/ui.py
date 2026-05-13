@@ -1,7 +1,7 @@
 import streamlit as st
 import asyncio
 import pandas as pd
-from common.services_p2p3 import MessageService
+from modules.message.service import MessageService
 
 
 def show_page():
@@ -24,9 +24,7 @@ def show_page():
 
             if st.button("🔄 同步消息", type="primary", use_container_width=True):
                 service = MessageService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.sync_messages(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.sync_messages(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}

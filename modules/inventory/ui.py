@@ -59,9 +59,7 @@ def show_page():
 
             if st.button("🔄 同步库存", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.sync_inventory(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.sync_inventory(shop_id=shop_id))
 
                 if result.success:
                     st.success(f"✅ {result.message}")
@@ -82,9 +80,7 @@ def show_page():
 
             if st.button("🔍 检查告警", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.check_inventory_alerts(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.check_inventory_alerts(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -123,11 +119,9 @@ def show_page():
 
             if st.button("📊 生成补货建议", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.generate_replenishment_suggestions(shop_id=shop_id)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}

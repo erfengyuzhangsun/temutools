@@ -34,11 +34,9 @@ def show_page():
                 else:
                     sku_list = [s.strip() for s in sku_input.split("\n") if s.strip()]
                     service = ShippingService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(
+                    result = asyncio.run(
                         service.generate_labels(shop_id=shop_id, sku_list=sku_list)
                     )
-                    loop.close()
 
                     if result.success:
                         data = result.data or {}
@@ -104,11 +102,9 @@ def show_page():
                 else:
                     order_ids = [o.strip() for o in order_input.split("\n") if o.strip()]
                     service = ShippingService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(
+                    result = asyncio.run(
                         service.generate_manifest(shop_id=shop_id, order_ids=order_ids)
                     )
-                    loop.close()
 
                     if result.success:
                         data = result.data or {}

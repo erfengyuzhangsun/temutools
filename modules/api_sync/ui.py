@@ -41,11 +41,9 @@ def show_page():
 
                     with st.spinner(f"正在同步 {selected_shop_name} 的数据..."):
                         service = ApiSyncService(user_id)
-                        loop = asyncio.new_event_loop()
-                        result = loop.run_until_complete(
+                        result = asyncio.run(
                             service.sync_orders(shop_id=selected_shop_id, page_size=page_size, sync_type=sync_type_enum)
                         )
-                        loop.close()
 
                     if result.success:
                         data = result.data or {}
@@ -127,9 +125,7 @@ def show_page():
                         api_secret=api_secret, main_category=main_category,
                     )
                     service = ApiSyncService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(service.bind_shop(request))
-                    loop.close()
+                    result = asyncio.run(service.bind_shop(request))
 
                     if result.success:
                         st.success(f"✅ 店铺 {shop_name} 绑定成功")
@@ -161,11 +157,9 @@ def show_page():
 
             if st.button("📋 查询同步历史"):
                 service = ApiSyncService(user_id)
-                loop = asyncio.new_event_loop()
-                history = loop.run_until_complete(
+                history = asyncio.run(
                     service.get_sync_history(shop_id=shop_options[selected_shop], limit=20)
                 )
-                loop.close()
 
                 if history:
                     records = []

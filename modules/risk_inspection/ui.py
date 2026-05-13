@@ -24,9 +24,7 @@ def show_page():
 
             if st.button("🔍 开始体检", type="primary", use_container_width=True):
                 service = RiskInspectionService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.inspect_all_skus(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.inspect_all_skus(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -68,9 +66,7 @@ def show_page():
 
             if st.button("📊 生成报告", type="primary", use_container_width=True):
                 service = RiskInspectionService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.generate_report(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.generate_report(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}

@@ -58,11 +58,9 @@ def show_page():
                         st.error("请输入SKU编码")
                     else:
                         service = PricingAdjustmentService(user_id)
-                        loop = asyncio.new_event_loop()
-                        result = loop.run_until_complete(
+                        result = asyncio.run(
                             service.auto_adjust_price(shop_id=shop_id, sku=sku)
                         )
-                        loop.close()
 
                         if result.success:
                             data = result.data or {}
@@ -94,11 +92,9 @@ def show_page():
                         st.error("请输入有效活动价格")
                     else:
                         service = PricingAdjustmentService(user_id)
-                        loop = asyncio.new_event_loop()
-                        result = loop.run_until_complete(
+                        result = asyncio.run(
                             service.adjust_for_activity(shop_id=shop_id, sku=sku, activity_price=activity_price)
                         )
-                        loop.close()
 
                         if result.success:
                             data = result.data or {}

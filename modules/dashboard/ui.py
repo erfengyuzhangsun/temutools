@@ -14,9 +14,7 @@ def show_page():
 
     with tab1:
         service = DashboardService(user_id)
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(service.get_overview())
-        loop.close()
+        result = asyncio.run(service.get_overview())
 
         if result.success:
             data = result.data or {}
@@ -97,9 +95,7 @@ def show_page():
         st.markdown("#### 全局告警中心")
 
         service = DashboardService(user_id)
-        loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(service.get_all_alerts())
-        loop.close()
+        result = asyncio.run(service.get_all_alerts())
 
         if result.success:
             data = result.data or {}

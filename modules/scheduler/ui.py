@@ -143,9 +143,7 @@ def show_page():
             limit = st.slider("显示条数", min_value=5, max_value=50, value=20)
 
             if st.button("📋 查询日志", use_container_width=True):
-                loop = asyncio.new_event_loop()
-                logs = loop.run_until_complete(service.get_task_logs(selected, limit=limit))
-                loop.close()
+                logs = asyncio.run(service.get_task_logs(selected, limit=limit))
 
                 if logs:
                     records = []

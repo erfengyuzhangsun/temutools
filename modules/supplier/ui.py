@@ -46,11 +46,9 @@ def show_page():
 
             if st.button("📊 查看价格变动", use_container_width=True):
                 service = SupplierService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.check_price_changes(supplier_id=supplier_id)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}

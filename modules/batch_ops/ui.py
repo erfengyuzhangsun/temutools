@@ -63,11 +63,9 @@ def show_page():
             with col_b1:
                 if st.button("📋 执行批量下架", type="primary", use_container_width=True, disabled=not confirm):
                     service = BatchOpsService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(
+                    result = asyncio.run(
                         service.batch_offline(shop_id=shop_id, sku_list=sku_list)
                     )
-                    loop.close()
 
                     if result.success:
                         data = result.data or {}

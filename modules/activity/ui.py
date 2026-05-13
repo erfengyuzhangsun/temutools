@@ -24,9 +24,7 @@ def show_page():
 
             if st.button("🔍 获取并匹配活动", type="primary", use_container_width=True):
                 service = ActivityService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.fetch_and_match(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.fetch_and_match(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -50,15 +48,13 @@ def show_page():
 
                                     if st.button(f"📋 报名此活动", key=act.get("activity_id")):
                                         sku_list = act.get("matched_skus", [])
-                                        loop2 = asyncio.new_event_loop()
-                                        result2 = loop2.run_until_complete(
+                                        result2 = asyncio.run(
                                             service.batch_apply(
                                                 shop_id=shop_id,
                                                 activity_id=act.get("activity_id"),
                                                 sku_list=sku_list,
                                             )
                                         )
-                                        loop2.close()
 
                                         if result2.success:
                                             st.success(f"✅ 报名成功，共 {len(sku_list)} 个SKU")

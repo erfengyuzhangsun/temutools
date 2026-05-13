@@ -26,11 +26,9 @@ def show_page():
                 st.error("请输入搜索关键词")
             else:
                 service = ProductResearchService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.collect_1688(keywords=keywords, limit=limit)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}
@@ -80,11 +78,9 @@ def show_page():
                 }
 
                 service = ProductResearchService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.estimate_profit(product_data=product_data, shop_id=shop_id)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}

@@ -26,9 +26,7 @@ def show_page():
             with col_b1:
                 if st.button("🔄 同步最新评价", type="primary", use_container_width=True):
                     service = ReviewMonitorService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(service.sync_new_reviews(shop_id=shop_id))
-                    loop.close()
+                    result = asyncio.run(service.sync_new_reviews(shop_id=shop_id))
 
                     if result.success:
                         data = result.data or {}
@@ -84,9 +82,7 @@ def show_page():
 
             if st.button("📊 分析差评", type="primary", use_container_width=True):
                 service = ReviewMonitorService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.analyze_reviews(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.analyze_reviews(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}

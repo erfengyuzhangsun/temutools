@@ -25,9 +25,7 @@ def show_page():
 
             if st.button("🔄 同步结算", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.sync_settlement(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.sync_settlement(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -76,11 +74,9 @@ def show_page():
 
             if st.button("📊 查看月度汇总", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.get_monthly_profit_summary(shop_id=shop_id, month=month)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}
@@ -115,11 +111,9 @@ def show_page():
 
             if st.button("🔮 预估下期回款", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(
+                result = asyncio.run(
                     service.predict_next_payout(shop_id=shop_id)
                 )
-                loop.close()
 
                 if result.success:
                     data = result.data or {}
@@ -167,11 +161,9 @@ def show_page():
 
                 if st.button("📋 执行对账", type="primary", use_container_width=True):
                     service = FinanceService(user_id)
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(
+                    result = asyncio.run(
                         service.reconcile(shop_id=shop_id, settlement_id=settlement_id)
                     )
-                    loop.close()
 
                     if result.success:
                         data = result.data or {}

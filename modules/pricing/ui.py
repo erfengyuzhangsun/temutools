@@ -37,9 +37,7 @@ def show_page():
 
             if st.button("🚀 执行自动核价", type="primary", use_container_width=True):
                 service = PricingService(user_id)
-                loop = asyncio.new_event_loop()
-                result = loop.run_until_complete(service.auto_handle_pricing(shop_id=shop_id))
-                loop.close()
+                result = asyncio.run(service.auto_handle_pricing(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -83,9 +81,7 @@ def show_page():
 
             if st.button("📋 查询核价日志", use_container_width=True):
                 service = PricingService(user_id)
-                loop = asyncio.new_event_loop()
-                logs = loop.run_until_complete(service.get_pricing_logs(shop_id=shop_id, limit=limit))
-                loop.close()
+                logs = asyncio.run(service.get_pricing_logs(shop_id=shop_id, limit=limit))
 
                 if logs:
                     records = []
