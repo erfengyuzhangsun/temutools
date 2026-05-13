@@ -49,7 +49,11 @@ def get_connection():
         return conn
 
 
+_initializing_tables = False
+
+
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
+    global _initializing_tables
     conn = get_connection()
     try:
         cursor = conn.cursor(dictionary=True) if DB_MODE == "mysql" else conn.cursor()
@@ -66,6 +70,29 @@ def execute_query(query: str, params: tuple = None, fetch: bool = False):
         conn.commit()
         return cursor.lastrowid if hasattr(cursor, 'lastrowid') else None
     except Exception as e:
+        if DB_MODE == "sqlite" and "no such table" in str(e).lower() and not _initializing_tables:
+            _initializing_tables = True
+            try:
+                from db_init import initialize_all_tables
+                initialize_all_tables()
+                cursor = conn.cursor()
+                if params:
+                    cursor.execute(query, params)
+                else:
+                    cursor.execute(query)
+                if fetch:
+                    if DB_MODE == "sqlite":
+                        columns = [desc[0] for desc in cursor.description]
+                        rows = cursor.fetchall()
+                        return [dict(zip(columns, row)) for row in rows]
+                    return cursor.fetchall()
+                conn.commit()
+                return cursor.lastrowid if hasattr(cursor, 'lastrowid') else None
+            except Exception:
+                conn.rollback()
+                raise e
+            finally:
+                _initializing_tables = False
         conn.rollback()
         raise e
     finally:

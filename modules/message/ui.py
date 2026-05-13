@@ -71,7 +71,7 @@ def show_page():
                 with st.container():
                     st.markdown(f"""
                     <div class="metric-card">
-                        <h6>{t.get('title', '未命名模板')}</h6>
+                        <h6>{t.get('name', '未命名模板')}</h6>
                         <p>{t.get('content', '')[:100]}{'...' if len(t.get('content', '')) > 100 else ''}</p>
                         <small>类别: {t.get('category', '通用')}</small>
                     </div>
@@ -88,7 +88,7 @@ def show_page():
                 if st.form_submit_button("创建模板", use_container_width=True):
                     from db import execute_query
                     execute_query(
-                        "INSERT INTO temu_reply_templates (user_id, title, content, category) VALUES (?, ?, ?, ?)",
+                        "INSERT INTO temu_reply_templates (user_id, name, content, category) VALUES (?, ?, ?, ?)",
                         (user_id, title, content, tmpl_category),
                     )
                     st.success("✅ 模板创建成功")

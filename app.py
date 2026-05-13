@@ -6,7 +6,7 @@ from calculator import ProfitCalculator
 from risk_monitor import RiskMonitor
 from config import CATEGORY_COMMISSION_RATES, PRICING_PLANS, PROFIT_WARNING_THRESHOLD
 
-from db import initialize_database, get_or_create_shop, save_profit_stats, save_sku_profits, save_risk_metrics
+from db import get_or_create_shop, save_profit_stats, save_sku_profits, save_risk_metrics
 from auth import is_authenticated, get_current_user, get_user_id, get_user_info, logout, show_login_page
 from admin import show_admin_panel, is_admin
 from logger import log_action, log_error, logger
@@ -50,7 +50,8 @@ def save_analysis_to_db(user_id, summary, results_df, risk_report):
 
 if 'db_initialized' not in st.session_state:
     try:
-        initialize_database()
+        from db_init import initialize_all_tables
+        initialize_all_tables()
         st.session_state['db_initialized'] = True
         log_action("数据库初始化完成")
     except Exception as e:

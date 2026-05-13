@@ -69,10 +69,11 @@ def initialize_all_tables():
     except Exception as e:
         logger.warning(f"数据分析表初始化失败: {e}")
 
-    # 7. P1-模块6/7/8: 调价/财务
+    # 7. P1-模块6/7/8: 调价/财务/大屏
     for mod_name, mod_import in [
         ("pricing_adj", "modules.pricing_adj.models"),
         ("finance", "modules.finance.models"),
+        ("dashboard", "modules.dashboard.models"),
     ]:
         try:
             mod = __import__(mod_import, fromlist=["initialize_tables"])
@@ -80,9 +81,19 @@ def initialize_all_tables():
             _initialized_modules.add(mod_name)
         except Exception as e:
             logger.warning(f"{mod_name}表初始化失败: {e}")
-    logger.info("[7/8] 调价/财务表初始化完成")
+    logger.info("[7/8] 调价/财务/大屏表初始化完成")
 
-    # 8. P2+P3: 剩余模块（消息/发货/活动/风控/选品/供应商等）
+    # 8. P2+P3: 消息+发货/活动/风控/选品/供应商等
+    for mod_name, mod_import in [
+        ("message", "modules.message.models"),
+    ]:
+        try:
+            mod = __import__(mod_import, fromlist=["initialize_tables"])
+            mod.initialize_tables()
+            _initialized_modules.add(mod_name)
+        except Exception as e:
+            logger.warning(f"{mod_name}表初始化失败: {e}")
+
     try:
         from common.models_p2p3 import initialize_tables
         initialize_tables()
