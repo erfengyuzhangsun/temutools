@@ -10,16 +10,24 @@ class ShippingService:
     async def generate_labels(self,shop_id:int,sku_list:list)->Any:
         from db import execute_query
         labels=[]
+        skipped=[]
         for sku in sku_list:
+            sku=sku.strip()
+            if not sku:
+                continue
             rows=execute_query("SELECT sku,product_name,settlement_price FROM temu_sync_orders WHERE user_id=? AND shop_id=? AND sku=? LIMIT 1",(self.uid,shop_id,sku),fetch=True)
             if not rows:
                 logger.warning(f"SKU {sku} 数据不完整，已跳过")
+                skipped.append(sku)
                 continue
             r=rows[0]
             label={"sku":r["sku"],"name":r.get("product_name",""),"price":float(r.get("settlement_price",0)),"barcode":f"TEMU_{r['sku']}","status":"generated"}
             execute_query("INSERT INTO temu_shipping_labels(user_id,shop_id,sku,label_data,status)VALUES(?,?,?,?,?)",(self.uid,shop_id,sku,"{}","ready"))
             labels.append(label)
-        return R(True,f"生成{len(labels)}张标签",{"labels":labels,"count":len(labels)})
+        msg=f"生成{len(labels)}张标签"
+        if skipped:
+            msg+=f"，{len(skipped)}个SKU未找到"
+        return R(True,msg,{"labels":labels,"count":len(labels),"skipped":skipped})
     async def generate_manifest(self,shop_id:int,order_ids:list)->Any:
         from db import execute_query
         manifest={"order_ids":order_ids,"generated_at":datetime.now().isoformat(),"total_orders":len(order_ids)}
@@ -29,8 +37,10 @@ class ShippingService:
 class ActivityService:
     def __init__(self,uid:int):self.uid=uid
     async def fetch_and_match(self,shop_id:int)->Any:
-        from common.temu_client import TemuApiClient;c=TemuApiClient(shop_id)
+        from common.temu_client import TemuApiClient
+        c=None
         try:
+            c=TemuApiClient(shop_id)
             r=await c.get_activities()
             if not r.success:return R(False,"获取活动失败")
             acts=(r.data or {}).get("activities",[])or[]
@@ -40,12 +50,21 @@ class ActivityService:
             for act in acts:
                 cat=act.get("category","");matched_skus=[s["sku"] for s in skus if cat and cat in str(s.get("category",""))]
                 if matched_skus:
-                    matched.append({"activity_id":act.get("activity_id"),"name":act.get("name",""),"matched_skus":matched_skus,"count":len(matched_skus)})
+                    activity_id=act.get("activity_id");name=act.get("name","")
+                    matched.append({"activity_id":activity_id,"name":name,"matched_skus":matched_skus,"count":len(matched_skus)})
+                    try:
+                        execute_query("INSERT OR REPLACE INTO temu_activities(user_id,shop_id,activity_id,name,status,applied_skus)VALUES(?,?,?,?,?,?)",(self.uid,shop_id,activity_id,name,"pending",""))
+                    except Exception:
+                        pass
             return R(True,data={"activities":matched,"count":len(matched)})
-        finally:await c.close()
+        except Exception:
+            return R(False,"获取活动异常")
+        finally:
+            if c is not None:
+                await c.close()
     async def batch_apply(self,shop_id:int,activity_id:str,sku_list:list)->Any:
         from db import execute_query
-        execute_query("UPDATE temu_activities SET status='applied',applied_skus=? WHERE user_id=? AND shop_id=? AND activity_id=?",(",".join(sku_list),self.uid,shop_id,activity_id))
+        execute_query("INSERT OR REPLACE INTO temu_activities(user_id,shop_id,activity_id,status,applied_skus)VALUES(?,?,?,?,?)",(self.uid,shop_id,activity_id,"applied",",".join(sku_list)))
         return R(True,"报名成功",{"activity_id":activity_id,"sku_count":len(sku_list)})
 
 class RiskInspectionService:
