@@ -81,19 +81,29 @@ def show_page():
 
             if submitted:
                 if not name.strip():
-                    st.error("供应商名称不能为空")
+                    st.error("❌ 请填写供应商名称（标 * 为必填项）")
                 else:
-                    service = SupplierService(user_id)
-                    result = service.add_supplier(
-                        name=name, contact=contact,
-                        phone=phone, category=category,
-                    )
+                    try:
+                        service = SupplierService(user_id)
+                        result = service.add_supplier(
+                            name=name, contact=contact,
+                            phone=phone, category=category,
+                        )
 
-                    if result.success:
-                        st.success(f"✅ 供应商 {name} 添加成功")
-                        st.rerun()
-                    else:
-                        st.error(f"❌ {result.message}")
+                        if result.success:
+                            st.success(f"✅ 供应商「{name}」添加成功！欢迎合作 🎉")
+                            st.info("💡 可继续添加下一个供应商")
+                            if not st.session_state.get('_rerun_pending', False):
+                                st.session_state['_rerun_pending'] = True
+                                st.rerun()
+                        else:
+                            st.error(f"❌ {result.message}")
+                    except Exception as e:
+                        err_msg = str(e).lower()
+                        if "unique" in err_msg or "integrity" in err_msg or "已存在" in err_msg:
+                            st.error(f"❌ 该供应商名称「{name}」已注册，请修改后重试")
+                        else:
+                            st.error("❌ 添加失败，请稍后重试或联系管理员")
 
     with tab3:
         st.markdown("#### 供应商比价")
