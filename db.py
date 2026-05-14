@@ -54,6 +54,8 @@ _initializing_tables = False
 
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     global _initializing_tables
+    if DB_MODE == "mysql":
+        query = _adapt_query_for_mysql(query)
     conn = get_connection()
     try:
         cursor = conn.cursor(dictionary=True) if DB_MODE == "mysql" else conn.cursor()
@@ -101,6 +103,15 @@ def execute_query(query: str, params: tuple = None, fetch: bool = False):
 
 
 import re
+
+
+def _adapt_query_for_mysql(query: str) -> str:
+    if DB_MODE == "mysql":
+        query = query.replace("INSERT OR REPLACE INTO", "REPLACE INTO")
+        query = query.replace("INSERT OR IGNORE INTO", "INSERT IGNORE INTO")
+        query = query.replace("?", "%s")
+    return query
+
 
 def adapt_query_for_sqlite(query: str) -> str:
     if DB_MODE == "sqlite":
@@ -157,6 +168,8 @@ def initialize_database():
 
     if DB_MODE == "sqlite":
         ensure_sqlite_defaults()
+    elif DB_MODE == "mysql":
+        ensure_mysql_defaults()
 
 
 def get_table_schemas():
@@ -285,6 +298,22 @@ def ensure_sqlite_defaults():
         )
     conn.commit()
     conn.close()
+
+
+def ensure_mysql_defaults():
+    rows = execute_query("SELECT COUNT(*) as cnt FROM temu_users", fetch=True)
+    if rows and rows[0]["cnt"] == 0:
+        today = date.today()
+        expire = today + timedelta(days=365 * 10)
+        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "admin@hjp1")
+        admin_user_id = execute_query(
+            "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (%s, %s, %s, %s, %s, 1)",
+            (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())
+        )
+        execute_query(
+            "INSERT INTO temu_shops (user_id, shop_name, main_category) VALUES (%s, %s, %s)",
+            (admin_user_id, "默认店铺", "家居百货")
+        )
 
 
 def verify_user_password(password: str) -> Optional[Dict]:
