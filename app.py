@@ -70,6 +70,9 @@ if "page" not in st.session_state:
     initial_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
     st.session_state["page"] = initial_page
 
+if st.session_state.get('_rerun_pending', False):
+    st.session_state['_rerun_pending'] = False
+
 current_page = st.session_state["page"]
 
 if current_page == "landing":
@@ -117,7 +120,9 @@ if 'first_visit' not in st.session_state:
 
 if st.session_state.get('_needs_rerun', False):
     st.session_state['_needs_rerun'] = False
-    st.rerun()
+    if not st.session_state.get('_rerun_pending', False):
+        st.session_state['_rerun_pending'] = True
+        st.rerun()
     st.stop()
 
 with st.sidebar:
@@ -148,7 +153,9 @@ with st.sidebar:
         btn_type = "primary" if is_active else "secondary"
         if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
             st.session_state["page"] = page
-            st.rerun()
+            if not st.session_state.get('_rerun_pending', False):
+                st.session_state['_rerun_pending'] = True
+                st.rerun()
 
     with st.expander("📊 核心工具", expanded=True):
         nav_button("利润分析", "app", "💰")
@@ -210,7 +217,9 @@ with st.sidebar:
                     if user_id:
                         save_analysis_to_db(user_id, summary, results_df, risk_report)
 
-                    st.rerun()
+                    if not st.session_state.get('_rerun_pending', False):
+                        st.session_state['_rerun_pending'] = True
+                        st.rerun()
                     
         except Exception as e:
             st.error(f"❌ 文件处理失败：{str(e)}")
@@ -287,7 +296,9 @@ with st.sidebar:
             if user_id:
                 save_analysis_to_db(user_id, summary, results_df, risk_report)
 
-            st.rerun()
+            if not st.session_state.get('_rerun_pending', False):
+                st.session_state['_rerun_pending'] = True
+                st.rerun()
     
     st.markdown("---")
     st.markdown("### 📌 使用说明")
@@ -304,7 +315,9 @@ with st.sidebar:
             st.session_state['show_admin'] = not st.session_state.get('show_admin', False)
         if st.button("🚪 退出登录", use_container_width=True, type="secondary"):
             logout()
-            st.rerun()
+            if not st.session_state.get('_rerun_pending', False):
+                st.session_state['_rerun_pending'] = True
+                st.rerun()
 
 if current_page in MODULE_PAGES:
     MODULE_PAGES[current_page]()
@@ -958,7 +971,9 @@ Temu 店铺风险评估报告
             for key in ['results_df', 'summary', 'calculator', 'risk_report', 'monitor']:
                 if key in st.session_state:
                     del st.session_state[key]
-            st.rerun()
+            if not st.session_state.get('_rerun_pending', False):
+                st.session_state['_rerun_pending'] = True
+                st.rerun()
     
     st.markdown("---")
     

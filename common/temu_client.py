@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import httpx
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
@@ -51,6 +52,7 @@ class TemuApiClient:
         self.api_key = api_key
         self.api_secret = api_secret
         self._http_client = None
+        self._proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
         self._load_credentials_if_needed()
 
     def _load_credentials_if_needed(self):
@@ -73,7 +75,10 @@ class TemuApiClient:
 
     async def _ensure_client(self):
         if self._http_client is None:
-            self._http_client = httpx.AsyncClient(timeout=30.0)
+            client_kwargs = {"timeout": 30.0}
+            if self._proxy:
+                client_kwargs["proxy"] = self._proxy
+            self._http_client = httpx.AsyncClient(**client_kwargs)
 
     async def close(self):
         if self._http_client:
@@ -123,7 +128,13 @@ class TemuApiClient:
         except httpx.HTTPStatusError as e:
             raise TemuApiError(f"HTTP错误: {str(e)}", status_code=e.response.status_code)
         except (httpx.RequestError, ConnectionError) as e:
-            raise TemuApiError(f"网络错误: {str(e)}", status_code=0, error_code="NETWORK_ERROR")
+            error_msg = str(e)
+            if "Name or service not known" in error_msg or "名称或服务未知" in error_msg:
+                raise TemuApiError(
+                    "无法连接 Temu API 服务器（DNS解析失败），请检查服务器网络配置",
+                    status_code=0, error_code="DNS_ERROR"
+                )
+            raise TemuApiError(f"网络错误: {error_msg}", status_code=0, error_code="NETWORK_ERROR")
 
     @async_retry(RETRY_CONFIG)
     async def get_orders(self, page: int = 1, page_size: int = 500, **kwargs) -> TemuApiResponse:

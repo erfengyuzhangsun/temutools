@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import asyncio
 from common.services_p2p3 import SupplierService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -46,7 +48,7 @@ def show_page():
 
             if st.button("📊 查看价格变动", use_container_width=True):
                 service = SupplierService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.check_price_changes(supplier_id=supplier_id)
                 )
 
