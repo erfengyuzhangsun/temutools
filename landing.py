@@ -437,6 +437,60 @@ def show_landing_page():
         [data-testid="baseButton-secondary"] {
             color: #1E1E1E !important;
         }
+
+        /* ========== 自动化流程演示卡片 ========== */
+        .demo-section {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+            border-radius: 16px;
+            padding: 1.8rem 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid #d0d5ff;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.12);
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem 0.9rem;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .demo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.18);
+        }
+        .demo-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.4rem;
+        }
+        .demo-card h4 {
+            margin: 0.3rem 0 0.3rem 0;
+            font-size: 1rem;
+        }
+        .demo-card p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.5;
+        }
+        @media (max-width: 768px) {
+            .demo-grid { grid-template-columns: 1fr; }
+        }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -461,7 +515,7 @@ def show_landing_page():
         </div>
         <div style="margin-top: 1rem; position: relative; z-index: 1; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;">
             <a href="?page=app" class="cta-button-primary" style="color: white; text-decoration: none;">🚀 免费试用7天，开启躺平运营</a>
-            <a href="#solutions" class="cta-button-outline" style="color: white; text-decoration: none;">▶ 查看自动化全流程演示</a>
+            <a href="?show_demo=1" class="cta-button-outline" style="color: white; text-decoration: none;">▶ 查看自动化全流程演示</a>
         </div>
         <div style="margin-top: 1rem; display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; font-size: 0.82rem; opacity: 0.9;">
             <span>✅ 已帮 800+ 卖家实现 90% 运营自动化</span>
@@ -476,6 +530,35 @@ def show_landing_page():
         if st.button("🚪 进入应用", use_container_width=True, type="primary"):
             st.session_state["page"] = "app"
             st.query_params["page"] = "app"
+
+    # ==================== 1.5️⃣ 自动化全流程演示 ====================
+    _demo_param = st.query_params.get("show_demo", [""])
+    if isinstance(_demo_param, (list, tuple)):
+        _demo_param = _demo_param[0] if _demo_param else ""
+    show_demo = _demo_param == "1" or st.session_state.get("show_demo", False)
+    if show_demo:
+        st.session_state["show_demo"] = True
+        st.markdown("""
+        <div class="demo-section">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0; font-size: 1.35rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🤖 Temu全流程自动化演示</h3>
+                <p style="color: #555; margin: 0.4rem 0 0 0; font-size: 0.92rem;">系统自动完成整个运营闭环，每天只需5分钟</p>
+            </div>
+            <div class="demo-grid">
+                <div class="demo-card"><div class="demo-num">1</div><h4>📊 自动核价</h4><p>系统实时接收平台核价通知，按你预设的毛利规则批量自动算价，拒绝亏损、零误操作</p></div>
+                <div class="demo-card"><div class="demo-num">2</div><h4>⚡ 智能调价</h4><p>竞品降价自动跟价，保本线由你锁定，不盲目内卷、守住每一分利润</p></div>
+                <div class="demo-card"><div class="demo-num">3</div><h4>🚨 库存预警</h4><p>库存低于安全线自动提醒，断货/滞销提前预判，不压资金、不丢流量</p></div>
+                <div class="demo-card"><div class="demo-num">4</div><h4>🎯 活动报名</h4><p>自动匹配符合条件的平台活动，一键批量报名，不再错过大促流量</p></div>
+                <div class="demo-card"><div class="demo-num">5</div><h4>💬 售后消息</h4><p>售后通知、处罚消息实时同步提醒，不遗漏、不扣分、不罚款</p></div>
+                <div class="demo-card"><div class="demo-num">6</div><h4>📈 数据报表</h4><p>每日自动生成运营报表，盈亏、库存、活动数据一键查看，不用手动做表</p></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        col_d1, col_d2, col_d3 = st.columns([1, 2, 1])
+        with col_d2:
+            if st.button("✕ 关闭演示", use_container_width=True, type="secondary"):
+                st.session_state["show_demo"] = False
+                st.query_params["show_demo"] = "0"
 
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""
