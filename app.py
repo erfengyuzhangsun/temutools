@@ -64,24 +64,31 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+_query_params = st.query_params
+_raw_page = _query_params.get("page", ["landing"])
+_query_page = _raw_page[0] if isinstance(_raw_page, (list, tuple)) else _raw_page
+
 if "page" not in st.session_state:
-    query_params = st.query_params
-    raw_page = query_params.get("page", ["landing"])
-    initial_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
-    st.session_state["page"] = initial_page
+    st.session_state["page"] = _query_page
+elif _query_page != st.session_state["page"]:
+    st.session_state["page"] = _query_page
 
 if st.session_state.get('_rerun_pending', False):
     st.session_state['_rerun_pending'] = False
 
 current_page = st.session_state["page"]
 
-if current_page == "landing":
-    import landing
-    landing.show_landing_page()
-    st.stop()
+try:
+    if current_page == "landing":
+        import landing
+        landing.show_landing_page()
+        st.stop()
 
-if not is_authenticated():
-    show_login_page()
+    if not is_authenticated():
+        show_login_page()
+        st.stop()
+except Exception:
+    st.error("页面加载中，请稍候...")
     st.stop()
 
 MODULE_PAGES = {

@@ -127,4 +127,7 @@ def show_login_page():
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    show_landing_page()
+    try:
+        show_landing_page()
+    except Exception:
+        st.info("💡 页面加载中，请稍候...")

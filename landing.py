@@ -442,9 +442,7 @@ def show_landing_page():
     with col_enter2:
         if st.button("🚪 进入应用", use_container_width=True, type="primary"):
             st.session_state["page"] = "app"
-            if not st.session_state.get('_rerun_pending', False):
-                st.session_state['_rerun_pending'] = True
-                st.rerun()
+            st.query_params["page"] = "app"
 
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""
