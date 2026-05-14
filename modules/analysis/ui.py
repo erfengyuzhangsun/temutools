@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from modules.analysis.service import AnalysisService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -24,7 +24,7 @@ def show_page():
 
             if st.button("📥 采集指标", type="primary", use_container_width=True):
                 service = AnalysisService(user_id)
-                result = asyncio.run(service.collect_metrics(shop_id=shop_id))
+                result = run_async(service.collect_metrics(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -70,7 +70,7 @@ def show_page():
 
             if st.button("🔍 检查告警", type="primary", use_container_width=True):
                 service = AnalysisService(user_id)
-                result = asyncio.run(service.check_metric_alerts(shop_id=shop_id))
+                result = run_async(service.check_metric_alerts(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -112,7 +112,7 @@ def show_page():
 
             if st.button("📄 生成报表", type="primary", use_container_width=True):
                 service = AnalysisService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.generate_report(shop_id=shop_id, report_type=report_type)
                 )
 

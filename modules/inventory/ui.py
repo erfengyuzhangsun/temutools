@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from modules.inventory.service import InventoryService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -59,7 +59,7 @@ def show_page():
 
             if st.button("🔄 同步库存", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                result = asyncio.run(service.sync_inventory(shop_id=shop_id))
+                result = run_async(service.sync_inventory(shop_id=shop_id))
 
                 if result.success:
                     st.success(f"✅ {result.message}")
@@ -80,7 +80,7 @@ def show_page():
 
             if st.button("🔍 检查告警", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                result = asyncio.run(service.check_inventory_alerts(shop_id=shop_id))
+                result = run_async(service.check_inventory_alerts(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -119,7 +119,7 @@ def show_page():
 
             if st.button("📊 生成补货建议", type="primary", use_container_width=True):
                 service = InventoryService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.generate_replenishment_suggestions(shop_id=shop_id)
                 )
 

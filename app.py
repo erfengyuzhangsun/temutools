@@ -66,7 +66,7 @@ st.set_page_config(
 
 if "page" not in st.session_state:
     query_params = st.query_params
-    raw_page = query_params.get("page", ["app"])
+    raw_page = query_params.get("page", ["landing"])
     initial_page = raw_page[0] if isinstance(raw_page, (list, tuple)) else raw_page
     st.session_state["page"] = initial_page
 
@@ -301,13 +301,13 @@ with st.sidebar:
                 st.rerun()
     
     st.markdown("---")
-    st.markdown("### 📌 使用说明")
-    st.info("""
-    1️⃣ 从 Temu 商家后台导出订单 CSV  
-    2️⃣ 上传文件并点击"开始分析"  
-    3️⃣ 查看风险仪表盘 + 利润报告  
-    4️⃣ 导出报表进行进一步分析
-    """)
+    with st.expander("📌 使用说明（点击展开）", expanded=False):
+        st.info("""
+        1️⃣ 从 Temu 商家后台导出订单 CSV  
+        2️⃣ 上传文件并点击"开始分析"  
+        3️⃣ 查看风险仪表盘 + 利润报告  
+        4️⃣ 导出报表进行进一步分析
+        """)
 
     st.markdown("---")
     with st.expander("⚙️ 管理", expanded=False):

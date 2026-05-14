@@ -99,7 +99,7 @@ def show_login_page():
     <div class="login-container">
         <div style="font-size: 3rem; margin-bottom: 0.5rem;">🤖</div>
         <div class="login-title">Temu全托管自动化运营平台</div>
-        <div class="login-subtitle">请输入访问密码以继续使用</div>
+        <div class="login-subtitle">请输入访问密码，开启您的自动化运营之旅</div>
     </div>
     """, unsafe_allow_html=True)
 

@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from modules.message.service import MessageService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -24,7 +24,7 @@ def show_page():
 
             if st.button("🔄 同步消息", type="primary", use_container_width=True):
                 service = MessageService(user_id)
-                result = asyncio.run(service.sync_messages(shop_id=shop_id))
+                result = run_async(service.sync_messages(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -59,25 +59,28 @@ def show_page():
     with tab2:
         st.markdown("#### 回复模板管理")
 
-        service = MessageService(user_id)
-        templates = service.get_templates()
+        try:
+            service = MessageService(user_id)
+            templates = service.get_templates()
 
-        category = st.text_input("按类别筛选（留空显示全部）", "")
-        if category:
-            templates = service.get_templates(category=category)
+            category = st.text_input("按类别筛选（留空显示全部）", "")
+            if category:
+                templates = service.get_templates(category=category)
 
-        if templates:
-            for t in templates:
-                with st.container():
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <h6>{t.get('name', '未命名模板')}</h6>
-                        <p>{t.get('content', '')[:100]}{'...' if len(t.get('content', '')) > 100 else ''}</p>
-                        <small>类别: {t.get('category', '通用')}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.info("暂无回复模板")
+            if templates:
+                for t in templates:
+                    with st.container():
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <h6>{t.get('name', '未命名模板')}</h6>
+                            <p>{t.get('content', '')[:100]}{'...' if len(t.get('content', '')) > 100 else ''}</p>
+                            <small>类别: {t.get('category', '通用')}</small>
+                        </div>
+                        """, unsafe_allow_html=True)
+            else:
+                st.info("暂无回复模板")
+        except Exception as e:
+            st.error(f"加载回复模板失败: {e}")
 
         st.markdown("---")
         with st.expander("➕ 新建回复模板"):

@@ -15,11 +15,14 @@ def show_landing_page():
             st.session_state['db_initialized'] = True
         except Exception:
             pass
-    st.set_page_config(
-        page_title="Temu全托管自动化运营平台 - 告别熬夜盯后台",
-        page_icon="🤖",
-        layout="wide"
-    )
+    try:
+        st.set_page_config(
+            page_title="Temu全托管自动化运营平台 - 告别熬夜盯后台",
+            page_icon="🤖",
+            layout="wide"
+        )
+    except Exception:
+        pass
 
     try:
         query_params = st.query_params
@@ -424,6 +427,14 @@ def show_landing_page():
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    col_enter1, col_enter2, col_enter3 = st.columns([1, 2, 1])
+    with col_enter2:
+        if st.button("🚪 进入应用", use_container_width=True, type="primary"):
+            st.session_state["page"] = "app"
+            if not st.session_state.get('_rerun_pending', False):
+                st.session_state['_rerun_pending'] = True
+                st.rerun()
 
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""

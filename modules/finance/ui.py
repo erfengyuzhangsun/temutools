@@ -1,8 +1,8 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from datetime import datetime
 from modules.finance.service import FinanceService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -25,7 +25,7 @@ def show_page():
 
             if st.button("🔄 同步结算", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                result = asyncio.run(service.sync_settlement(shop_id=shop_id))
+                result = run_async(service.sync_settlement(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -74,7 +74,7 @@ def show_page():
 
             if st.button("📊 查看月度汇总", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.get_monthly_profit_summary(shop_id=shop_id, month=month)
                 )
 
@@ -111,7 +111,7 @@ def show_page():
 
             if st.button("🔮 预估下期回款", type="primary", use_container_width=True):
                 service = FinanceService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.predict_next_payout(shop_id=shop_id)
                 )
 
@@ -161,7 +161,7 @@ def show_page():
 
                 if st.button("📋 执行对账", type="primary", use_container_width=True):
                     service = FinanceService(user_id)
-                    result = asyncio.run(
+                    result = run_async(
                         service.reconcile(shop_id=shop_id, settlement_id=settlement_id)
                     )
 
