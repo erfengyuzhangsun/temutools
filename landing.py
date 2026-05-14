@@ -404,6 +404,39 @@ def show_landing_page():
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; }
+
+        /* ========== 强制亮色主题（覆盖系统深色模式） ========== */
+        [data-testid="stAppViewContainer"],
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        .stApp, .main, .block-container {
+            background-color: #FFFFFF !important;
+            color: #1E1E1E !important;
+        }
+        html, body, .stApp, .main, .block-container,
+        p, h1, h2, h3, h4, h5, h6, span, div, label,
+        .stMarkdown, .stText {
+            color: #1E1E1E !important;
+        }
+        .stSidebar, [data-testid="stSidebar"] {
+            background-color: #F8F9FA !important;
+        }
+        .stSidebar * {
+            color: #1E1E1E !important;
+        }
+        input, textarea, select, [data-baseweb="input"] input {
+            background-color: #FFFFFF !important;
+            color: #1E1E1E !important;
+        }
+        /* 覆盖深色模式下Streamlit默认文本颜色 */
+        .css-1y4p8pa, .css-1r6goiv, .css-1v3fvcr, .css-1x8cf1d,
+        .css-1n76uvr, .css-1cpxqw2, .css-1q8ddro {
+            color: #1E1E1E !important;
+        }
+        /* 确保侧边栏导航按钮文字可见 */
+        [data-testid="baseButton-secondary"] {
+            color: #1E1E1E !important;
+        }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -447,7 +480,7 @@ def show_landing_page():
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""
     <div class="urgency-banner">
-        <h3 style="margin: 0 0 0.3rem 0; font-size: 1.15rem;">🎉 首发特惠：前 <strong>100</strong> 名用户享受 <strong>8折优惠</strong></h3>
+        <h3 style="margin: 0 0 0.3rem 0; font-size: 1.15rem;">🎉 累计服务800+卖家，首发专属：前 <strong>100</strong> 名新用户享 <strong>8折</strong></h3>
         <p style="margin: 0; font-size: 0.92rem; opacity: 0.95;">
             专业版原价 ¥99/季度，现价 <strong style="font-size: 1.05rem;">¥79.2/季度</strong> |
             仅剩 <strong style="color: #FFE66D; font-size: 1.05rem;">23</strong> 个名额 |
@@ -462,7 +495,7 @@ def show_landing_page():
     col_s1, col_s2, col_s3, col_s4 = st.columns(4)
 
     with col_s1:
-        st.markdown("""<div class="stat-item"><div class="stat-number">800+</div><div class="stat-label">👥 卖家正在使用</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="stat-item"><div class="stat-number">800+</div><div class="stat-label">👥 累计合作卖家</div></div>""", unsafe_allow_html=True)
 
     with col_s2:
         st.markdown("""<div class="stat-item"><div class="stat-number">90%</div><div class="stat-label">🤖 运营工作已自动化</div></div>""", unsafe_allow_html=True)

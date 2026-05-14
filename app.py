@@ -64,6 +64,201 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.markdown("""
+<style>
+    html {
+        color-scheme: light !important;
+    }
+    html, body, .stApp, .main, .block-container,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stBottom"],
+    [data-testid="stMainMenu"],
+    [data-testid="stSidebarNav"],
+    [data-testid="stSidebarNavItems"],
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stVerticalBlock"],
+    [data-testid="stHorizontalBlock"],
+    [data-testid="stElementContainer"],
+    [data-testid="column"],
+    [data-testid="stText"],
+    [data-testid="stCaption"],
+    [data-testid="stInfo"],
+    [data-testid="stSuccess"],
+    [data-testid="stWarning"],
+    [data-testid="stError"],
+    [data-testid="stException"],
+    [data-testid="stMetric"],
+    [data-testid="stMetricLabel"],
+    [data-testid="stMetricValue"],
+    [data-testid="stMetricDelta"],
+    [data-testid="stDataFrame"],
+    [data-testid="stTable"],
+    [data-testid="stForm"],
+    [data-testid="stFormBorder"],
+    [data-testid="stSelectbox"],
+    [data-testid="stMultiselect"],
+    [data-testid="stNumberInput"],
+    [data-testid="stTextInput"],
+    [data-testid="stTextArea"],
+    [data-testid="stDateInput"],
+    [data-testid="stTimeInput"],
+    [data-testid="stSlider"],
+    [data-testid="stCheckbox"],
+    [data-testid="stRadio"],
+    [data-testid="stToggle"],
+    [data-testid="stColorPicker"],
+    [data-testid="stFileUploader"],
+    [data-testid="stImage"],
+    [data-testid="stVideo"],
+    [data-testid="stAudio"],
+    [data-testid="stPlotlyChart"],
+    [data-testid="stVegaLiteChart"],
+    [data-testid="stDeckGlChart"],
+    [data-testid="stGraphVizChart"],
+    [data-testid="stBokehChart"],
+    [data-testid="stPyplotChart"],
+    [data-testid="stAltairChart"],
+    [data-testid="stProgress"],
+    [data-testid="stSpinner"],
+    [data-testid="stBalloons"],
+    [data-testid="stSnow"],
+    [data-testid="stCode"],
+    [data-testid="stJson"],
+    [data-testid="stTabs"],
+    [data-testid="stTab"],
+    [data-testid="stExpander"],
+    [data-testid="stExpanderToggle"],
+    [data-testid="stPopover"],
+    [data-testid="stModal"],
+    [data-testid="stTooltip"],
+    [data-testid="stHelp"],
+    [data-testid="stAlert"],
+    [data-testid="stBanner"],
+    [data-testid="stNotification"],
+    [data-testid="stToast"],
+    [data-testid="stEmpty"],
+    [data-testid="stHeading"],
+    [data-testid="stSubheading"],
+    [data-testid="stDivider"],
+    [data-testid="stSeparator"],
+    [data-testid="stLinkButton"],
+    [data-testid="stDownloadButton"],
+    [data-testid="stActionButton"],
+    [data-testid="stPageLink"],
+    [data-testid="stTabBar"],
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"],
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapseButton"] {
+        background-color: #FFFFFF !important;
+        color: #1E1E1E !important;
+    }
+    * {
+        color: #1E1E1E !important;
+        border-color: #DEE2E6 !important;
+    }
+    svg, [data-testid="stMetricValue"] svg,
+    [data-testid="stMetricDelta"] svg,
+    .st-emotion-cache * svg,
+    .stMarkdown svg {
+        fill: #1E1E1E !important;
+        color: #1E1E1E !important;
+        stroke: #1E1E1E !important;
+    }
+    a, a:link, a:visited, a:hover, a:active {
+        color: #667EEA !important;
+    }
+    a.cta-button-primary, a.cta-button-primary:link,
+    a.cta-button-primary:visited, a.cta-button-primary:hover {
+        color: #FFFFFF !important;
+    }
+    [data-testid="baseButton-primary"],
+    [data-testid="baseButton-primaryFormSubmit"] {
+        color: #FFFFFF !important;
+    }
+    [data-testid="baseButton-secondary"],
+    [data-testid="baseButton-secondaryFormSubmit"] {
+        color: #1E1E1E !important;
+    }
+    [data-testid="baseButton-tertiary"],
+    [data-testid="baseButton-tertiaryFormSubmit"] {
+        color: #1E1E1E !important;
+    }
+    button, [data-testid="baseButton-primary"] button,
+    [data-testid="baseButton-secondary"] button,
+    .stButton button {
+        color: #1E1E1E !important;
+    }
+    button[kind="primary"] {
+        color: #FFFFFF !important;
+    }
+    .stSidebar, [data-testid="stSidebar"] {
+        background-color: #F8F9FA !important;
+    }
+    .stSidebar *, [data-testid="stSidebar"] * {
+        background-color: #F8F9FA !important;
+        color: #1E1E1E !important;
+    }
+    .stSidebar .stButton button,
+    [data-testid="stSidebar"] button {
+        background-color: #F0F2F6 !important;
+        color: #1E1E1E !important;
+    }
+    .stSidebar button[kind="primary"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #FFFFFF !important;
+    }
+    input, textarea, select,
+    [data-baseweb="input"] input,
+    [data-baseweb="textarea"] textarea,
+    [data-baseweb="select"] select,
+    .stTextInput input, .stTextArea textarea,
+    .stNumberInput input, .stDateInput input,
+    .stTimeInput input, .stSelectbox div,
+    .stMultiselect div {
+        background-color: #FFFFFF !important;
+        color: #1E1E1E !important;
+        border-color: #DEE2E6 !important;
+    }
+    .st-cc, .st-bb, .st-bc, .st-bd, .st-be, .st-bf,
+    .st-bg, .st-bh, .st-bi, .st-bj, .st-bk, .st-bl,
+    .st-bm, .st-bn, .st-bo, .st-bp, .st-bq, .st-br,
+    .st-bs, .st-bt, .st-bu, .st-bv, .st-bw, .st-bx,
+    .st-by, .st-bz, .st-ca, .st-cb, .st-cc, .st-cd,
+    .st-ce, .st-cf, .st-cg, .st-ch, .st-ci, .st-cj,
+    .st-ck, .st-cl, .st-cm, .st-cn, .st-co, .st-cp,
+    .st-cq, .st-cr, .st-cs, .st-ct, .st-cu, .st-cv,
+    .st-cw, .st-cx, .st-cy, .st-cz, .st-da, .st-db,
+    .st-dc, .st-dd, .st-de, .st-df, .st-dg, .st-dh,
+    .st-di, .st-dj, .st-dk, .st-dl, .st-dm, .st-dn,
+    .st-do, .st-dp, .st-dq, .st-dr, .st-ds, .st-dt,
+    .st-emotion-cache,
+    .st-emotion-cache * {
+        color: #1E1E1E !important;
+    }
+    [data-theme="dark"],
+    [data-testid="stAppViewContainer"][data-theme="dark"],
+    .stApp[data-theme="dark"] {
+        background-color: #FFFFFF !important;
+        color: #1E1E1E !important;
+    }
+    [data-theme="dark"] .stSidebar,
+    [data-theme="dark"] [data-testid="stSidebar"] {
+        background-color: #F8F9FA !important;
+    }
+    [data-theme="dark"] input,
+    [data-theme="dark"] textarea,
+    [data-theme="dark"] select {
+        background-color: #FFFFFF !important;
+        color: #1E1E1E !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 _query_params = st.query_params
 _raw_page = _query_params.get("page", ["landing"])
 _query_page = _raw_page[0] if isinstance(_raw_page, (list, tuple)) else _raw_page
