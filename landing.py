@@ -684,7 +684,7 @@ def show_landing_page():
                 ✅ 库存预警+基础数据分析<br>
                 ✅ 7×12小时客服支持<br>
             </ul>
-            <a href="?page=landing&plan=basic#payment" class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block;">选择基础版</a>
+            <a href="javascript:void(0)" onclick="document.getElementById('payment-code').scrollIntoView({behavior:'smooth'});" class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block;">选择基础版</a>
         </div>
         """, unsafe_allow_html=True)
 
@@ -706,7 +706,7 @@ def show_landing_page():
                 ✅ 优先客服支持+专属运营建议<br>
             </ul>
             <p style="font-size: 0.85rem; font-weight: bold; opacity: 0.9; margin-top: 0.5rem;">🔥 90%卖家首选，开启躺平运营的必备方案</p>
-            <a href="?page=landing&plan=pro#payment" class="cta-button-primary" style="color: white; text-decoration: none; display: inline-block;">🎯 立即订阅专业版</a>
+            <a href="javascript:void(0)" onclick="document.getElementById('payment-code').scrollIntoView({behavior:'smooth'});" class="cta-button-primary" style="color: white; text-decoration: none; display: inline-block;">🎯 立即订阅专业版</a>
         </div>
         """, unsafe_allow_html=True)
 
@@ -726,14 +726,14 @@ def show_landing_page():
                 ✅ 专属客户经理+定制化需求支持<br>
                 ✅ API接口权限+多店无限扩展<br>
             </ul>
-            <a href="?page=landing&plan=lifetime#payment" class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block;">🏆 升级终身版</a>
+            <a href="javascript:void(0)" onclick="document.getElementById('payment-code').scrollIntoView({behavior:'smooth'});" class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block;">🏆 升级终身版</a>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
 
     # ==================== 💳 收款码与订单表单（保持原有逻辑） ====================
-    st.markdown("""<div id="payment"></div>""", unsafe_allow_html=True)
+    st.markdown("""<div id="payment-code"></div>""", unsafe_allow_html=True)
     st.markdown("""
     <div class="payment-section">
         <h3 style="text-align: center; color: #333; margin-bottom: 1.2rem; font-size: 1.2rem;">� 选择套餐，立即开通</h3>
@@ -973,7 +973,7 @@ def show_landing_page():
             </p>
             <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
                 <a href="?page=app" class="cta-button-primary" style="color: white; text-decoration: none;">� 免费试用7天 →</a>
-                <a href="#payment" class="cta-button-outline" style="color: white; text-decoration: none;">💰 查看定价方案</a>
+                <a href="#payment-code" class="cta-button-outline" style="color: white; text-decoration: none;">💰 查看定价方案</a>
             </div>
         </div>
         """, unsafe_allow_html=True)
