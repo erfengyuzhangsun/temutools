@@ -491,6 +491,259 @@ def show_landing_page():
         @media (max-width: 768px) {
             .demo-grid { grid-template-columns: 1fr; }
         }
+
+        /* ========== 分步轮播演示 ========== */
+        .demo-carousel {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            margin-bottom: 1rem;
+        }
+        .demo-step-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .demo-step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        /* ===== 模拟界面容器 ===== */
+        .mock-ui {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .mock-ui-header {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf0 100%);
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+        }
+        .mock-ui-header .dot {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .mock-ui-header .dot-red { background: #ff5f56; }
+        .mock-ui-header .dot-yellow { background: #ffbd2e; }
+        .mock-ui-header .dot-green { background: #27c93f; }
+        .mock-ui-body {
+            padding: 1rem 1.2rem;
+            min-height: 200px;
+            position: relative;
+        }
+        /* ===== 模拟界面中的表格/列表 ===== */
+        .mock-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .mock-table th {
+            background: #f8f9fa;
+            padding: 0.5rem 0.6rem;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .mock-table td {
+            padding: 0.45rem 0.6rem;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        .mock-table tr:hover td { background: #f8f9ff; }
+        .mock-tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .mock-tag-success { background: #d4edda; color: #155724; }
+        .mock-tag-warning { background: #fff3cd; color: #856404; }
+        .mock-tag-danger { background: #f8d7da; color: #721c24; }
+        .mock-tag-info { background: #d1ecf1; color: #0c5460; }
+        .mock-panel {
+            background: #f8f9ff;
+            border: 1px solid #e8ecf0;
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            margin-top: 0.6rem;
+        }
+        .mock-panel-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 0.4rem;
+        }
+        .mock-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.3rem;
+            font-size: 0.82rem;
+        }
+        .mock-label { color: #666; }
+        .mock-value { font-weight: 600; color: #333; }
+        .mock-highlight {
+            background: #fff8e1;
+            border-left: 3px solid #ffc107;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+        .mock-highlight-red {
+            background: #fff0f0;
+            border-left: 3px solid #dc3545;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: #721c24;
+            font-size: 0.82rem;
+        }
+        .mock-btn {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .mock-btn-primary { background: #667eea; color: white; }
+        .mock-btn-success { background: #28a745; color: white; }
+        .mock-btn-outline { background: transparent; border: 1px solid #667eea; color: #667eea; }
+        /* ===== 箭头标注 ===== */
+        .annotation {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-top: 0.9rem;
+            padding: 0.6rem 0.8rem;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border: 1px dashed #667eea;
+        }
+        .annotation-arrow {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .annotation-text {
+            font-size: 0.85rem;
+            color: #444;
+            line-height: 1.5;
+        }
+        .annotation-text strong { color: #667eea; }
+        .annotation-arrow-shape {
+            display: inline-block;
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-right: 0.3rem;
+        }
+        /* ===== 界面双栏布局 ===== */
+        .mock-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 600px) {
+            .mock-two-col { grid-template-columns: 1fr; }
+        }
+        .mock-col {
+            background: #fafbfc;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 0.8rem;
+        }
+        .mock-col-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        /* ===== 步骤指示器 ===== */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 1rem 0;
+        }
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d0d5ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .step-dot.active {
+            width: 32px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .step-dot:hover:not(.active) { background: #b0b8ff; }
+        .step-label {
+            font-size: 0.8rem;
+            color: #999;
+            text-align: center;
+            margin-top: 0.3rem;
+        }
+        .step-label.active { color: #667eea; font-weight: 600; }
+        /* ===== 底部说明条 ===== */
+        .demo-footer-text {
+            text-align: center;
+            padding: 0.8rem 1rem;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: #444;
+            margin-top: 1rem;
+            border: 1px solid #d0d5ff;
+        }
+        .demo-footer-text strong { color: #667eea; }
+        /* ===== 双箭头标注区 ===== */
+        .annotations-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-top: 0.8rem;
+        }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -537,26 +790,408 @@ def show_landing_page():
     show_demo = st.session_state.get("show_demo", False)
     if show_demo:
         st.session_state["show_demo"] = True
+        if "demo_step" not in st.session_state:
+            st.session_state["demo_step"] = 1
+        current_step = st.session_state["demo_step"]
+
         st.markdown("""
         <div class="demo-section">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="text-align: center; margin-bottom: 1.2rem;">
                 <h3 style="margin: 0; font-size: 1.35rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🤖 Temu全流程自动化演示</h3>
                 <p style="color: #555; margin: 0.4rem 0 0 0; font-size: 0.92rem;">系统自动完成整个运营闭环，每天只需5分钟</p>
             </div>
-            <div class="demo-grid">
-                <div class="demo-card"><div class="demo-num">1</div><h4>📊 自动核价</h4><p>系统实时接收平台核价通知，按你预设的毛利规则批量自动算价，拒绝亏损、零误操作</p></div>
-                <div class="demo-card"><div class="demo-num">2</div><h4>⚡ 智能调价</h4><p>竞品降价自动跟价，保本线由你锁定，不盲目内卷、守住每一分利润</p></div>
-                <div class="demo-card"><div class="demo-num">3</div><h4>🚨 库存预警</h4><p>库存低于安全线自动提醒，断货/滞销提前预判，不压资金、不丢流量</p></div>
-                <div class="demo-card"><div class="demo-num">4</div><h4>🎯 活动报名</h4><p>自动匹配符合条件的平台活动，一键批量报名，不再错过大促流量</p></div>
-                <div class="demo-card"><div class="demo-num">5</div><h4>💬 售后消息</h4><p>售后通知、处罚消息实时同步提醒，不遗漏、不扣分、不罚款</p></div>
-                <div class="demo-card"><div class="demo-num">6</div><h4>📈 数据报表</h4><p>每日自动生成运营报表，盈亏、库存、活动数据一键查看，不用手动做表</p></div>
-            </div>
-        </div>
         """, unsafe_allow_html=True)
-        col_d1, col_d2, col_d3 = st.columns([1, 2, 1])
-        with col_d2:
+
+        _step_names = ["自动核价", "智能调价", "库存预警", "活动报名", "售后消息", "数据报表"]
+        _step_icons = ["📊", "⚡", "🚨", "🎯", "💬", "📈"]
+        _step_title = f"步骤{current_step}：{_step_icons[current_step-1]} {_step_names[current_step-1]}"
+
+        # ────────── Step 1: 自动核价 ──────────
+        if current_step == 1:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">📊 核价自动化 — 核价通知管理</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">📋 核价通知列表 <span style="float:right;font-size:0.75rem;color:#999;font-weight:400;">共 3 条待处理</span></div>
+                                <table class="mock-table">
+                                    <tr><th>SKU</th><th>平台报价</th><th>成本价</th><th>利润率</th><th>状态</th></tr>
+                                    <tr><td>SKU-A1001</td><td>¥100.00</td><td>¥80.00</td><td>25.0%</td><td><span class="mock-tag mock-tag-success">✅ 接受</span></td></tr>
+                                    <tr><td>SKU-B2003</td><td>¥85.00</td><td>¥75.00</td><td>13.3%</td><td><span class="mock-tag mock-tag-danger">⚠️ 低于阈值</span></td></tr>
+                                    <tr><td>SKU-C3005</td><td>¥120.00</td><td>¥95.00</td><td>26.3%</td><td><span class="mock-tag mock-tag-success">✅ 接受</span></td></tr>
+                                </table>
+                                <div style="margin-top:0.5rem;font-size:0.78rem;color:#667eea;text-align:right;">➡ 系统已自动处理 2/3 条通知</div>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">⚙️ 毛利率规则设置</div>
+                                <div class="mock-panel">
+                                    <div class="mock-row"><span class="mock-label">常规商品毛利率阈值</span><span class="mock-value">20.0%</span></div>
+                                    <div class="mock-row"><span class="mock-label">活动商品毛利率阈值</span><span class="mock-value">10.0%</span></div>
+                                    <div class="mock-row"><span class="mock-label">超时自动处理</span><span class="mock-value">✅ 开启</span></div>
+                                    <div class="mock-row"><span class="mock-label">处理策略</span><span class="mock-value">高于阈值自动接受</span></div>
+                                </div>
+                                <div style="margin-top:0.6rem;display:flex;gap:0.5rem;">
+                                    <span class="mock-btn mock-btn-success" style="font-size:0.78rem;">🚀 执行自动核价</span>
+                                    <span class="mock-btn mock-btn-outline" style="font-size:0.78rem;">📋 查看日志</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 系统实时接收平台核价通知</strong> — 左侧列表自动同步平台下发的核价通知，每条通知含SKU、报价、成本、利润率，一目了然</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 按你预设的保本规则自动算价</strong> — 右侧规则面板按你设定的毛利率阈值批量自动判断，高于阈值自动接受，低于阈值自动拦截</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>系统批量处理核价通知，拒绝亏损价，零手动操作
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step 2: 智能调价 ──────────
+        elif current_step == 2:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">🏷️ 智能调价 — 竞品监控与自动跟价</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">📊 竞品价格监控 <span style="float:right;font-size:0.75rem;color:#999;font-weight:400;">更新于 30秒前</span></div>
+                                <table class="mock-table">
+                                    <tr><th>SKU</th><th>你的售价</th><th>竞品售价</th><th>差价</th><th>建议</th></tr>
+                                    <tr><td>SKU-A1001</td><td>¥100.00</td><td>¥95.00</td><td style="color:#dc3545;">-¥5.00</td><td><span class="mock-tag mock-tag-warning">⚡ 建议跟价</span></td></tr>
+                                    <tr><td>SKU-B2003</td><td>¥85.00</td><td>¥85.00</td><td style="color:#28a745;">持平</td><td><span class="mock-tag mock-tag-success">✅ 价格正常</span></td></tr>
+                                    <tr><td>SKU-C3005</td><td>¥120.00</td><td>¥115.00</td><td style="color:#dc3545;">-¥5.00</td><td><span class="mock-tag mock-tag-warning">⚡ 建议跟价</span></td></tr>
+                                </table>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">🔒 保本线设置</div>
+                                <div class="mock-panel">
+                                    <div class="mock-row"><span class="mock-label">最低保本毛利率</span><span class="mock-value">15.0%</span></div>
+                                    <div class="mock-row"><span class="mock-label">跟价策略</span><span class="mock-value">智能自动跟价</span></div>
+                                    <div class="mock-row"><span class="mock-label">活动价保护</span><span class="mock-value">✅ 已开启</span></div>
+                                    <div class="mock-row"><span class="mock-label">调价频率</span><span class="mock-value">每30分钟</span></div>
+                                </div>
+                                <div style="margin-top:0.6rem;">
+                                    <span class="mock-btn mock-btn-primary" style="font-size:0.78rem;">🔄 启动自动调价</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 实时监控竞品降价</strong> — 左侧竞品价格监控表实时追踪竞品售价变动，识别降价商品并自动计算差价，触发跟价建议</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 按你锁定的利润线自动跟价</strong> — 右侧保本线设置锁定最低毛利率，系统自动在保本前提下跟价，不盲目内卷</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>竞品降价自动跟价，保本线由你锁定，不盲目内卷、守住每一分利润
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step 3: 库存预警 ──────────
+        elif current_step == 3:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">📦 库存智能管理 — 实时库存与预警</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #dc3545; background: #fff5f5;">
+                                <div class="mock-col-title" style="color: #dc3545; font-weight: 700;">🚨 库存预警 <span style="float:right;font-size:0.75rem;font-weight:400;">2 项告警</span></div>
+                                <div class="mock-highlight-red" style="margin-bottom:0.4rem;">
+                                    <strong>🔴 SKU-A1001</strong> — 库存 12 件 · 安全线 50 件 · 预计 2 天耗尽
+                                </div>
+                                <div class="mock-highlight-red">
+                                    <strong>🔴 SKU-D4002</strong> — 库存 8 件 · 安全线 30 件 · 预计 1 天耗尽
+                                </div>
+                                <div style="margin-top:0.6rem;">
+                                    <span class="mock-tag mock-tag-danger" style="font-size:0.78rem;">⚠️ 紧急补货建议已生成</span>
+                                </div>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #ffc107; background: #fffdf5;">
+                                <div class="mock-col-title" style="color: #856404; font-weight: 700;">📉 滞销预警</div>
+                                <div class="mock-highlight" style="margin-bottom:0.4rem;">
+                                    <strong>🟡 SKU-E5005</strong> — 库存 200 件 · 近7天销量 3 件 · 滞销风险高
+                                </div>
+                                <div class="mock-highlight">
+                                    <strong>🟡 SKU-F6008</strong> — 库存 150 件 · 近7天销量 5 件 · 建议清仓
+                                </div>
+                                <div style="margin-top:0.6rem;">
+                                    <span class="mock-tag mock-tag-warning" style="font-size:0.78rem;">📋 查看清仓建议</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 库存不足自动标红提醒</strong> — 左侧库存预警区实时显示低于安全库存的商品，自动标红提醒，标注预计耗尽天数</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 滞销库存提前预判</strong> — 右侧滞销预警区自动识别近7天销量极低的商品，提前预警滞销风险，建议清仓处理</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>库存低于安全线自动提醒，断货/滞销提前预判，不压资金、不丢流量
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step 4: 活动报名 ──────────
+        elif current_step == 4:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">🎯 平台活动报名 — 活动管理与批量报名</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">📋 可报名活动 <span style="float:right;font-size:0.75rem;color:#999;font-weight:400;">共 3 个活动</span></div>
+                                <table class="mock-table">
+                                    <tr><th>活动名称</th><th>报名截止</th><th>匹配SKU</th><th>状态</th></tr>
+                                    <tr><td>618年中大促</td><td>2026-06-10</td><td>12 个</td><td><span class="mock-tag mock-tag-success">可报名</span></td></tr>
+                                    <tr><td>夏日清仓季</td><td>2026-05-25</td><td>8 个</td><td><span class="mock-tag mock-tag-success">可报名</span></td></tr>
+                                    <tr><td>新品首发专场</td><td>2026-05-20</td><td>5 个</td><td><span class="mock-tag mock-tag-warning">即将截止</span></td></tr>
+                                </table>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">✅ 批量报名操作</div>
+                                <div class="mock-panel">
+                                    <div class="mock-row"><span class="mock-label">已选SKU数量</span><span class="mock-value">25 个</span></div>
+                                    <div class="mock-row"><span class="mock-label">匹配活动数</span><span class="mock-value">3 个</span></div>
+                                    <div class="mock-row"><span class="mock-label">预估活动流量</span><span class="mock-value">+200%</span></div>
+                                </div>
+                                <div style="margin-top:0.8rem;text-align:center;">
+                                    <span class="mock-btn mock-btn-primary" style="font-size:0.9rem;padding:0.5rem 2rem;">📋 一键批量报名</span>
+                                </div>
+                                <div style="margin-top:0.4rem;font-size:0.75rem;color:#999;text-align:center;">系统自动匹配符合条件的SKU和活动</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 自动抓取平台可报名活动</strong> — 左侧活动列表自动同步平台当前可报名的活动，显示报名截止时间、匹配SKU数量</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 一键匹配店铺SKU报名</strong> — 右侧批量报名面板自动计算可匹配的SKU和活动，点击一键报名批量参与</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>自动匹配符合条件的平台活动，一键批量报名，不再错过大促流量
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step 5: 售后消息 ──────────
+        elif current_step == 5:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">💬 消息售后 — 消息中心与智能分类</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #dc3545; background: #fff5f5;">
+                                <div class="mock-col-title" style="color: #dc3545; font-weight: 700;">🔔 重要通知（3条未读）</div>
+                                <div class="mock-highlight-red" style="margin-bottom:0.4rem;">
+                                    <strong>🚨 处罚警告</strong> — SKU-A1001 涉嫌描述不符，请在24h内处理
+                                </div>
+                                <div class="mock-highlight-red" style="margin-bottom:0.4rem;">
+                                    <strong>📋 售后请求</strong> — 订单 #T12345 买家申请退货，待审核
+                                </div>
+                                <div class="mock-highlight-red">
+                                    <strong>⏰ 核价超时提醒</strong> — 3条核价通知即将超时自动处理
+                                </div>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">🏷️ 消息分类</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.6rem;">
+                                    <span class="mock-tag mock-tag-danger">处罚通知 3</span>
+                                    <span class="mock-tag mock-tag-warning">售后请求 5</span>
+                                    <span class="mock-tag mock-tag-info">核价通知 8</span>
+                                    <span class="mock-tag mock-tag-success">系统通知 12</span>
+                                    <span class="mock-tag">活动通知 4</span>
+                                </div>
+                                <div style="margin-top:0.5rem;font-size:0.8rem;color:#666;">
+                                    ✅ 智能分类，重要消息自动置顶高亮，零漏看
+                                </div>
+                                <div style="margin-top:0.6rem;">
+                                    <span class="mock-btn mock-btn-primary" style="font-size:0.78rem;">📋 一键处理待办</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 售后/处罚消息实时高亮提醒</strong> — 左侧重要通知区实时显示处罚警告、售后请求等紧急消息，红色高亮标注，一眼识别</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 消息自动分类，零漏看</strong> — 右侧消息分类栏按类型自动归类，各类消息数量一目了然，重要消息不会淹没</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>售后通知、处罚消息实时同步提醒，不遗漏、不扣分、不罚款
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step 6: 数据报表 ──────────
+        elif current_step == 6:
+            st.markdown(f"""
+            <div class="demo-carousel">
+                <div class="demo-step-title">
+                    <span class="demo-step-badge">{current_step}</span>
+                    {_step_title}
+                </div>
+                <div class="mock-ui">
+                    <div class="mock-ui-header">
+                        <span><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></span>
+                        <span style="margin-left: 0.5rem;">📈 数据自动分析 — 运营看板与报表</span>
+                    </div>
+                    <div class="mock-ui-body">
+                        <div class="mock-two-col">
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">📊 核心数据指标（今日）</div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                    <div class="mock-panel" style="margin:0;text-align:center;">
+                                        <div style="font-size:0.7rem;color:#999;">总销售额</div>
+                                        <div style="font-size:1.1rem;font-weight:bold;color:#28a745;">¥12,580</div>
+                                    </div>
+                                    <div class="mock-panel" style="margin:0;text-align:center;">
+                                        <div style="font-size:0.7rem;color:#999;">总利润</div>
+                                        <div style="font-size:1.1rem;font-weight:bold;color:#667eea;">¥3,145</div>
+                                    </div>
+                                    <div class="mock-panel" style="margin:0;text-align:center;">
+                                        <div style="font-size:0.7rem;color:#999;">利润率</div>
+                                        <div style="font-size:1.1rem;font-weight:bold;color:#28a745;">25.0%</div>
+                                    </div>
+                                    <div class="mock-panel" style="margin:0;text-align:center;">
+                                        <div style="font-size:0.7rem;color:#999;">待处理告警</div>
+                                        <div style="font-size:1.1rem;font-weight:bold;color:#dc3545;">5 项</div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:0.5rem;font-size:0.78rem;color:#999;">📅 日报生成时间：每日 09:00 自动发送</div>
+                            </div>
+                            <div class="mock-col" style="border: 2px solid #667eea; background: #f8f9ff;">
+                                <div class="mock-col-title" style="color: #667eea; font-weight: 700;">📋 报表管理</div>
+                                <div class="mock-panel">
+                                    <div class="mock-row"><span class="mock-label">📄 运营日报</span><span class="mock-value" style="font-size:0.75rem;">2026-05-14</span></div>
+                                    <div class="mock-row"><span class="mock-label">📄 周度利润报告</span><span class="mock-value" style="font-size:0.75rem;">第19周</span></div>
+                                    <div class="mock-row"><span class="mock-label">📄 库存分析报表</span><span class="mock-value" style="font-size:0.75rem;">实时</span></div>
+                                    <div class="mock-row"><span class="mock-label">📄 活动效果复盘</span><span class="mock-value" style="font-size:0.75rem;">上月</span></div>
+                                </div>
+                                <div style="margin-top:0.6rem;text-align:center;">
+                                    <span class="mock-btn mock-btn-success" style="font-size:0.85rem;">📥 一键导出报表</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="annotations-group">
+                    <div class="annotation">
+                        <div class="annotation-arrow">①</div>
+                        <div class="annotation-text"><strong>➡ 每日自动生成盈亏/库存报表</strong> — 左侧核心数据看板自动汇总今日销售额、利润、利润率、告警数量，运营状态一目了然</div>
+                    </div>
+                    <div class="annotation">
+                        <div class="annotation-arrow">②</div>
+                        <div class="annotation-text"><strong>➡ 一键导出报表，不用手动做表</strong> — 右侧报表管理列出每日自动生成的各类报表，点击一键导出，无需手动制作</div>
+                    </div>
+                </div>
+                <div class="demo-footer-text">
+                    💡 <strong>效果：</strong>每日自动生成运营报表，盈亏、库存、活动数据一键查看，不用手动做表
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ────────── Step indicator ──────────
+        _dots_html = '<div class="step-indicator">'
+        for i in range(1, 7):
+            if i == current_step:
+                _dots_html += f'<span class="step-dot active"></span>'
+            else:
+                _dots_html += f'<span class="step-dot"></span>'
+        _dots_html += '</div>'
+        _dots_html += f'<div class="step-label active" style="text-align:center;">{current_step} / 6 · {_step_names[current_step-1]}</div>'
+        st.markdown(_dots_html, unsafe_allow_html=True)
+
+        # ────────── Navigation buttons ──────────
+        col_p1, col_p2, col_p3, col_p4, col_p5, col_p6 = st.columns([1, 1, 0.5, 1, 1, 1.5])
+        with col_p2:
+            if current_step > 1:
+                if st.button("◀ 上一步", use_container_width=True):
+                    st.session_state["demo_step"] = current_step - 1
+            else:
+                st.markdown('<div style="height:37px;"></div>', unsafe_allow_html=True)
+        with col_p4:
+            if current_step < 6:
+                if st.button("下一步 ▶", use_container_width=True, type="primary"):
+                    st.session_state["demo_step"] = current_step + 1
+            else:
+                st.markdown('<div style="height:37px;"></div>', unsafe_allow_html=True)
+        with col_p6:
             if st.button("✕ 关闭演示", use_container_width=True, type="secondary"):
                 st.session_state["show_demo"] = False
+                st.session_state.pop("demo_step", None)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""
