@@ -515,7 +515,6 @@ def show_landing_page():
         </div>
         <div style="margin-top: 1rem; position: relative; z-index: 1; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;">
             <a href="?page=app" class="cta-button-primary" style="color: white; text-decoration: none;">🚀 免费试用7天，开启躺平运营</a>
-            <a href="?show_demo=1" class="cta-button-outline" style="color: white; text-decoration: none;">▶ 查看自动化全流程演示</a>
         </div>
         <div style="margin-top: 1rem; display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; font-size: 0.82rem; opacity: 0.9;">
             <span>✅ 已帮 800+ 卖家实现 90% 运营自动化</span>
@@ -525,17 +524,17 @@ def show_landing_page():
     </div>
     """, unsafe_allow_html=True)
 
-    col_enter1, col_enter2, col_enter3 = st.columns([1, 2, 1])
+    col_enter1, col_enter2, col_enter3, col_enter4 = st.columns([1, 1.5, 0.3, 1.5])
     with col_enter2:
         if st.button("🚪 进入应用", use_container_width=True, type="primary"):
             st.session_state["page"] = "app"
             st.query_params["page"] = "app"
+    with col_enter4:
+        if st.button("▶ 查看自动化全流程演示", use_container_width=True, type="secondary"):
+            st.session_state["show_demo"] = True
 
     # ==================== 1.5️⃣ 自动化全流程演示 ====================
-    _demo_param = st.query_params.get("show_demo", [""])
-    if isinstance(_demo_param, (list, tuple)):
-        _demo_param = _demo_param[0] if _demo_param else ""
-    show_demo = _demo_param == "1" or st.session_state.get("show_demo", False)
+    show_demo = st.session_state.get("show_demo", False)
     if show_demo:
         st.session_state["show_demo"] = True
         st.markdown("""
@@ -558,7 +557,6 @@ def show_landing_page():
         with col_d2:
             if st.button("✕ 关闭演示", use_container_width=True, type="secondary"):
                 st.session_state["show_demo"] = False
-                st.query_params["show_demo"] = "0"
 
     # ==================== 2️⃣ 紧迫感横幅 ====================
     st.markdown("""
