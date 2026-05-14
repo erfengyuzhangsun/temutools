@@ -161,6 +161,7 @@ with st.sidebar:
         btn_type = "primary" if is_active else "secondary"
         if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
             st.session_state["page"] = page
+            st.query_params["page"] = page
             if not st.session_state.get('_rerun_pending', False):
                 st.session_state['_rerun_pending'] = True
                 st.rerun()
