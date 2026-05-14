@@ -224,14 +224,15 @@ MYSQL_USER=${DB_USER}
 MYSQL_PASSWORD=${DB_PASS}
 MYSQL_DATABASE=${DB_NAME}
 ADMIN_PASSWORD=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -12)
-SEED_ADMIN_PASSWORD=admin@hjp1
+SEED_ADMIN_PASSWORD=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -12)
 ENCRYPTION_KEY=${ENCRYPTION_KEY}
 PORT=${STREAMLIT_PORT}
 ADDRESS=0.0.0.0
 EOF
 
 log_info "环境变量已配置到 .env"
-ADMIN_PASSWORD=$(grep ADMIN_PASSWORD "$PROJECT_DIR/.env" | cut -d= -f2)
+ADMIN_PASSWORD=$(grep "^ADMIN_PASSWORD=" "$PROJECT_DIR/.env" | cut -d= -f2)
+SEED_PASSWORD=$(grep "^SEED_ADMIN_PASSWORD=" "$PROJECT_DIR/.env" | cut -d= -f2)
 
 # ==================== 初始化数据库 ====================
 log_step 8 $TOTAL_STEPS "初始化数据库表"
@@ -372,7 +373,7 @@ echo -e "${GREEN}  ✅ 部署完成！${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "  ${BLUE}应用地址:${NC}  http://$(curl -s ifconfig.me):${STREAMLIT_PORT}"
-echo -e "  ${BLUE}访问密码:${NC}  admin@hjp1"
+echo -e "  ${BLUE}访问密码:${NC}  ${SEED_PASSWORD}"
 echo -e "  ${BLUE}管理员密码:${NC} ${ADMIN_PASSWORD}"
 echo ""
 echo -e "  ${YELLOW}数据库信息${NC}"
@@ -381,18 +382,8 @@ echo -e "  数据库: ${DB_NAME}"
 echo -e "  用户名: ${DB_USER}"
 echo -e "  密  码: ${DB_PASS}"
 echo ""
-echo -e "  ${YELLOW}管理命令${NC}"
+echo -e "  ${YELLOW}⚠️  安全须知${NC}"
 echo -e "  ───────────────────────────────"
-echo -e "  查看状态: systemctl status temu-tools"
-echo -e "  重启服务: systemctl restart temu-tools"
-echo -e "  查看日志: tail -f ${PROJECT_DIR}/logs/app.log"
-echo ""
-echo -e "  ${YELLOW}项目路径${NC}"
-echo -e "  ───────────────────────────────"
-echo -e "  ${PROJECT_DIR}"
-echo ""
-echo -e "  ${YELLOW}重要${NC}"
-echo -e "  ───────────────────────────────"
-echo -e "  🔴 首次登录后请立即在管理后台修改默认密码！"
-echo -e "  🔴 请保存好上方数据库密码！"
-echo ""
+echo -e "  🔴 请立即保存以上密码，关闭终端后将无法找回！"
+echo -e "  🔴 首次登录后请在管理后台修改密码"
+echo -e "  🔴 .env 文件包含敏感信息，严禁提交到 Git"

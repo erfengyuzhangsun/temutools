@@ -2,6 +2,7 @@ import os,sys,tempfile
 _db=tempfile.NamedTemporaryFile(suffix=".db",delete=False);_dp=_db.name;_db.close()
 os.environ["DB_MODE"]="sqlite";os.environ["SQLITE_PATH"]=_dp
 from cryptography.fernet import Fernet;os.environ["ENCRYPTION_KEY"]=Fernet.generate_key().decode()
+os.environ["SEED_ADMIN_PASSWORD"]="test-seed-pwd"
 from db import initialize_database;initialize_database()
 from common.models_p2p3 import initialize_tables;initialize_tables()
 from unittest.mock import AsyncMock, patch, MagicMock

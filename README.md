@@ -116,7 +116,7 @@ python -m uvicorn api.index:app --host 0.0.0.0 --port 8000
 ### 访问
 - **主应用**：http://localhost:8501
 - **API健康检查**：http://localhost:8000/health
-- **默认密码（无环境变量时）**：访问密码 `admin@hjp1`，管理员密码 `admin@hjp0`
+- **默认密码**：通过 `.env` 文件或环境变量设置，首次部署时由部署脚本自动随机生成
 
 ---
 

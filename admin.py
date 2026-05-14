@@ -9,7 +9,7 @@ from db import (
 )
 from auth import get_current_user, get_user_id
 
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin@hjp0")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 def is_admin() -> bool:

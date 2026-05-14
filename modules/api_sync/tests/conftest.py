@@ -16,6 +16,7 @@ _db_file.close()
 os.environ["DB_MODE"] = "sqlite"
 os.environ["SQLITE_PATH"] = _db_path
 os.environ["ENCRYPTION_KEY"] = Fernet.generate_key().decode()
+os.environ["SEED_ADMIN_PASSWORD"] = "test-seed-pwd"
 
 
 def pytest_unconfigure(config):

@@ -286,16 +286,19 @@ def ensure_sqlite_defaults():
     if count == 0:
         today = date.today()
         expire = today + timedelta(days=365 * 10)
-        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "admin@hjp1")
-        cursor.execute(
-            "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (?, ?, ?, ?, ?, 1)",
-            (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())
-        )
-        admin_user_id = cursor.lastrowid
-        cursor.execute(
-            "INSERT INTO temu_shops (user_id, shop_name, main_category) VALUES (?, ?, ?)",
-            (admin_user_id, "默认店铺", "家居百货")
-        )
+        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "")
+        if not seed_password:
+            print("SEED_ADMIN_PASSWORD 未设置，跳过创建默认管理员")
+        else:
+            cursor.execute(
+                "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (?, ?, ?, ?, ?, 1)",
+                (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())
+            )
+            admin_user_id = cursor.lastrowid
+            cursor.execute(
+                "INSERT INTO temu_shops (user_id, shop_name, main_category) VALUES (?, ?, ?)",
+                (admin_user_id, "默认店铺", "家居百货")
+            )
     conn.commit()
     conn.close()
 
@@ -305,15 +308,18 @@ def ensure_mysql_defaults():
     if rows and rows[0]["cnt"] == 0:
         today = date.today()
         expire = today + timedelta(days=365 * 10)
-        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "admin@hjp1")
-        admin_user_id = execute_query(
-            "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (%s, %s, %s, %s, %s, 1)",
-            (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())
-        )
-        execute_query(
-            "INSERT INTO temu_shops (user_id, shop_name, main_category) VALUES (%s, %s, %s)",
-            (admin_user_id, "默认店铺", "家居百货")
-        )
+        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "")
+        if not seed_password:
+            print("SEED_ADMIN_PASSWORD 未设置，跳过创建默认管理员")
+        else:
+            admin_user_id = execute_query(
+                "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (%s, %s, %s, %s, %s, 1)",
+                (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())
+            )
+            execute_query(
+                "INSERT INTO temu_shops (user_id, shop_name, main_category) VALUES (%s, %s, %s)",
+                (admin_user_id, "默认店铺", "家居百货")
+            )
 
 
 def verify_user_password(password: str) -> Optional[Dict]:

@@ -4,6 +4,7 @@ if p not in sys.path: sys.path.insert(0,p)
 
 _db=tempfile.NamedTemporaryFile(suffix=".db",delete=False);_p=_db.name;_db.close()
 os.environ["DB_MODE"]="sqlite";os.environ["SQLITE_PATH"]=_p;os.environ["ENCRYPTION_KEY"]=Fernet.generate_key().decode()
+os.environ["SEED_ADMIN_PASSWORD"]="test-seed-pwd"
 
 @pytest.fixture(autouse=True)
 def _init():
