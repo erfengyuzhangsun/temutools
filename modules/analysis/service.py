@@ -18,7 +18,7 @@ class AnalysisService:
                 total_orders=int(data.get("total_orders",0)),negative_review_rate=float(data.get("negative_review_rate",0)))
             self._save_metrics(shop_id, metrics)
             return ServiceResult(success=True,data={"metrics":metrics.__dict__})
-        except Exception as e: logger.error(f"指标采集异常: {e}"); return ServiceResult(success=False,message=str(e),error_code="INTERNAL_ERROR")
+        except Exception as e: logger.error(f"指标采集异常: {e}"); return ServiceResult(success=False,message="指标采集异常，请检查网络连接及API凭证配置",error_code="INTERNAL_ERROR")
         finally: await client.close()
 
     async def check_metric_alerts(self, shop_id: int) -> ServiceResult:

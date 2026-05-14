@@ -16,7 +16,7 @@ class FinanceService:
             for s in data:
                 self._save_settlement(shop_id, s); count+=1
             return ServiceResult(success=True,data={"synced_count":count})
-        except Exception as e: logger.error(f"结算同步异常: {e}"); return ServiceResult(success=False,message=str(e))
+        except Exception as e: logger.error(f"结算同步异常: {e}"); return ServiceResult(success=False,message="结算同步异常，请检查网络连接及API凭证配置")
         finally: await client.close()
 
     async def get_monthly_profit_summary(self, shop_id: int, month: str) -> ServiceResult:

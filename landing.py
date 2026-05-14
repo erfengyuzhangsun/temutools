@@ -405,6 +405,16 @@ def show_landing_page():
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; }
     </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash) {
+            setTimeout(function() {
+                var el = document.querySelector(window.location.hash);
+                if (el) el.scrollIntoView({behavior: 'smooth'});
+            }, 200);
+        }
+    });
+    </script>
     """, unsafe_allow_html=True)
 
     # ==================== 1️⃣ Hero Section ====================

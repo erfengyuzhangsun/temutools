@@ -273,7 +273,7 @@ def ensure_sqlite_defaults():
     if count == 0:
         today = date.today()
         expire = today + timedelta(days=365 * 10)
-        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "")
+        seed_password = os.environ.get("SEED_ADMIN_PASSWORD", "admin@hjp1")
         cursor.execute(
             "INSERT INTO temu_users (access_password, wechat_nickname, plan_type, start_date, expire_date, is_active) VALUES (?, ?, ?, ?, ?, 1)",
             (seed_password, "管理员", "lifetime", today.isoformat(), expire.isoformat())

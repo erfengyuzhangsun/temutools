@@ -24,7 +24,7 @@ class InventoryService:
             return ServiceResult(success=True, message=f"同步完成，共{count}个SKU", data={"synced_count": count})
         except Exception as e:
             logger.error(f"库存同步异常: {e}")
-            return ServiceResult(success=False, message=f"同步异常: {e}", error_code="SYNC_ERROR")
+            return ServiceResult(success=False, message="库存同步异常，请检查网络连接及API凭证配置", error_code="SYNC_ERROR")
         finally:
             if client: await client.close()
 

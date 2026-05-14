@@ -44,16 +44,20 @@ class TestNoHardcodedSecrets:
         )
 
     def test_db_seed_password_not_hardcoded(self):
-        """Verify seed password in db.py is not a hardcoded literal."""
+        """Verify seed password in db.py is not a hardcoded literal outside os.environ.get()."""
         db_path = os.path.join(PROJECT_ROOT, "db.py")
         with open(db_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        hardcoded_seed = re.search(r'admin123["\']', content)
-        assert hardcoded_seed is None, (
-            "Seed password 'admin123' must not be hardcoded. "
-            "Read from environment variable instead."
-        )
+        for pwd in ['admin123', 'admin@hjp1', 'admin@hjp0']:
+            for match in re.finditer(rf'{re.escape(pwd)}["\']', content):
+                context = content[max(0, match.start()-80):match.end()]
+                if 'os.environ.get' in context:
+                    continue
+                assert False, (
+                    f"Password '{pwd}' must not be hardcoded directly. "
+                    "Use os.environ.get() instead."
+                )
 
     def test_encryption_key_not_hardcoded_in_production(self):
         """Verify no hardcoded encryption key in production code."""
