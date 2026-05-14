@@ -67,10 +67,11 @@ st.set_page_config(
 _query_params = st.query_params
 _raw_page = _query_params.get("page", ["landing"])
 _query_page = _raw_page[0] if isinstance(_raw_page, (list, tuple)) else _raw_page
+_has_page_param = "page" in _query_params
 
 if "page" not in st.session_state:
     st.session_state["page"] = _query_page
-elif _query_page != st.session_state["page"]:
+elif _has_page_param and _query_page != st.session_state["page"]:
     st.session_state["page"] = _query_page
 
 if st.session_state.get('_rerun_pending', False):
