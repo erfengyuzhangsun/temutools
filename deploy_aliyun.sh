@@ -33,7 +33,7 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-TOTAL_STEPS=10
+TOTAL_STEPS=12
 
 # ==================== 检测操作系统 ====================
 log_step 1 $TOTAL_STEPS "检测操作系统"
@@ -366,6 +366,171 @@ else
     log_info "跳过Nginx配置，直接通过 http://你的服务器IP:${STREAMLIT_PORT} 访问"
 fi
 
+# ==================== 配置云主机监控服务 ====================
+log_step 11 $TOTAL_STEPS "配置云主机监控服务"
+
+# 创建独立的后台监控脚本
+cat > "$PROJECT_DIR/server_monitor_daemon.py" <<'MONITOR_EOF'
+#!/usr/bin/env python3
+"""
+云主机监控守护进程
+定期检查服务器状态并通过 Webhook 发送告警
+"""
+
+import asyncio
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from modules.server_monitor.service import ServerMonitor
+from modules.server_monitor.notifications import NotificationManager
+from datetime import datetime
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/monitor.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+async def monitor_loop(check_interval: int = 30):
+    """持续监控循环"""
+    
+    config = {
+        "cpu_threshold": float(os.getenv("CPU_THRESHOLD", 80.0)),
+        "memory_threshold": float(os.getenv("MEMORY_THRESHOLD", 85.0)),
+        "disk_threshold": float(os.getenv("DISK_THRESHOLD", 90.0)),
+        "check_interval": check_interval,
+        "enable_multi_platform_notifications": True,
+        "critical_processes": [
+            p.strip() for p in os.getenv("CRITICAL_PROCESSES", "").split(",") if p.strip()
+        ]
+    }
+    
+    monitor = ServerMonitor(config=config)
+    logger.info(f"监控服务启动 | 配置: {config}")
+    
+    consecutive_errors = 0
+    max_consecutive_errors = 5
+    
+    while True:
+        try:
+            report = await monitor.run_full_check()
+            
+            # 如果有活跃告警，发送通知
+            if report["alerts"]:
+                logger.warning(f"发现 {len(report['alerts'])} 个活跃告警")
+                for alert in report["alerts"][:3]:  # 最多发送前3个告警
+                    await monitor.send_notification(alert)
+            
+            # 记录健康状态
+            status_emoji = {"healthy": "✅", "degraded": "⚠️", "warning": "🟡", "critical": "🔴"}
+            emoji = status_emoji.get(report["status"], "❓")
+            
+            logger.info(f"{emoji} 健康检查完成 | 评分: {report['health_score']:.1f} | 状态: {report['status']} | 告警数: {len(report['alerts'])}")
+            
+            consecutive_errors = 0
+            
+        except Exception as e:
+            consecutive_errors += 1
+            logger.error(f"监控检查失败 (连续错误: {consecutive_errors}/{max_consecutive_errors}): {e}")
+            
+            if consecutive_errors >= max_consecutive_errors:
+                logger.critical(f"连续 {max_consecutive_errors} 次错误，发送严重告警")
+                critical_alert = {
+                    "type": "system",
+                    "level": "critical",
+                    "message": f"监控系统连续失败 {max_consecutive_errors} 次，请立即检查！",
+                    "metric_value": consecutive_errors,
+                    "threshold": max_consecutive_errors,
+                    "timestamp": datetime.now()
+                }
+                try:
+                    await monitor.send_notification(critical_alert)
+                except:
+                    pass
+                consecutive_errors = 0
+        
+        await asyncio.sleep(check_interval)
+
+if __name__ == "__main__":
+    interval = int(os.getenv("MONITOR_INTERVAL", 30))
+    logger.info(f"=== 云主机监控守护进程启动 === | 检查间隔: {interval}秒")
+    
+    try:
+        asyncio.run(monitor_loop(interval))
+    except KeyboardInterrupt:
+        logger.info("监控服务停止 (用户中断)")
+    except Exception as e:
+        logger.critical(f"监控服务异常退出: {e}")
+        sys.exit(1)
+MONITOR_EOF
+
+chmod +x "$PROJECT_DIR/server_monitor_daemon.py"
+log_info "监控守护进程脚本已创建"
+
+# 创建监控专用的 systemd 服务
+cat > /etc/systemd/system/temu-monitor.service <<EOF
+[Unit]
+Description=Temu云主机监控服务
+After=network.target mysql.service mariadb.service temu-tools.service
+Wants=temu-tools.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=${PROJECT_DIR}
+Environment=PATH=${PROJECT_DIR}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+EnvironmentFile=-${PROJECT_DIR}/env.monitor
+ExecStart=${PROJECT_DIR}/venv/bin/python ${PROJECT_DIR}/server_monitor_daemon.py
+Restart=always
+RestartSec=10
+StandardOutput=append:${PROJECT_DIR}/logs/monitor.log
+StandardError=append:${PROJECT_DIR}/logs/monitor.log
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 创建监控环境变量文件（可选）
+cat > "$PROJECT_DIR/env.monitor" <<EOF
+# 监控服务专用环境变量
+CPU_THRESHOLD=80.0
+MEMORY_THRESHOLD=85.0
+DISK_THRESHOLD=90.0
+MONITOR_INTERVAL=30
+CRITICAL_PROCESSES=nginx,mysql,redis
+EOF
+
+systemctl daemon-reload
+systemctl enable temu-monitor.service
+log_info "监控 systemd 服务已配置"
+
+# ==================== 配置日志轮转 ====================
+log_step 12 $TOTAL_STEPS "配置日志轮转"
+
+cat > /etc/logrotate.d/temu-tools <<EOF
+${PROJECT_DIR}/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0644 root root
+    postrotate
+        systemctl reload temu-tools.service >/dev/null 2>&1 || true
+        systemctl reload temu-monitor.service >/dev/null 2>&1 || true
+    endscript
+}
+EOF
+
+log_info "日志轮转已配置（保留14天）"
+
 # ==================== 完成 ====================
 echo ""
 echo -e "${GREEN}========================================${NC}"
@@ -387,3 +552,22 @@ echo -e "  ───────────────────────
 echo -e "  🔴 请立即保存以上密码，关闭终端后将无法找回！"
 echo -e "  🔴 首次登录后请在管理后台修改密码"
 echo -e "  🔴 .env 文件包含敏感信息，严禁提交到 Git"
+echo ""
+echo -e "  ${BLUE}🖥️ 云主机监控${NC}"
+echo -e "  ───────────────────────────────"
+echo -e "  监控服务: 已启用 (systemd: temu-monitor)"
+echo -e "  检查间隔: 30秒"
+echo -e "  日志位置: ${PROJECT_DIR}/logs/monitor.log"
+echo -e "  管理命令:"
+echo -e "    systemctl status temu-monitor     # 查看状态"
+echo -e "    systemctl restart temu-monitor     # 重启监控"
+echo -e "    journalctl -u temu-monitor -f       # 查看实时日志"
+echo ""
+echo -e "  ${YELLOW}📱 配置告警通知${NC}"
+echo -e "  ───────────────────────────────"
+echo -e "  编辑 ${PROJECT_DIR}/.env 添加以下变量："
+echo -e "    DINGTALK_WEBHOOK_URL=你的钉钉机器人地址"
+echo -e "    WECHAT_WORK_WEBHOOK_URL=你的企业微信地址"
+echo -e "    FEISHU_WEBHOOK_URL=你的飞书机器人地址"
+echo -e "  然后执行: systemctl restart temu-monitor"
+echo ""
