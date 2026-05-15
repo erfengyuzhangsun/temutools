@@ -2,11 +2,16 @@
 chcp 65001 >nul
 echo ==========================================
 echo   Temu 运营平台 - 代码上传工具
-echo   目标服务器: 47.74.135.196
+echo   目标服务器: 请输入服务器IP或域名
 echo ==========================================
 echo.
 
-set SERVER_IP=47.74.135.196
+if "%1"=="" (
+    set /p SERVER_IP=请输入服务器IP地址或域名: 
+) else (
+    set SERVER_IP=%1
+)
+
 set SERVER_USER=root
 set REMOTE_DIR=/opt/temu_tools
 set LOCAL_DIR=d:\develop\code\temu_tools

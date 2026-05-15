@@ -9,7 +9,7 @@ echo "=========================================="
 PROJECT_DIR="/opt/temu_tools"
 DOMAIN="jinpuhuang.com"
 WWW_DOMAIN="www.jinpuhuang.com"
-SERVER_IP="47.74.135.196"
+SERVER_IP=${SERVER_IP:-$(dig +short ${WWW_DOMAIN} 2>/dev/null || hostname -I | awk '{print $1}')}
 
 check_root() {
     if [ "$EUID" -ne 0 ]; then
