@@ -180,21 +180,23 @@ class ApiSyncService:
 
     async def bind_shop(self, request: ShopBindRequest) -> ServiceResult:
         try:
-            encrypted_key = self.crypto.encrypt(request.api_key)
-            encrypted_secret = self.crypto.encrypt(request.api_secret)
+            encrypted_key = self.crypto.encrypt(request.api_key) if request.api_key else ""
+            encrypted_secret = self.crypto.encrypt(request.api_secret) if request.api_secret else ""
+            encrypted_token = self.crypto.encrypt(request.access_token) if request.access_token else ""
 
             shop_id = self._save_shop_to_db(
                 user_id=self.user_id,
                 shop_name=request.shop_name,
                 encrypted_api_key=encrypted_key,
                 encrypted_api_secret=encrypted_secret,
+                encrypted_access_token=encrypted_token,
                 main_category=request.main_category,
             )
 
             logger.info(f"店铺绑定成功 | user_id={self.user_id} | shop_name={request.shop_name}")
             return ServiceResult(
                 success=True, message="店铺绑定成功",
-                data={"shop_id": shop_id, "encrypted_api_key": encrypted_key},
+                data={"shop_id": shop_id},
             )
 
         except Exception as e:
@@ -273,16 +275,17 @@ class ApiSyncService:
     def _save_shop_to_db(
         self, user_id: int, shop_name: str,
         encrypted_api_key: str, encrypted_api_secret: str,
-        main_category: str,
+        encrypted_access_token: str = "",
+        main_category: str = "",
     ) -> int:
         from db import execute_query
         from db import get_or_create_shop
         shop_id = get_or_create_shop(user_id, shop_name, main_category)
         execute_query(
             "INSERT OR REPLACE INTO temu_shop_credentials "
-            "(user_id, shop_id, encrypted_api_key, encrypted_api_secret) "
-            "VALUES (?, ?, ?, ?)",
-            (user_id, shop_id, encrypted_api_key, encrypted_api_secret),
+            "(user_id, shop_id, encrypted_api_key, encrypted_api_secret, encrypted_access_token) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, shop_id, encrypted_api_key, encrypted_api_secret, encrypted_access_token),
         )
         return shop_id
 

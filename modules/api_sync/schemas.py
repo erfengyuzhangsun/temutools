@@ -77,8 +77,9 @@ class SyncHistoryItem:
 @dataclass
 class ShopBindRequest:
     shop_name: str
-    api_key: str
-    api_secret: str
+    api_key: str = ""
+    api_secret: str = ""
+    access_token: str = ""
     main_category: str = "家居百货"
 
 

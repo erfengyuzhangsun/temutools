@@ -100,29 +100,48 @@ def show_page():
 
     with tab2:
         st.markdown("#### 绑定新店铺")
+        st.caption("新版使用 access_token 授权（推荐）；旧版兼容 API Key + API Secret")
+
+        bind_mode = st.radio("绑定方式", ["🔑 access_token（新版）", "🔐 API Key + Secret（旧版）"],
+                             horizontal=True, label_visibility="collapsed")
 
         with st.form("bind_shop_form"):
             col_f1, col_f2 = st.columns(2)
             with col_f1:
                 shop_name = st.text_input("店铺名称", placeholder="例如：旗舰店-1")
-                api_key = st.text_input("API Key", type="password")
+                if bind_mode.startswith("🔑"):
+                    access_token = st.text_input("Access Token", type="password",
+                        help="卖家授权后获取的 access_token")
+                    api_key = ""
+                    api_secret = ""
+                else:
+                    api_key = st.text_input("API Key", type="password")
+                    access_token = ""
             with col_f2:
                 main_category = st.selectbox("主营类目", [
                     "家居百货", "3C数码", "服装鞋包", "美妆个护",
                     "玩具母婴", "食品饮料", "运动户外", "其他"
                 ])
-                api_secret = st.text_input("API Secret", type="password")
+                if not bind_mode.startswith("🔑"):
+                    api_secret = st.text_input("API Secret", type="password")
+                else:
+                    api_secret = ""
 
             submitted = st.form_submit_button("🔗 绑定店铺", type="primary", use_container_width=True)
 
             if submitted:
-                if not shop_name or not api_key or not api_secret:
-                    st.error("请填写完整信息")
+                if not shop_name:
+                    st.error("请填写店铺名称")
+                elif bind_mode.startswith("🔑") and not access_token:
+                    st.error("请填写 Access Token")
+                elif not bind_mode.startswith("🔑") and (not api_key or not api_secret):
+                    st.error("请填写完整的 API Key 和 API Secret")
                 else:
                     from modules.api_sync.schemas import ShopBindRequest
                     request = ShopBindRequest(
                         shop_name=shop_name, api_key=api_key,
-                        api_secret=api_secret, main_category=main_category,
+                        api_secret=api_secret, access_token=access_token,
+                        main_category=main_category,
                     )
                     service = ApiSyncService(user_id)
                     result = run_async(service.bind_shop(request))
