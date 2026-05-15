@@ -3,74 +3,125 @@
 PRIVACY_POLICY_TEXT = """
 # 隐私政策
 
-最后更新日期：2026-05-15
+最后更新日期：2026 年 05 月 15 日
 
 ## 1. 总则
 
-感谢您使用本工具。我们深知您的数据安全至关重要，本隐私政策旨在向您清晰说明我们如何收集、使用、存储和保护您的个人信息。
+1.1 感谢您使用本 Temu 卖家辅助工具（以下简称"本工具"）。我们严格遵循合法、正当、必要、诚信原则，恪守法律法规及行业规范，致力于保护您的个人信息、店铺数据及敏感信息安全。
 
-## 2. 我们收集的信息
+1.2 本隐私政策旨在清晰告知您，我们如何收集、使用、存储、保护、传输您的相关信息，以及您依法享有的权利、行使权利的方式，同时界定双方在数据处理过程中的责任边界。
 
-### 2.1 您主动提供的信息
-- **Temu API Key / API Secret**：用于通过 Temu 开放平台官方接口获取您的订单、库存、结算等数据
-- **店铺名称与类目**：用于多店铺管理和数据隔离
-- **访问密码**：用于登录验证
+1.3 本隐私政策仅适用于本工具的全部功能及服务，不适用于第三方平台（包括但不限于 Temu 开放平台、阿里云服务器提供商等）的服务及隐私政策。
 
-### 2.2 我们自动获取的信息
-- **Temu 订单数据**：订单编号、金额、商品信息（通过官方API获取）
-- **Temu 库存数据**：SKU、库存数量（通过官方API获取）
-- **Temu 结算数据**：结算金额、回款记录（通过官方API获取）
-- **Temu 核价通知**：核价信息、报价（通过官方API获取）
+1.4 您在使用本工具前，应仔细阅读并充分理解本隐私政策的全部条款；您点击"同意"、继续使用本工具，即视为您已阅读、理解并完全同意本隐私政策的全部内容；若您不同意本政策，应立即停止使用本工具。
 
-## 3. 我们如何使用您的信息
+## 2. 定义
 
-我们仅将您的信息用于以下目的：
-- ✅ 利润计算与订单统计
-- ✅ 库存管理与预警
-- ✅ 数据分析与报表生成
-- ✅ 核价通知的自动判断与处理（仅当您开启自动处理功能时）
-- ✅ 多店铺统一管理
+2.1 **个人信息**：指以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息。
 
-我们**不会**：
-- ❌ 将您的数据出售或分享给任何第三方
-- ❌ 使用您的数据用于未经授权的目的
-- ❌ 收集与功能无关的额外数据
+2.2 **敏感个人信息**：指一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，本工具中主要指您的 Temu API Key、API Secret（以下统称"API 信息"）。
 
-## 4. 数据存储与保护
+2.3 **非个人信息**：指不涉及自然人个人身份、无法识别具体自然人的信息，包括但不限于 Temu 店铺订单数据、库存数据、结算数据、核价数据（该类数据仅与店铺经营相关）、工具使用日志（脱敏后）等。
 
-- **加密存储**：您的 API Key 和 API Secret 使用 AES-256 加密算法加密后存储于服务器数据库
-- **传输加密**：所有数据传输均通过 HTTPS 加密通道
-- **数据隔离**：每个用户的数据通过 user_id 严格隔离，其他用户无法访问
-- **访问控制**：系统设有密码验证机制，未授权用户无法访问
-- **日志脱敏**：系统日志中不会记录完整的 API Key/Secret
+2.4 **数据处理**：指收集、存储、使用、加工、传输、提供、删除、匿名化等与信息相关的全部行为。
 
-## 5. 数据保留期限
+## 3. 我们收集的信息
 
-我们仅在您使用本工具期间保留您的数据。当您停止使用或要求删除时，我们将在合理时间内删除您的所有数据。
+### 3.1 您主动提供的信息
+
+1. **敏感个人信息**：Temu API Key、API Secret，您主动提供该类信息，系授权我们通过 Temu 开放平台官方 API 接口获取您的店铺相关经营数据，仅用于接口调用，不用于任何其他用途。
+2. **基础信息**：店铺名称、店铺类目，用于实现多店铺统一管理、数据隔离。
+3. **登录信息**：访问密码（加密存储），用于您登录本工具的身份验证。
+4. **联系方式**：您自愿提供的微信（用于接收通知、响应您的咨询及权利行使请求）。
+
+### 3.2 我们自动获取的信息
+
+1. **店铺经营数据**：通过您授权的 Temu 官方 API 接口，自动获取您的 Temu 店铺相关数据，包括但不限于订单编号、订单金额、商品信息、SKU、库存数量、结算金额、回款记录、核价信息、报价等，仅用于实现利润计算、订单统计、库存管理等核心功能。
+2. **工具使用日志**：自动记录您使用本工具的相关操作日志，包括登录时间、操作模块、使用时长，仅用于工具运营维护、故障排查、功能优化，日志中不记录完整的 API 信息、密码等敏感数据。
+3. **设备基础信息**：自动获取您用于访问本工具的设备基础信息（包括设备型号、浏览器类型、IP 地址），仅用于识别异常登录、防范账号被盗及网络安全风险。
+
+### 3.3 收集信息的合法性依据
+
+我们收集您的信息，均基于以下合法情形：
+1. 您的明确同意（尤其是敏感个人信息的收集，需您单独确认同意后才会收集）
+2. 履行本工具服务协议、实现工具核心功能所必需
+3. 遵守法律法规、响应国家机关依法开展的调查取证要求
+4. 保护您的合法权益、防范网络安全风险所必需
+
+### 3.4 禁止收集的信息
+
+我们绝对不会收集与本工具功能无关的任何信息，包括但不限于：您的身份证号、银行卡号、家庭住址、通讯记录、相册、通讯录等个人隐私信息；Temu 平台未开放的非公开接口数据、其他用户的店铺数据及个人信息。
+
+## 4. 我们如何使用您的信息
+
+### 4.1 信息使用范围
+
+1. **核心功能实现**：使用您的 API 信息调用 Temu 官方 API，获取店铺经营数据，为您提供利润计算、订单统计、库存管理与预警、数据分析与报表生成、核价通知自动判断与处理（仅当您主动开启该功能时）、多店铺统一管理等服务。
+2. **账号安全保障**：使用您的登录信息、设备基础信息、使用日志，识别异常登录行为，防范账号被盗、未授权访问等风险。
+3. **工具优化与维护**：使用脱敏后的工具使用日志，分析工具使用情况，优化功能体验、修复故障。
+4. **响应您的请求**：使用您的联系方式，响应您的咨询、投诉、权利行使请求，向您推送必要的工具更新通知、数据安全提醒。
+5. **遵守法律法规**：按照法律法规、国家机关调查取证要求，使用、提供相关信息。
+
+### 4.2 信息使用限制
+
+1. 仅使用实现工具功能所必需的信息，不超出您授权的范围使用信息
+2. 绝对不会将您的信息出售、出租、出借、转让给任何第三方
+3. 不会将您的信息用于未经您授权的任何目的
+4. 对店铺经营数据进行匿名化处理后，可用于工具优化、行业数据分析
+
+## 5. 数据存储与保护
+
+### 5.1 存储方式
+
+您的所有信息均存储于阿里云服务器，服务器由阿里云提供安全保障。
+
+### 5.2 安全保护措施
+
+1. **加密保护**：您的 API 信息、访问密码，采用 AES-256 加密算法进行加密后存储；所有数据传输过程均通过 HTTPS 加密通道进行
+2. **数据隔离**：采用用户 ID 严格隔离机制，每个用户的信息、店铺数据单独存储
+3. **访问控制**：仅授权的技术、运营人员（签订保密协议）可访问相关数据，日志记录所有访问行为
+4. **日志脱敏**：系统日志中不记录完整的 API 信息、访问密码等敏感数据
+5. **安全防护**：服务器部署防火墙、入侵检测系统，定期进行安全检测、漏洞修复
+
+### 5.3 数据存储期限
+
+1. 我们仅在您使用本工具期间，为实现工具功能所必需的期限内保留您的信息
+2. 您主动要求删除全部数据的，我们将在收到您的有效申请后 15 个工作日内完成删除
+3. 若您连续 6 个月未登录本工具，视为停止使用，我们将在 15 个工作日内主动删除您的全部数据
 
 ## 6. 您的权利
 
-根据《个人信息保护法》，您享有以下权利：
-- ✅ **知情权**：了解我们收集了哪些数据（本政策已说明）
-- ✅ **删除权**：要求删除您的所有数据
-- ✅ **撤回同意权**：撤回对本工具使用的同意
-- ✅ **数据可携带权**：获取您的数据副本
+根据《个人信息保护法》等相关法律法规，您依法享有以下权利：
 
-如需行使以上权利，请联系我们。
+1. **知情权**：了解我们收集、使用、存储、保护您信息的全部情况
+2. **删除权**：随时要求我们删除您的全部信息，我们将在收到申请后 15 个工作日内完成
+3. **撤回同意权**：随时撤回对本工具收集、使用您信息的同意，撤回后我们将立即停止收集并使用您的信息
+4. **数据可携带权**：要求我们向您提供您的信息副本
+5. **更正权**：要求我们更正您的信息（如店铺名称、联系方式等）
+6. **投诉举报权**：向我们投诉，或向国家网信部门等相关主管部门举报
+
+如需行使以上权利，请联系微信：returnHuangMuNing。
 
 ## 7. 第三方服务
 
-- **Temu 开放平台**：我们通过 Temu 官方 API 获取数据，数据使用受 Temu《开发者协议》约束
-- 我们不会将数据发送至任何其他第三方平台或服务
+1. **Temu 开放平台**：我们通过 Temu 官方 API 接口获取数据，数据使用受 Temu《开发者协议》约束
+2. **阿里云服务器提供商**：我们使用阿里云服务器存储您的信息，服务器安全保障由阿里云负责
+3. 我们不会将您的信息委托给任何其他第三方处理
 
-## 8. 隐私政策更新
+## 8. 隐私政策的更新
 
-我们可能会不时更新本隐私政策。重大变更时，我们会在应用中显著提示。
+1. 我们可能会不时更新本隐私政策，更新后的版本将在工具中显著提示
+2. 若发生重大变更，我们将通过您绑定的微信发送变更通知
+3. 若您不同意更新后的隐私政策，应立即停止使用本工具
 
-## 9. 联系我们
+## 9. 免责条款
 
-如您对本隐私政策有任何疑问，或希望删除您的数据，请联系：
-- 微信：returnHuangMuNing
+1. 因不可抗力（自然灾害、战争、政策调整、网络中断、服务器故障等）导致的信息泄露等，我们不承担法律责任，但将尽力采取补救措施
+2. 因您自身原因（泄露密码、转借账号、使用不安全网络等）导致的信息泄露，由您自行承担
+3. 因 Temu 开放平台 API 接口故障、数据错误、政策调整等原因导致的问题，我们不承担责任
+4. 因阿里云服务器故障、安全漏洞等原因导致的问题，我们不承担直接责任，但将协助您追责
+5. 因网络安全技术的局限性、黑客攻击等不可防范的原因导致的问题，且我们无过错的，我们不承担责任
+6. 您因违反本隐私政策、法律法规、Temu 平台规则导致损失的，由您自行承担
 
 ---
 
@@ -79,14 +130,122 @@ PRIVACY_POLICY_TEXT = """
 
 
 def get_privacy_policy_html():
-    import markdown
-    try:
-        html = markdown.markdown(PRIVACY_POLICY_TEXT, extensions=['extra'])
-    except Exception:
-        html = PRIVACY_POLICY_TEXT.replace("\n\n", "</p><p>").replace("\n", "<br>")
-        html = f"<div style='max-width:800px;margin:0 auto;line-height:1.8;font-size:14px'><p>{html}</p></div>"
+    """将隐私政策 Markdown 转为 HTML 显示"""
+    text = PRIVACY_POLICY_TEXT
+    lines = text.split("\n")
+    html_parts = []
+    in_list = False
+    list_type = None
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            continue
+
+        if stripped.startswith("# "):
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            html_parts.append(f"<h1>{stripped[2:]}</h1>")
+        elif stripped.startswith("## "):
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            html_parts.append(f"<h2>{stripped[3:]}</h2>")
+        elif stripped.startswith("### "):
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            html_parts.append(f"<h3>{stripped[4:]}</h3>")
+        elif stripped.startswith("1. ") or stripped.startswith("2. ") or stripped.startswith("3. ") or stripped.startswith("4. ") or stripped.startswith("5. ") or stripped.startswith("6. "):
+            if not in_list or list_type != "ordered":
+                if in_list:
+                    html_parts.append("</ul>")
+                html_parts.append("<ol>")
+                in_list = True
+                list_type = "ordered"
+            html_parts.append(f"<li>{stripped[3:]}</li>")
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            if not in_list or list_type != "unordered":
+                if in_list:
+                    html_parts.append("</ol>")
+                html_parts.append("<ul>")
+                in_list = True
+                list_type = "unordered"
+            html_parts.append(f"<li>{stripped[2:]}</li>")
+        elif stripped.startswith("**") and stripped.endswith("**"):
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            html_parts.append(f"<p><strong>{stripped[2:-2]}</strong></p>")
+        else:
+            if in_list:
+                html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+                in_list = False
+                list_type = None
+            html_parts.append(f"<p>{stripped}</p>")
+
+    if in_list:
+        html_parts.append(f"</{'ol' if list_type == 'ordered' else 'ul'}>")
+
+    content = "".join(html_parts)
     return f"""
-    <div style="max-width:800px;margin:0 auto;line-height:1.8;font-size:14px">
-        {html}
-    </div>
+    <style>
+        .privacy-policy {{
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 14px;
+            color: #333;
+        }}
+        .privacy-policy h1 {{
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1a1a2e;
+        }}
+        .privacy-policy h2 {{
+            font-size: 1.15rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #1a1a2e;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.3rem;
+        }}
+        .privacy-policy h3 {{
+            font-size: 1rem;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+            color: #333;
+        }}
+        .privacy-policy p {{
+            margin: 0.4rem 0;
+            text-align: justify;
+        }}
+        .privacy-policy ol, .privacy-policy ul {{
+            padding-left: 1.5rem;
+            margin: 0.3rem 0;
+        }}
+        .privacy-policy li {{
+            margin: 0.2rem 0;
+            text-align: justify;
+        }}
+        .privacy-policy strong {{
+            color: #1a1a2e;
+        }}
+        hr {{
+            margin: 1rem 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }}
+    </style>
+    <div class="privacy-policy">{content}</div>
     """
