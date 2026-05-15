@@ -59,16 +59,15 @@ def sign(params: dict, secret: str) -> str:
 
 
 TEST_ENDPOINTS = [
-    {"name": "📦 订单列表", "type": "bg.order.list.get",
+    {"name": "📦 订单列表(v2)", "type": "bg.order.list.v2.get",
      "params": {"pageSize": 10, "pageNumber": 1}},
     {"name": "🎯 活动列表", "type": "bg.promotion.activity.query",
      "params": {"pageSize": 10, "pageNumber": 1}},
-    {"name": "💰 结算列表", "type": "bg.settlement.list.get",
-     "params": {"dateFrom": "2026-05-01", "dateTo": "2026-05-15", "page": 1}},
-    {"name": "📋 核价通知", "type": "bg.pricing.notice.list",
-     "params": {"pageSize": 10, "page": 1}},
-    {"name": "📦 订单详情", "type": "bg.order.detail.get",
+    {"name": "📦 订单详情(v2)", "type": "bg.order.detail.v2.get",
      "params": {"parentOrderSn": "test"}},
+    {"name": "📋 Token信息", "type": "bg.open.accesstoken.info.get"},
+    {"name": "🏪 商品SKU查询", "type": "bg.local.goods.sku.list.query",
+     "params": {"skuIdList": "[]"}},
 ]
 
 

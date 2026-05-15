@@ -175,7 +175,7 @@ class TemuApiClient:
 
     @async_retry(RETRY_CONFIG)
     async def get_orders(self, page: int = 1, page_size: int = 100, **kwargs) -> TemuApiResponse:
-        return await self.request("bg.order.list.get", {
+        return await self.request("bg.order.list.v2.get", {
             "pageSize": page_size,
             "pageNumber": page,
             **kwargs,
@@ -183,7 +183,7 @@ class TemuApiClient:
 
     @async_retry(RETRY_CONFIG)
     async def get_order_detail(self, parent_order_sn: str) -> TemuApiResponse:
-        return await self.request("bg.order.detail.get", {
+        return await self.request("bg.order.detail.v2.get", {
             "parentOrderSn": parent_order_sn,
         })
 
@@ -195,51 +195,33 @@ class TemuApiClient:
 
     @async_retry(RETRY_CONFIG)
     async def get_pricing_notices(self, page: int = 1, page_size: int = 50) -> TemuApiResponse:
-        return await self.request("bg.pricing.notice.list", {
-            "page": page,
-            "pageSize": page_size,
-        })
+        raise TemuApiError("核价通知API(price notice)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
 
     @async_retry(RETRY_CONFIG)
     async def accept_pricing(self, notice_id: str) -> TemuApiResponse:
-        return await self.request("bg.pricing.notice.accept", {
-            "noticeId": notice_id,
-        })
+        raise TemuApiError("接受核价API(price accept)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
 
     @async_retry(RETRY_CONFIG)
     async def reject_pricing(self, notice_id: str, reason: str = "") -> TemuApiResponse:
-        return await self.request("bg.pricing.notice.reject", {
-            "noticeId": notice_id,
-            "reason": reason,
-        })
+        raise TemuApiError("拒绝核价API(price reject)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
 
     @async_retry(RETRY_CONFIG)
     async def get_settlements(self, date_from: str, date_to: str, page: int = 1) -> TemuApiResponse:
-        return await self.request("bg.settlement.list.get", {
-            "dateFrom": date_from,
-            "dateTo": date_to,
-            "page": page,
-        })
+        raise TemuApiError("结算查询API(settlement)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
 
     @async_retry(RETRY_CONFIG)
     async def get_shop_metrics(self, date_from: str, date_to: str) -> TemuApiResponse:
-        return await self.request("bg.shop.metrics.get", {
-            "dateFrom": date_from,
-            "dateTo": date_to,
-        })
+        raise TemuApiError("店铺指标API(metrics)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
+
+    @async_retry(RETRY_CONFIG)
+    async def get_messages(self, page: int = 1, page_size: int = 50) -> TemuApiResponse:
+        raise TemuApiError("消息列表API(message)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
 
     @async_retry(RETRY_CONFIG)
     async def get_activities(self, page: int = 1) -> TemuApiResponse:
         return await self.request("bg.promotion.activity.query", {
             "pageNumber": page,
             "pageSize": 20,
-        })
-
-    @async_retry(RETRY_CONFIG)
-    async def get_messages(self, page: int = 1, page_size: int = 50) -> TemuApiResponse:
-        return await self.request("bg.message.list.get", {
-            "page": page,
-            "pageSize": page_size,
         })
 
     @async_retry(RETRY_CONFIG)
