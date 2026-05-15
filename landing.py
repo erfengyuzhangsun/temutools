@@ -1520,7 +1520,7 @@ def show_landing_page():
     with col_qr1:
         st.markdown("""<div class="qr-code-container"><span class="qr-label" style="color: #07C160;">💚 微信支付</span>""", unsafe_allow_html=True)
         try:
-            st.image("https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/WeChat_20260512015412.png", width=230, caption="微信扫码付款")
+            st.image("assets/WeChat_20260512015412.png", width=230, caption="微信扫码付款")
         except Exception as e:
             st.warning("⚠️ 微信收款码加载失败，请刷新页面或联系客服")
         st.markdown("</div>", unsafe_allow_html=True)
@@ -1528,7 +1528,7 @@ def show_landing_page():
     with col_qr2:
         st.markdown("""<div class="qr-code-container"><span class="qr-label" style="color: #1677FF;">💙 支付宝</span>""", unsafe_allow_html=True)
         try:
-            st.image("https://raw.githubusercontent.com/erfengyuzhangsun/temutools/main/paypal_20260512015446.jpg", width=230, caption="支付宝扫码付款")
+            st.image("assets/paypal_20260512015446.jpg", width=230, caption="支付宝扫码付款")
         except Exception as e:
             st.warning("⚠️ 支付宝收款码加载失败，请刷新页面或联系客服")
         st.markdown("</div>", unsafe_allow_html=True)
