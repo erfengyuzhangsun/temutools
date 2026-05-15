@@ -123,7 +123,7 @@ async def proxy_to_streamlit(request: Request, path: str):
             <body>
                 <div class="container">
                     <div class="spinner"></div>
-                    <h1>🤖 Temu全托管自动化运营平台</h1>
+                    <h1>🤖 跨境卖家运营辅助工具</h1>
                     <p>应用正在启动中，请稍候...</p>
                     <p style="font-size: 0.9rem; color: #999; margin-top: 2rem;">
                         首次启动可能需要 30-60 秒<br>

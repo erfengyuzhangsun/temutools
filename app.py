@@ -59,7 +59,7 @@ if 'db_initialized' not in st.session_state:
         log_error(f"数据库初始化失败: {e}")
 
 st.set_page_config(
-    page_title="Temu全托管自动化运营平台",
+    page_title="跨境卖家运营辅助工具",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -563,7 +563,7 @@ st.markdown("""
 </style>
 
 <div class="nav-bar">
-    <a href="?page=app" class="nav-brand">🤖 Temu全托管自动化运营平台</a>
+    <a href="?page=app" class="nav-brand">🤖 跨境卖家运营辅助工具</a>
     <div class="nav-links">
         <a href="?page=app">📊 分析工具</a>
         <a href="?page=landing">🏠 返回首页</a>
@@ -664,11 +664,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<p class="main-header">🤖 Temu全托管自动化运营平台</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-header">🤖 跨境卖家运营辅助工具</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">全流程自动化运营 | 核价·库存·调价·活动·发货·售后一站式管理</p>', unsafe_allow_html=True)
 
 if st.session_state['first_visit'] and st.session_state['results_df'] is None:
-    with st.expander("👋 欢迎使用 Temu全托管自动化运营平台！点击查看使用指南", expanded=True):
+    with st.expander("👋 欢迎使用跨境卖家运营辅助工具！点击查看使用指南", expanded=True):
         col_guide1, col_guide2, col_guide3 = st.columns(3)
         
         with col_guide1:
@@ -1219,7 +1219,7 @@ Temu 店铺风险评估报告
 else:
     st.markdown("""
     <div style="text-align: center; padding: 4rem 2rem;">
-        <h2>👋 欢迎使用 Temu全托管自动化运营平台</h2>
+        <h2>👋 欢迎使用跨境卖家运营辅助工具</h2>
         <p style="font-size: 1.2rem; color: #666; margin: 2rem 0;">
             上传您的 Temu 订单 CSV 文件，即刻获取精确到分的利润分析和全流程自动化运营支持
         </p>
@@ -1261,7 +1261,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 1rem; color: #999; font-size: 0.9rem;">
-    <p>💡 <strong>Temu全托管自动化运营平台</strong> | 基于 2026 年 5 月最新费用规则</p>
+    <p>💡 <strong>跨境卖家运营辅助工具</strong> | 基于 2026 年 5 月最新费用规则</p>
     <p>核价·库存·调价·活动·发货·售后全流程自动化 · 每天5分钟，告别熬夜运营</p>
 </div>
 """, unsafe_allow_html=True)

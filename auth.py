@@ -98,18 +98,30 @@ def show_login_page():
     st.markdown("""
     <div class="login-container">
         <div style="font-size: 3rem; margin-bottom: 0.5rem;">🤖</div>
-        <div class="login-title">Temu全托管自动化运营平台</div>
-        <div class="login-subtitle">请输入访问密码，开启您的自动化运营之旅</div>
+        <div class="login-title">跨境卖家运营辅助工具</div>
+        <div class="login-subtitle">请输入访问密码，开启您的运营管理之旅</div>
     </div>
     """, unsafe_allow_html=True)
 
     password = st.text_input("访问密码", type="password", placeholder="请输入您的访问密码", label_visibility="collapsed")
+
+    with st.expander("📋 查看隐私政策与用户协议", expanded=False):
+        from privacy_policy import get_privacy_policy_html
+        st.markdown(get_privacy_policy_html(), unsafe_allow_html=True)
+
+    privacy_consent = st.checkbox(
+        "我已阅读并同意《隐私政策》，了解我的数据将加密存储、仅用于功能服务，不会泄露给任何第三方",
+        value=False,
+        help="您需要同意隐私政策后才能使用本工具",
+    )
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("🔑 验证身份", use_container_width=True, type="primary"):
             if not password:
                 st.error("请输入访问密码")
+            elif not privacy_consent:
+                st.error("请先阅读并同意《隐私政策》")
             else:
                 result = login(password)
                 if result["success"]:

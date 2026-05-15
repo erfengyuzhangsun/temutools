@@ -17,7 +17,7 @@ def show_landing_page():
             pass
     try:
         st.set_page_config(
-            page_title="Temu全托管自动化运营平台 - 告别熬夜盯后台",
+            page_title="跨境卖家运营辅助工具 - 告别熬夜盯后台",
             page_icon="🤖",
             layout="wide"
         )
@@ -760,7 +760,7 @@ def show_landing_page():
     # ==================== 1️⃣ Hero Section ====================
     st.markdown("""
     <div class="hero-section">
-        <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.4rem; position: relative; z-index: 1;">🤖 Temu全托管自动化运营平台</div>
+        <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.4rem; position: relative; z-index: 1;">🤖 跨境卖家运营辅助工具</div>
         <div class="hero-title">告别熬夜盯后台<br>Temu运营，交给AI全自动搞定</div>
         <div class="hero-subtitle">
             核价、库存、调价、活动、发货、售后全流程自动化<br>
@@ -1632,7 +1632,7 @@ def show_landing_page():
                 🎉 订单提交成功！
             </h3>
             <p style="margin: 0.5rem 0; color: #155724; font-size: 1rem; line-height: 1.8;">
-                感谢您选择 <strong>{order.get('plan', 'Temu全托管自动化运营平台')}</strong>！<br>
+                感谢您选择 <strong>{order.get('plan', '跨境卖家运营辅助工具')}</strong>！<br>
                 我们将在 <strong style="color: #dc3545;">10分钟内</strong> 通过手机号 <strong>{order.get('phone', '')}</strong> 联系您<br>
                 如需加急开通，请添加微信：<strong style="color: #07C160;">returnHuangMuNing</strong>
             </p>
@@ -1778,7 +1778,7 @@ def show_landing_page():
 
     st.markdown("""
     <div style="text-align: center; padding: 1.2rem 0; margin-top: 1.5rem; border-top: 2px solid #e9ecef; color: #888;">
-        <p style="margin: 0.3rem 0; font-size: 0.88rem;">© 2026 Temu全托管自动化运营平台 | 告别熬夜盯后台，Temu运营交给AI 🤖</p>
+        <p style="margin: 0.3rem 0; font-size: 0.88rem;">© 2026 跨境卖家运营辅助工具 | 告别熬夜盯后台，跨境运营交给AI 🤖</p>
         <p style="margin: 0.3rem 0; font-size: 0.8rem; color: #aaa;">本工具仅用于辅助商家进行数据分析和运营决策，不构成任何投资建议</p>
     </div>
     """, unsafe_allow_html=True)

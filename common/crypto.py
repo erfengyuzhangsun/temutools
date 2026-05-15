@@ -1,19 +1,8 @@
 import os
-import hashlib
-import base64
 import logging
 from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
-
-# 应用固定签名，用于派生默认加密密钥
-# 确保即使没有 ENCRYPTION_KEY 环境变量，密钥也始终一致
-_APP_SIGNATURE = b"temu_tools_default_key_v1_2026"
-
-
-def _derive_default_key() -> bytes:
-    hash_bytes = hashlib.sha256(_APP_SIGNATURE).digest()
-    return base64.urlsafe_b64encode(hash_bytes)
 
 
 class CryptoUtils:
@@ -27,11 +16,11 @@ class CryptoUtils:
             if key:
                 cls._cipher = Fernet(key.encode() if isinstance(key, str) else key)
             else:
-                fallback = _derive_default_key()
-                cls._cipher = Fernet(fallback)
-                logger.warning(
-                    "未设置 ENCRYPTION_KEY 环境变量，"
-                    "使用确定性派生密钥（推荐在 Streamlit Secrets 中显式设置）"
+                raise RuntimeError(
+                    "环境变量 ENCRYPTION_KEY 未设置。\n"
+                    "请设置一个 Fernet 兼容的32字节加密密钥:\n"
+                    f"  密钥生成: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"\n"
+                    "  设置方式: export ENCRYPTION_KEY='生成的密钥'"
                 )
         return cls._instance
 
