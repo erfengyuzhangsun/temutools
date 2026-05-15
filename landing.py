@@ -17,7 +17,7 @@ def show_landing_page():
             pass
     try:
         st.set_page_config(
-            page_title="跨境卖家运营辅助工具 - 告别熬夜盯后台",
+            page_title="跨境卖家运营辅助工具 - 高效运营助手",
             page_icon="🤖",
             layout="wide"
         )
@@ -761,18 +761,18 @@ def show_landing_page():
     st.markdown("""
     <div class="hero-section">
         <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.4rem; position: relative; z-index: 1;">🤖 跨境卖家运营辅助工具</div>
-        <div class="hero-title">告别熬夜盯后台<br>Temu运营，交给AI全自动搞定</div>
+        <div class="hero-title">智能运营辅助<br>让数据帮你做决策，高效管理店铺</div>
         <div class="hero-subtitle">
-            核价、库存、调价、活动、发货、售后全流程自动化<br>
-            <strong>每天仅需5分钟，其余时间躺平</strong>
+            核价、库存、调价、活动、发货、售后一站式管理<br>
+            <strong>提升运营效率，省时省力</strong>
         </div>
         <div style="margin-top: 1rem; position: relative; z-index: 1; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap;">
-            <a href="?page=app" class="cta-button-primary" style="color: white; text-decoration: none;">🚀 免费试用7天，开启躺平运营</a>
+            <a href="?page=app" class="cta-button-primary" style="color: white; text-decoration: none;">🚀 免费试用7天，开启高效运营</a>
         </div>
         <div style="margin-top: 1rem; display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; font-size: 0.82rem; opacity: 0.9;">
-            <span>✅ 已帮 800+ 卖家实现 90% 运营自动化</span>
-            <span>✅ 单店月均节省人工成本 3000+ 元</span>
-            <span>✅ 用户满意度 4.9/5，零差评退款</span>
+            <span>✅ 助力卖家简化日常运营流程</span>
+            <span>✅ 功能覆盖核价/库存/调价/活动/消息</span>
+            <span>✅ 数据加密存储，保障信息安全</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -797,8 +797,8 @@ def show_landing_page():
         st.markdown("""
         <div class="demo-section">
             <div style="text-align: center; margin-bottom: 1.2rem;">
-                <h3 style="margin: 0; font-size: 1.35rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🤖 Temu全流程自动化演示</h3>
-                <p style="color: #555; margin: 0.4rem 0 0 0; font-size: 0.92rem;">系统自动完成整个运营闭环，每天只需5分钟</p>
+                <h3 style="margin: 0; font-size: 1.35rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🤖 运营功能演示</h3>
+                <p style="color: #555; margin: 0.4rem 0 0 0; font-size: 0.92rem;">一站式管理多个运营环节，提升效率</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -1068,7 +1068,7 @@ def show_landing_page():
                                     <span class="mock-tag">活动通知 4</span>
                                 </div>
                                 <div style="margin-top:0.5rem;font-size:0.8rem;color:#666;">
-                                    ✅ 智能分类，重要消息自动置顶高亮，零漏看
+                                    ✅ 智能分类，重要消息自动置顶高亮，减少遗漏
                                 </div>
                                 <div style="margin-top:0.6rem;">
                                     <span class="mock-btn mock-btn-primary" style="font-size:0.78rem;">📋 一键处理待办</span>
@@ -1084,7 +1084,7 @@ def show_landing_page():
                     </div>
                     <div class="annotation">
                         <div class="annotation-arrow">②</div>
-                        <div class="annotation-text"><strong>➡ 消息自动分类，零漏看</strong> — 右侧消息分类栏按类型自动归类，各类消息数量一目了然，重要消息不会淹没</div>
+                        <div class="annotation-text"><strong>➡ 消息自动分类，减少遗漏</strong> — 右侧消息分类栏按类型自动归类，各类消息数量一目了然，重要消息不会淹没</div>
                     </div>
                 </div>
                 <div class="demo-footer-text">
@@ -1214,7 +1214,7 @@ def show_landing_page():
         st.markdown("""<div class="stat-item"><div class="stat-number">800+</div><div class="stat-label">👥 累计合作卖家</div></div>""", unsafe_allow_html=True)
 
     with col_s2:
-        st.markdown("""<div class="stat-item"><div class="stat-number">90%</div><div class="stat-label">🤖 运营工作已自动化</div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="stat-item"><div class="stat-number">高效</div><div class="stat-label">🤖 智能辅助运营管理</div></div>""", unsafe_allow_html=True)
 
     with col_s3:
         st.markdown("""<div class="stat-item"><div class="stat-number">¥3000+</div><div class="stat-label">💰 单店月均节省成本</div></div>""", unsafe_allow_html=True)
@@ -1248,41 +1248,41 @@ def show_landing_page():
     st.markdown("---")
 
     # ==================== 5️⃣ 解决方案模块：8个三段式 ====================
-    st.markdown("""<h2 id="solutions">🚀 全流程自动化，每个环节都帮你赚钱</h2>""", unsafe_allow_html=True)
+    st.markdown("""<h2 id="solutions">🚀 全流程辅助，每个环节都帮你提效</h2>""", unsafe_allow_html=True)
 
     sol_rows = [
         [
-            ("全自动核价", "零漏单、零亏损，再也不用熬夜核价", 
+            ("全自动核价", "智能核价提醒，避免遗漏，轻松管理", 
              "手动核价30分钟，还漏处理导致商品下架",
              "按预设毛利规则批量自动处理核价通知，超时强提醒",
-             "每天省30分钟，零漏单、零亏损"),
+             "节省运营时间，降低遗漏风险"),
             ("库存智能管理", "防断货、防积压，资金和流量双保住",
              "断货丢流量，滞销压资金",
              "安全库存预警+销量预测+滞销SKU识别，自动生成补货建议",
-             "库存周转提升40%，资金占用直降30%"),
+             "智能库存管理，优化资金周转"),
         ],
         [
             ("智能自动调价", "跟价不亏，守住每一分利润",
              "跟价就亏，不跟价就没单",
              "竞品实时监控+保本毛利锁定+活动价定时切换",
-             "保毛利前提下自动跟价，单店利润提升15%"),
-            ("活动自动报名", "一键匹配，再也不亏活动流量",
+             "保毛利前提下自动跟价，助力利润优化"),
+            ("活动自动报名", "一键匹配，轻松参与活动",
              "手动找活动、筛选SKU，错过报名时间",
              "自动抓取可报活动+SKU匹配+批量报名+状态追踪",
-             "大促活动100%参与，再也不亏活动流量"),
+             "及时获知活动信息，不错过报名机会"),
         ],
         [
-            ("数据自动分析预警", "自动找问题，每天5分钟掌握店铺状态",
+            ("数据自动分析预警", "自动找问题，快速掌握店铺状态",
              "做报表1小时，还找不到问题",
              "每日自动生成报表，异常指标实时预警，给出优化建议",
-             "1小时人工工作，压缩为5分钟全自动出结果"),
-            ("消息与售后自动化", "每天省15分钟，零漏看平台通知",
+             "批量处理，快速出结果"),
+            ("消息与售后自动化", "集中管理，减少遗漏",
              "消息太多看不过来，处罚通知漏看",
              "消息智能分类+重要通知强提醒+售后模板一键复用",
-             "每天省15分钟，零漏看平台通知"),
+             "集中管理通知，减少遗漏"),
         ],
         [
-            ("标签与发货自动化", "1小时备货压缩到20分钟",
+            ("标签与发货自动化", "批量处理发货流程，节省时间",
              "手动生成标签1小时，容易出错",
              "批量生成平台规范标签/箱唛，同步物流信息",
              "1小时备货发货，压缩到20分钟内完成"),
@@ -1319,7 +1319,7 @@ def show_landing_page():
     with col_f1:
         st.markdown("""
         <div class="feature-card">
-            <div class="value-tag">零漏单、零亏损，再也不用熬夜核价</div>
+            <div class="value-tag">智能核价提醒，避免遗漏，轻松管理</div>
             <h3 style="color: #667eea; margin: 0.6rem 0 0.5rem 0; font-size: 1.05rem;">📊 全自动核价模块</h3>
             <p style="color: #555; line-height: 1.7; font-size: 0.93rem;">
                 • 🔄 批量导入订单自动匹配核价规则<br>
@@ -1366,7 +1366,7 @@ def show_landing_page():
     with col_f4:
         st.markdown("""
         <div class="feature-card">
-            <div class="value-tag">一键匹配，再也不亏活动流量</div>
+            <div class="value-tag">一键匹配，轻松参与活动</div>
             <h3 style="color: #667eea; margin: 0.6rem 0 0.5rem 0; font-size: 1.05rem;">🎯 平台活动自动报名</h3>
             <p style="color: #555; line-height: 1.7; font-size: 0.93rem;">
                 • 🔍 自动抓取可报名活动，智能匹配店铺SKU<br>
@@ -1381,7 +1381,7 @@ def show_landing_page():
     with col_f5:
         st.markdown("""
         <div class="feature-card">
-            <div class="value-tag">自动找问题，每天5分钟掌握店铺状态</div>
+            <div class="value-tag">自动找问题，快速掌握店铺状态</div>
             <h3 style="color: #667eea; margin: 0.6rem 0 0.5rem 0; font-size: 1.05rem;">� 数据自动分析与预警</h3>
             <p style="color: #555; line-height: 1.7; font-size: 0.93rem;">
                 • 📋 每日自动生成运营日报，数据不遗漏<br>
@@ -1402,7 +1402,7 @@ def show_landing_page():
                 • 🖥 一个后台管理所有店铺，不用来回切换<br>
                 • 💰 多店盈亏/待办/告警一站式查看<br>
                 • 📊 各店数据横向对比，一眼定位问题店<br>
-                • ⚡ 跨店铺批量操作，效率翻倍<br>
+                • ⚡ 跨店铺批量操作，提升效率<br>
                 • 🔒 数据严格隔离，安全可靠
             </p>
         </div>
@@ -1443,16 +1443,16 @@ def show_landing_page():
                 <span class="user-tag" style="background: rgba(255,255,255,0.2); color: white;">🏪 多店卖家</span>
             </div>
             <h3 style="margin-bottom: 0.3rem;">专业版</h3>
-            <p style="font-size: 0.82rem; opacity: 0.85; margin-bottom: 0.5rem;">全流程自动化，实现躺平运营</p>
+            <p style="font-size: 0.82rem; opacity: 0.85; margin-bottom: 0.5rem;">全流程辅助，轻松管理运营</p>
             <div class="price-amount">¥79.2<span style="font-size: 1.15rem;">/季度</span><br><span class="price-savings">省40%</span></div>
             <p style="font-size: 0.88rem; opacity: 0.9; margin: 0.4rem 0;">原价 ¥99/季度 | 限时8折</p>
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; opacity: 0.95; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 包含所有基础版功能<br>
-                ✅ 全自动化模块（核价/库存/调价/活动/消息）<br>
+                ✅ 智能辅助模块（核价/库存/调价/活动/消息）<br>
                 ✅ 多店铺统一管理+高级数据分析<br>
                 ✅ 优先客服支持+专属运营建议<br>
             </ul>
-            <p style="font-size: 0.85rem; font-weight: bold; opacity: 0.9; margin-top: 0.5rem;">🔥 90%卖家首选，开启躺平运营的必备方案</p>
+            <p style="font-size: 0.85rem; font-weight: bold; opacity: 0.9; margin-top: 0.5rem;">🔥 高效运营的必备方案</p>
             <a class="cta-button-primary" style="color: white; text-decoration: none; display: inline-block; pointer-events: none; cursor: not-allowed; opacity: 0.65;" aria-disabled="true">🎯 立即订阅专业版</a>
         </div>
         """, unsafe_allow_html=True)
@@ -1654,7 +1654,7 @@ def show_landing_page():
     # ==================== 8️⃣ 用户评价 ====================
     st.markdown("## 💬 卖家真实反馈")
 
-    st.markdown("""<p style="text-align: center; color: #666; font-size: 0.92rem; margin-bottom: 1.2rem;">已帮助 <strong style="color: #667eea;">800+</strong> 位卖家实现自动化运营</p>""", unsafe_allow_html=True)
+    st.markdown("""<p style="text-align: center; color: #666; font-size: 0.92rem; margin-bottom: 1.2rem;">已助力 <strong style="color: #667eea;">众多</strong> 卖家提升运营效率</p>""", unsafe_allow_html=True)
 
     col_t1, col_t2 = st.columns(2)
 
@@ -1662,7 +1662,7 @@ def show_landing_page():
         st.markdown("""
         <div class="testimonial-card">
             <p style="font-style: italic; color: #555; line-height: 1.7; font-size: 0.95rem;">
-                "以前每天运营要花<strong>3小时</strong>，现在全自动化，每天只看5分钟告警，每月多省了100多小时，<strong style="color: #28a745;">单店利润涨了20%</strong>！"
+                "以前每天运营要花<strong>3小时</strong>，现在每天看告警和管理数据，每月省了大量时间，<strong style="color: #28a745;">利润明显提升</strong>！"
             </p>
             <p style="margin-top: 0.7rem; font-size: 0.9rem;"><strong>— 服装类目卖家 · 张先生</strong> <span style="color: #888;">| 月销500单</span></p>
             <p style="color: #ffc107; font-size: 1rem; margin-top: 0.3rem;">⭐⭐⭐⭐⭐ 使用3个月</p>
@@ -1686,7 +1686,7 @@ def show_landing_page():
         st.markdown("""
         <div class="testimonial-card">
             <p style="font-style: italic; color: #555; line-height: 1.7; font-size: 0.95rem;">
-                "一个后台管5家店，不用来回切换后台，<strong>运营效率直接翻倍</strong>，终于不用熬夜盯数据了！<strong style="color: #667eea;">多店卖家必备</strong>"
+                "一个后台管5家店，不用来回切换后台，<strong>运营效率明显提升</strong>，多店管理方便多了！<strong style="color: #667eea;">多店卖家必备</strong>"
             </p>
             <p style="margin-top: 0.7rem; font-size: 0.9rem;"><strong>— 多店卖家 · 陈经理</strong> <span style="color: #888;">| 5家店铺</span></p>
             <p style="color: #ffc107; font-size: 1rem; margin-top: 0.3rem;">⭐⭐⭐⭐⭐ 使用6个月</p>
@@ -1712,10 +1712,10 @@ def show_landing_page():
     with col_cta2:
         st.markdown("""
         <div style="text-align: center; padding: 2rem 1.2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.35);">
-            <h2 style="margin-bottom: 0.6rem; font-size: 1.6rem;">🤖 每天5分钟，告别熬夜运营</h2>
+            <h2 style="margin-bottom: 0.6rem; font-size: 1.6rem;">🚀 高效运营，轻松管理</h2>
             <p style="margin-bottom: 1.2rem; font-size: 0.95rem; opacity: 0.95; line-height: 1.6;">
-                核价、库存、调价、活动、发货全自动搞定<br>
-                把时间花在选品和爆单上，而不是盯后台做报表<br>
+                核价、库存、调价、活动、发货一站式管理<br>
+                把时间花在选品和业务上，而不是盯后台做报表<br>
                 <span style="font-size: 0.88rem;">✅ 免费试用 7 天 | ✅ 无需信用卡 | ✅ 随时可取消</span>
             </p>
             <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
@@ -1778,7 +1778,7 @@ def show_landing_page():
 
     st.markdown("""
     <div style="text-align: center; padding: 1.2rem 0; margin-top: 1.5rem; border-top: 2px solid #e9ecef; color: #888;">
-        <p style="margin: 0.3rem 0; font-size: 0.88rem;">© 2026 跨境卖家运营辅助工具 | 告别熬夜盯后台，跨境运营交给AI 🤖</p>
+        <p style="margin: 0.3rem 0; font-size: 0.88rem;">© 2026 跨境卖家运营辅助工具 | 专注数据与运营管理 🤖</p>
         <p style="margin: 0.3rem 0; font-size: 0.8rem; color: #aaa;">本工具仅用于辅助商家进行数据分析和运营决策，不构成任何投资建议</p>
     </div>
     """, unsafe_allow_html=True)

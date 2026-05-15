@@ -665,7 +665,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<p class="main-header">🤖 跨境卖家运营辅助工具</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">全流程自动化运营 | 核价·库存·调价·活动·发货·售后一站式管理</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">核价·库存·调价·活动·发货·售后一站式管理</p>', unsafe_allow_html=True)
 
 if st.session_state['first_visit'] and st.session_state['results_df'] is None:
     with st.expander("👋 欢迎使用跨境卖家运营辅助工具！点击查看使用指南", expanded=True):
@@ -1221,13 +1221,13 @@ else:
     <div style="text-align: center; padding: 4rem 2rem;">
         <h2>👋 欢迎使用跨境卖家运营辅助工具</h2>
         <p style="font-size: 1.2rem; color: #666; margin: 2rem 0;">
-            上传您的 Temu 订单 CSV 文件，即刻获取精确到分的利润分析和全流程自动化运营支持
+            上传您的 Temu 订单 CSV 文件，即刻获取精确到分的利润分析和一站式运营管理支持
         </p>
         <div style="background-color: #f8f9fa; padding: 2rem; border-radius: 15px; max-width: 900px; margin: 2rem auto;">
             <h3>✨ 核心功能亮点</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; text-align: left;">
                 <div>
-                    <h4>🤖 全流程自动化</h4>
+                    <h4>🤖 全流程辅助</h4>
                     <ul style="font-size: 1rem; line-height: 1.8; color: #555;">
                         <li>✅ 自动核价处理，不漏单、不亏损</li>
                         <li>✅ 库存智能预警，防断货、防积压</li>
@@ -1249,7 +1249,7 @@ else:
         <div style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 15px; max-width: 800px; margin: 2rem auto;">
             <h3 style="color: white;">🎯 为什么选择我们？</h3>
             <p style="font-size: 1.1rem; margin: 1rem 0;">
-                全流程<strong>自动化运营</strong> · 每天仅需<strong>5分钟</strong> · 核价·库存·调价·活动·发货·售后<strong>一站式搞定</strong>
+                全流程<strong>辅助管理</strong> · 核价·库存·调价·活动·发货·售后<strong>一站式管理</strong>
             </p>
         </div>
         <p style="color: #999; margin-top: 2rem;">
@@ -1262,6 +1262,6 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 1rem; color: #999; font-size: 0.9rem;">
     <p>💡 <strong>跨境卖家运营辅助工具</strong> | 基于 2026 年 5 月最新费用规则</p>
-    <p>核价·库存·调价·活动·发货·售后全流程自动化 · 每天5分钟，告别熬夜运营</p>
+    <p>核价·库存·调价·活动·发货·售后一站式管理 · 高效运营，省时省力</p>
 </div>
 """, unsafe_allow_html=True)
