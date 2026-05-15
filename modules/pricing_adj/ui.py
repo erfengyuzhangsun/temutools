@@ -1,8 +1,8 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from modules.pricing_adj.service import PricingAdjustmentService
 from modules.pricing_adj.config import MODULE_CONFIG
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -58,7 +58,7 @@ def show_page():
                         st.error("请输入SKU编码")
                     else:
                         service = PricingAdjustmentService(user_id)
-                        result = asyncio.run(
+                        result = run_async(
                             service.auto_adjust_price(shop_id=shop_id, sku=sku)
                         )
 
@@ -92,7 +92,7 @@ def show_page():
                         st.error("请输入有效活动价格")
                     else:
                         service = PricingAdjustmentService(user_id)
-                        result = asyncio.run(
+                        result = run_async(
                             service.adjust_for_activity(shop_id=shop_id, sku=sku, activity_price=activity_price)
                         )
 

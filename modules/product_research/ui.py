@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import ProductResearchService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -26,7 +26,7 @@ def show_page():
                 st.error("请输入搜索关键词")
             else:
                 service = ProductResearchService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.collect_1688(keywords=keywords, limit=limit)
                 )
 
@@ -78,7 +78,7 @@ def show_page():
                 }
 
                 service = ProductResearchService(user_id)
-                result = asyncio.run(
+                result = run_async(
                     service.estimate_profit(product_data=product_data, shop_id=shop_id)
                 )
 

@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import ShippingService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -34,7 +34,7 @@ def show_page():
                 else:
                     sku_list = [s.strip() for s in sku_input.split("\n") if s.strip()]
                     service = ShippingService(user_id)
-                    result = asyncio.run(
+                    result = run_async(
                         service.generate_labels(shop_id=shop_id, sku_list=sku_list)
                     )
 
@@ -102,7 +102,7 @@ def show_page():
                 else:
                     order_ids = [o.strip() for o in order_input.split("\n") if o.strip()]
                     service = ShippingService(user_id)
-                    result = asyncio.run(
+                    result = run_async(
                         service.generate_manifest(shop_id=shop_id, order_ids=order_ids)
                     )
 

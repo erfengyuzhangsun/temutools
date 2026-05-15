@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import ActivityService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -24,7 +24,7 @@ def show_page():
 
             if st.button("🔍 获取并匹配活动", type="primary", use_container_width=True):
                 service = ActivityService(user_id)
-                result = asyncio.run(service.fetch_and_match(shop_id=shop_id))
+                result = run_async(service.fetch_and_match(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -48,7 +48,7 @@ def show_page():
 
                                     if st.button(f"📋 报名此活动", key=act.get("activity_id")):
                                         sku_list = act.get("matched_skus", [])
-                                        result2 = asyncio.run(
+                                        result2 = run_async(
                                             service.batch_apply(
                                                 shop_id=shop_id,
                                                 activity_id=act.get("activity_id"),

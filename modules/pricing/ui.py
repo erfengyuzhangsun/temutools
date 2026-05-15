@@ -1,8 +1,8 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from datetime import datetime
 from modules.pricing.service import PricingService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -37,7 +37,7 @@ def show_page():
 
             if st.button("🚀 执行自动核价", type="primary", use_container_width=True):
                 service = PricingService(user_id)
-                result = asyncio.run(service.auto_handle_pricing(shop_id=shop_id))
+                result = run_async(service.auto_handle_pricing(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -81,7 +81,7 @@ def show_page():
 
             if st.button("📋 查询核价日志", use_container_width=True):
                 service = PricingService(user_id)
-                logs = asyncio.run(service.get_pricing_logs(shop_id=shop_id, limit=limit))
+                logs = run_async(service.get_pricing_logs(shop_id=shop_id, limit=limit))
 
                 if logs:
                     records = []

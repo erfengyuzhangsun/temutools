@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import ReviewMonitorService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -26,7 +26,7 @@ def show_page():
             with col_b1:
                 if st.button("🔄 同步最新评价", type="primary", use_container_width=True):
                     service = ReviewMonitorService(user_id)
-                    result = asyncio.run(service.sync_new_reviews(shop_id=shop_id))
+                    result = run_async(service.sync_new_reviews(shop_id=shop_id))
 
                     if result.success:
                         data = result.data or {}
@@ -82,7 +82,7 @@ def show_page():
 
             if st.button("📊 分析差评", type="primary", use_container_width=True):
                 service = ReviewMonitorService(user_id)
-                result = asyncio.run(service.analyze_reviews(shop_id=shop_id))
+                result = run_async(service.analyze_reviews(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}

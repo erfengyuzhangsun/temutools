@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from modules.dashboard.service import DashboardService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -14,7 +14,7 @@ def show_page():
 
     with tab1:
         service = DashboardService(user_id)
-        result = asyncio.run(service.get_overview())
+        result = run_async(service.get_overview())
 
         if result.success:
             data = result.data or {}
@@ -95,7 +95,7 @@ def show_page():
         st.markdown("#### 全局告警中心")
 
         service = DashboardService(user_id)
-        result = asyncio.run(service.get_all_alerts())
+        result = run_async(service.get_all_alerts())
 
         if result.success:
             data = result.data or {}

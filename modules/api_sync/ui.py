@@ -1,8 +1,8 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from datetime import datetime
 from modules.api_sync.service import ApiSyncService
+from common.async_runner import run as run_async
 from modules.api_sync.schemas import SyncStatus
 
 
@@ -41,7 +41,7 @@ def show_page():
 
                     with st.spinner(f"正在同步 {selected_shop_name} 的数据..."):
                         service = ApiSyncService(user_id)
-                        result = asyncio.run(
+                        result = run_async(
                             service.sync_orders(shop_id=selected_shop_id, page_size=page_size, sync_type=sync_type_enum)
                         )
 
@@ -125,7 +125,7 @@ def show_page():
                         api_secret=api_secret, main_category=main_category,
                     )
                     service = ApiSyncService(user_id)
-                    result = asyncio.run(service.bind_shop(request))
+                    result = run_async(service.bind_shop(request))
 
                     if result.success:
                         st.success(f"✅ 店铺 {shop_name} 绑定成功")
@@ -157,7 +157,7 @@ def show_page():
 
             if st.button("📋 查询同步历史"):
                 service = ApiSyncService(user_id)
-                history = asyncio.run(
+                history = run_async(
                     service.get_sync_history(shop_id=shop_options[selected_shop], limit=20)
                 )
 

@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import BatchOpsService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -63,7 +63,7 @@ def show_page():
             with col_b1:
                 if st.button("📋 执行批量下架", type="primary", use_container_width=True, disabled=not confirm):
                     service = BatchOpsService(user_id)
-                    result = asyncio.run(
+                    result = run_async(
                         service.batch_offline(shop_id=shop_id, sku_list=sku_list)
                     )
 

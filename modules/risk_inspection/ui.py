@@ -1,7 +1,7 @@
 import streamlit as st
-import asyncio
 import pandas as pd
 from common.services_p2p3 import RiskInspectionService
+from common.async_runner import run as run_async
 
 
 def show_page():
@@ -24,7 +24,7 @@ def show_page():
 
             if st.button("🔍 开始体检", type="primary", use_container_width=True):
                 service = RiskInspectionService(user_id)
-                result = asyncio.run(service.inspect_all_skus(shop_id=shop_id))
+                result = run_async(service.inspect_all_skus(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
@@ -66,7 +66,7 @@ def show_page():
 
             if st.button("📊 生成报告", type="primary", use_container_width=True):
                 service = RiskInspectionService(user_id)
-                result = asyncio.run(service.generate_report(shop_id=shop_id))
+                result = run_async(service.generate_report(shop_id=shop_id))
 
                 if result.success:
                     data = result.data or {}
