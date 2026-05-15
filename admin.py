@@ -8,6 +8,7 @@ from db import (
     get_user_history_risks, list_all_orders, mark_order_completed, delete_order
 )
 from auth import get_current_user, get_user_id
+from modules.server_monitor.ui import render_server_monitor as render_admin_server_monitor
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
@@ -79,7 +80,7 @@ def show_admin_panel():
             st.session_state['is_admin'] = False
             st.rerun()
 
-    tab_add, tab_list, tab_orders, tab_maintain = st.tabs(["➕ 添加用户", "📋 用户列表", "📦 订单管理", "🔧 系统维护"])
+    tab_add, tab_list, tab_orders, tab_maintain, tab_monitor = st.tabs(["➕ 添加用户", "📋 用户列表", "📦 订单管理", "🔧 系统维护", "🖥️ 云主机监控"])
 
     with tab_add:
         st.markdown("### 添加新付费用户")
@@ -272,3 +273,9 @@ def show_admin_panel():
                     )
                 else:
                     st.warning("暂无数据可导出")
+
+    with tab_monitor:
+        st.markdown("### 🖥️ 云主机监控")
+        st.caption("此页面仅供管理员/开发人员使用，监控服务器 CPU、内存、磁盘和关键进程状态")
+        st.divider()
+        render_admin_server_monitor()

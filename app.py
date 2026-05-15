@@ -27,9 +27,6 @@ from modules.batch_ops import ui as batch_ops_ui
 from modules.review_monitor import ui as review_monitor_ui
 from modules.product_research import ui as product_research_ui
 from modules.supplier import ui as supplier_ui
-from modules.server_monitor import ui as server_monitor_ui
-
-
 def save_analysis_to_db(user_id, summary, results_df, risk_report):
     try:
         shop_id = get_or_create_shop(user_id)
@@ -305,7 +302,6 @@ MODULE_PAGES = {
     "review_monitor": review_monitor_ui.show_page,
     "product_research": product_research_ui.show_page,
     "supplier": supplier_ui.show_page,
-    "server_monitor": server_monitor_ui.render_server_monitor,
 }
 
 if 'calculator' not in st.session_state:
@@ -383,7 +379,6 @@ with st.sidebar:
         nav_button("风控体检", "risk_inspection", "🔍")
         nav_button("批量运营", "batch_ops", "📋")
         nav_button("差评监控", "review_monitor", "⭐")
-        nav_button("云主机监控", "server_monitor", "🖥️")
         nav_button("选品辅助", "product_research", "🔬")
         nav_button("供应商管理", "supplier", "🏭")
 
