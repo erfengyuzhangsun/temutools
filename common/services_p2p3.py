@@ -71,7 +71,7 @@ class RiskInspectionService:
     def __init__(self,uid:int):self.uid=uid
     async def inspect_all_skus(self,shop_id:int)->Any:
         from db import execute_query
-        skus=execute_query("SELECT sku,product_name,category FROM temu_sync_orders WHERE user_id=? AND shop_id=? GROUP BY sku",(self.uid,shop_id),fetch=True)or[]
+        skus=execute_query("SELECT sku,MAX(product_name)as product_name,MAX(category)as category FROM temu_sync_orders WHERE user_id=? AND shop_id=? GROUP BY sku",(self.uid,shop_id),fetch=True)or[]
         words=execute_query("SELECT word FROM temu_sensitive_words WHERE user_id=?",(self.uid,),fetch=True)or[]
         sensitive=[w["word"] for w in words]
         violations=[]
