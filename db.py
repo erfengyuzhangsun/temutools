@@ -72,12 +72,18 @@ def execute_query(query: str, params: tuple = None, fetch: bool = False):
         conn.commit()
         return cursor.lastrowid if hasattr(cursor, 'lastrowid') else None
     except Exception as e:
-        if DB_MODE == "sqlite" and "no such table" in str(e).lower() and not _initializing_tables:
+        err_str = str(e).lower()
+        is_table_not_found = (
+            "no such table" in err_str or
+            "doesn't exist" in err_str or
+            "1146 (42s02)" in err_str
+        )
+        if is_table_not_found and not _initializing_tables:
             _initializing_tables = True
             try:
                 from db_init import initialize_all_tables
                 initialize_all_tables()
-                cursor = conn.cursor()
+                cursor = conn.cursor(dictionary=True) if DB_MODE == "mysql" else conn.cursor()
                 if params:
                     cursor.execute(query, params)
                 else:
