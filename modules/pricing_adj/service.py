@@ -1,7 +1,10 @@
 import logging; from datetime import datetime; from typing import List; from modules.pricing_adj.schemas import ServiceResult, PriceAdjustment; from modules.pricing_adj.config import MODULE_CONFIG; from common.api_client_factory import get_api_client; logger=logging.getLogger(__name__)
 
 class PricingAdjustmentService:
-    def __init__(self, user_id: int): self.user_id = user_id
+    def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("pricing_adj", user_id)
+        self.user_id = user_id
 
     async def auto_adjust_price(self, shop_id: int, sku: str) -> ServiceResult:
         logger.info(f"自动调价 | user_id={self.user_id} | shop_id={shop_id} | sku={sku}")

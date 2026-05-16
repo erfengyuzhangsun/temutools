@@ -26,6 +26,10 @@ def _get_user_shops(user_id: int) -> list:
 
 
 async def _callback_auto_sync_orders(user_id: int):
+    from common.plan_guard import check_plan_access
+    if not check_plan_access("api_sync", user_id):
+        logger.info(f"[自动同步订单] user={user_id} 套餐无权限，跳过")
+        return
     from modules.api_sync.service import ApiSyncService
     shops = _get_user_shops(user_id)
     if not shops:
@@ -43,6 +47,10 @@ async def _callback_auto_sync_orders(user_id: int):
 
 
 async def _callback_auto_process_pricing(user_id: int):
+    from common.plan_guard import check_plan_access
+    if not check_plan_access("pricing", user_id):
+        logger.info(f"[自动核价处理] user={user_id} 套餐无权限，跳过")
+        return
     from modules.pricing.service import PricingService
     shops = _get_user_shops(user_id)
     if not shops:
@@ -61,6 +69,10 @@ async def _callback_auto_process_pricing(user_id: int):
 
 
 async def _callback_auto_sync_inventory(user_id: int):
+    from common.plan_guard import check_plan_access
+    if not check_plan_access("inventory", user_id):
+        logger.info(f"[自动库存同步] user={user_id} 套餐无权限，跳过")
+        return
     from modules.inventory.service import InventoryService
     shops = _get_user_shops(user_id)
     if not shops:
@@ -78,6 +90,10 @@ async def _callback_auto_sync_inventory(user_id: int):
 
 
 async def _callback_auto_risk_check(user_id: int):
+    from common.plan_guard import check_plan_access
+    if not check_plan_access("risk_inspection", user_id):
+        logger.info(f"[自动风控体检] user={user_id} 套餐无权限，跳过")
+        return
     from common.services_p2p3 import RiskInspectionService
     shops = _get_user_shops(user_id)
     if not shops:
@@ -96,6 +112,10 @@ async def _callback_auto_risk_check(user_id: int):
 
 
 async def _callback_auto_sync_reviews(user_id: int):
+    from common.plan_guard import check_plan_access
+    if not check_plan_access("review_monitor", user_id):
+        logger.info(f"[自动差评同步] user={user_id} 套餐无权限，跳过")
+        return
     from common.services_p2p3 import ReviewMonitorService
     shops = _get_user_shops(user_id)
     if not shops:

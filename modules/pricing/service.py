@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 class PricingService:
     def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("pricing", user_id)
         self.user_id = user_id
 
     async def auto_handle_pricing(self, shop_id: int) -> ServiceResult:

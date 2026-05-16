@@ -1,7 +1,10 @@
 import logging; from datetime import datetime, timedelta; from typing import List; from modules.analysis.schemas import ServiceResult, ShopMetrics, ReportData; from modules.analysis.config import MODULE_CONFIG; logger=logging.getLogger(__name__)
 
 class AnalysisService:
-    def __init__(self, user_id: int): self.user_id = user_id
+    def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("analysis", user_id)
+        self.user_id = user_id
 
     async def collect_metrics(self, shop_id: int) -> ServiceResult:
         logger.info(f"采集指标 | user_id={self.user_id} | shop_id={shop_id}")

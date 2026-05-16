@@ -6,7 +6,10 @@ from modules.inventory.config import MODULE_CONFIG
 logger = logging.getLogger(__name__)
 
 class InventoryService:
-    def __init__(self, user_id: int): self.user_id = user_id
+    def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("inventory", user_id)
+        self.user_id = user_id
 
     async def sync_inventory(self, shop_id: int) -> ServiceResult:
         logger.info(f"同步库存 | user_id={self.user_id} | shop_id={shop_id}")

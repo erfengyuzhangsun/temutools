@@ -399,20 +399,20 @@ with st.sidebar:
         is_active = current == page
         has_access = _has_plan_access(page, user_plan)
         btn_type = "primary" if is_active else "secondary"
-        display_label = f"{page_icon} {label}"
-        plan_access_hint = ""
         if not has_access:
             required = _get_required_plan_name(page)
-            display_label = f"🔒 {display_label}"
-            plan_access_hint = f" ({required})"
-        if st.button(display_label, key=f"nav_{page}", use_container_width=True, type=btn_type):
-            st.session_state["page"] = page
-            st.query_params["page"] = page
-            if not st.session_state.get('_rerun_pending', False):
-                st.session_state['_rerun_pending'] = True
-                st.rerun()
-        if not has_access:
-            st.caption(f"需升级至 {_get_required_plan_name(page)}")
+            st.button(f"🔒 {label}", key=f"nav_locked_{page}",
+                      use_container_width=True, disabled=True,
+                      help=f"需升级至 {required}")
+            st.caption(f"需升级至 {required}")
+        else:
+            if st.button(f"{page_icon} {label}", key=f"nav_{page}",
+                         use_container_width=True, type=btn_type):
+                st.session_state["page"] = page
+                st.query_params["page"] = page
+                if not st.session_state.get('_rerun_pending', False):
+                    st.session_state['_rerun_pending'] = True
+                    st.rerun()
 
     with st.expander("📊 核心工具", expanded=True):
         nav_button("利润分析", "app", "💰")

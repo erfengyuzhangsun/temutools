@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 class FactoryCostService:
     def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("factory_cost", user_id)
         self.user_id = user_id
         self._ensure_tables()
 

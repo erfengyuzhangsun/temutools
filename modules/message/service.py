@@ -1,6 +1,9 @@
 import logging;from datetime import datetime;from modules.message.schemas import ServiceResult;logger=logging.getLogger(__name__)
 class MessageService:
-    def __init__(self,user_id:int):self.user_id=user_id
+    def __init__(self, user_id: int):
+        from common.plan_guard import check_plan_access
+        check_plan_access("message", user_id)
+        self.user_id = user_id
     async def sync_messages(self,shop_id:int)->ServiceResult:
         from common.temu_client import TemuApiClient, TemuApiError
         client=TemuApiClient(shop_id=shop_id)
