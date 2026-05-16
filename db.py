@@ -125,6 +125,7 @@ def adapt_query_for_sqlite(query: str) -> str:
         query = re.sub(r"COMMENT\s+\"[^\"]*\"", "", query)
         query = re.sub(r"UNIQUE\s+KEY\s+\w+\s*", "UNIQUE ", query)
         query = re.sub(r"FOREIGN\s+KEY\s+\((\w+)\)", r"FOREIGN KEY (\1)", query)
+        query = re.sub(r",\s*KEY\s+\w+\s+\([^)]+\)", "", query)
         query = re.sub(r"ENUM\s*\([^)]*\)", "TEXT", query)
 
         replacements = {
@@ -138,6 +139,8 @@ def adapt_query_for_sqlite(query: str) -> str:
             "VARCHAR(255)": "TEXT",
             "VARCHAR(100)": "TEXT",
             "VARCHAR(50)": "TEXT",
+            "VARCHAR(64)": "TEXT",
+            "VARCHAR(32)": "TEXT",
             "ENGINE=InnoDB": "",
             "DEFAULT CHARSET=utf8mb4": "",
             "ON UPDATE CURRENT_TIMESTAMP": "",

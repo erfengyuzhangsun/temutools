@@ -2,6 +2,10 @@ import streamlit as st
 from datetime import datetime, date
 from typing import Optional, Dict
 from db import verify_user_password, cleanup_expired_users
+from common.rate_limiter import (
+    check_login_rate_limit, record_login_attempt,
+    clear_login_attempts, LoginRateLimitResult, get_client_ip,
+)
 
 
 SESSION_KEY = "auth_user"
@@ -29,11 +33,18 @@ def get_current_user() -> Optional[Dict]:
 
 def login(password: str) -> Dict:
     cleanup_expired_users()
+    client_ip = get_client_ip()
+    rate_result = check_login_rate_limit(client_ip)
+    if rate_result == LoginRateLimitResult.BLOCKED:
+        return {"success": False, "message": "登录尝试过于频繁，请30分钟后再试"}
     user = verify_user_password(password)
     if user is None:
+        record_login_attempt(client_ip, password)
         return {"success": False, "message": "密码错误，请联系客服获取正确的访问密码"}
     if isinstance(user, dict) and user.get("error") == "expired":
+        record_login_attempt(client_ip, password)
         return {"success": False, "message": "您的套餐已过期，请联系客服续费"}
+    clear_login_attempts(client_ip)
     user['login_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     st.session_state[SESSION_KEY] = user
     return {"success": True, "user": user}

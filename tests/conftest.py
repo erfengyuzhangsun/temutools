@@ -6,8 +6,7 @@ from typing import AsyncGenerator, Generator
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-os.environ["DB_MODE"] = "sqlite"
-os.environ["SQLITE_PATH"] = ":memory:"
+os.environ.setdefault("DB_MODE", "mysql")
 os.environ["ENCRYPTION_KEY"] = "test-encryption-key-for-testing-only-32chars"
 os.environ["SEED_ADMIN_PASSWORD"] = "test-seed-pwd"
 
