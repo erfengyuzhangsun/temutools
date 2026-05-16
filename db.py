@@ -281,6 +281,40 @@ def get_table_schemas():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """,
+        "temu_factory_products": """
+            CREATE TABLE IF NOT EXISTS temu_factory_products (
+                product_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_name VARCHAR(255) NOT NULL,
+                sku_code VARCHAR(100) NOT NULL,
+                category_name VARCHAR(100) DEFAULT '',
+                material_cost DECIMAL(10,2) DEFAULT 0.00,
+                labor_cost DECIMAL(10,2) DEFAULT 0.00,
+                packaging_cost DECIMAL(10,2) DEFAULT 0.00,
+                shipping_cost DECIMAL(10,2) DEFAULT 0.00,
+                other_cost DECIMAL(10,2) DEFAULT 0.00,
+                total_cost DECIMAL(10,2) DEFAULT 0.00,
+                expected_profit_margin DECIMAL(5,2) DEFAULT 20.00,
+                suggested_supply_price DECIMAL(10,2) DEFAULT 0.00,
+                product_images TEXT DEFAULT '',
+                product_description TEXT DEFAULT '',
+                is_full_commission TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_user_sku (user_id, sku_code)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工厂产品成本表';
+        """,
+        "temu_risk_guard_logs": """
+            CREATE TABLE IF NOT EXISTS temu_risk_guard_logs (
+                log_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                sku_code VARCHAR(100) DEFAULT '',
+                operation VARCHAR(50) NOT NULL COMMENT '操作类型',
+                detail TEXT DEFAULT '' COMMENT '详情',
+                risk_level VARCHAR(20) DEFAULT 'low' COMMENT '风险等级',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='风控检测日志';
+        """,
     }
 
 
