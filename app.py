@@ -312,6 +312,44 @@ MODULE_PAGES = {
     "api_guide": api_guide_ui.show_page,
 }
 
+PLAN_HIERARCHY = {"basic": 0, "pro": 1, "enterprise": 2, "lifetime": 3}
+
+PAGE_PLANS = {
+    "app": "basic",
+    "finance": "basic",
+    "risk_inspection": "basic",
+    "inventory": "basic",
+    "pricing_engine": "basic",
+    "dashboard": "basic",
+    "api_sync": "pro",
+    "api_guide": "pro",
+    "pricing": "pro",
+    "pricing_adj": "pro",
+    "risk_guard": "pro",
+    "analysis": "pro",
+    "scheduler": "pro",
+    "message": "pro",
+    "activity": "pro",
+    "review_monitor": "pro",
+    "shipping": "pro",
+    "factory_cost": "enterprise",
+    "supplier": "enterprise",
+    "batch_ops": "enterprise",
+    "product_research": "enterprise",
+}
+
+PLAN_NAMES = {"basic": "基础版", "pro": "专业版", "enterprise": "企业版", "lifetime": "终身版"}
+
+
+def _has_plan_access(page: str, plan_type: str) -> bool:
+    required = PAGE_PLANS.get(page, "pro")
+    return PLAN_HIERARCHY.get(plan_type, 0) >= PLAN_HIERARCHY.get(required, 1)
+
+
+def _get_required_plan_name(page: str) -> str:
+    required = PAGE_PLANS.get(page, "pro")
+    return PLAN_NAMES.get(required, required)
+
 if 'calculator' not in st.session_state:
     st.session_state['calculator'] = ProfitCalculator()
 
@@ -337,8 +375,8 @@ if st.session_state.get('_needs_rerun', False):
 with st.sidebar:
     user_info = get_user_info()
     if user_info:
-        plan_names = {'basic': '基础版', 'pro': '专业版', 'enterprise': '企业版', 'lifetime': '终身版'}
-        plan_display = plan_names.get(user_info.get('plan_type', ''), user_info.get('plan_type', ''))
+        user_plan = user_info.get('plan_type', 'basic')
+        plan_display = PLAN_NAMES.get(user_plan, user_plan)
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
                     padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;
@@ -359,13 +397,22 @@ with st.sidebar:
     def nav_button(label, page, page_icon):
         current = st.session_state.get("page", "app")
         is_active = current == page
+        has_access = _has_plan_access(page, user_plan)
         btn_type = "primary" if is_active else "secondary"
-        if st.button(f"{page_icon} {label}", key=f"nav_{page}", use_container_width=True, type=btn_type):
+        display_label = f"{page_icon} {label}"
+        plan_access_hint = ""
+        if not has_access:
+            required = _get_required_plan_name(page)
+            display_label = f"🔒 {display_label}"
+            plan_access_hint = f" ({required})"
+        if st.button(display_label, key=f"nav_{page}", use_container_width=True, type=btn_type):
             st.session_state["page"] = page
             st.query_params["page"] = page
             if not st.session_state.get('_rerun_pending', False):
                 st.session_state['_rerun_pending'] = True
                 st.rerun()
+        if not has_access:
+            st.caption(f"需升级至 {_get_required_plan_name(page)}")
 
     with st.expander("📊 核心工具", expanded=True):
         nav_button("利润分析", "app", "💰")
@@ -534,6 +581,23 @@ with st.sidebar:
                 st.rerun()
 
 if current_page in MODULE_PAGES:
+    if not _has_plan_access(current_page, get_user_info().get('plan_type', 'basic')):
+        required = _get_required_plan_name(current_page)
+        st.markdown("""
+        <div style="text-align: center; padding: 3rem 1rem; background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%); border-radius: 16px; margin: 2rem 0; border: 2px dashed #667eea;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+            <h2 style="color: #667eea; margin-bottom: 0.5rem;">该功能需要升级套餐</h2>
+            <p style="color: #555; font-size: 1.05rem; margin-bottom: 0.3rem;">
+                当前套餐：<strong>""" + PLAN_NAMES.get(get_user_info().get('plan_type', 'basic'), '') + """</strong>
+            </p>
+            <p style="color: #555; font-size: 1.05rem; margin-bottom: 1.5rem;">
+                需要套餐：<strong style="color: #28a745;">""" + required + """</strong>
+            </p>
+            <a href="?page=landing#payment-code" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 2.5rem; border-radius: 35px; font-weight: bold; text-decoration: none; font-size: 1.05rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);">🚀 查看升级方案</a>
+            <p style="color: #888; font-size: 0.85rem; margin-top: 1rem;">升级后即可使用该功能及更多专业工具</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.stop()
     MODULE_PAGES[current_page]()
     st.stop()
 
