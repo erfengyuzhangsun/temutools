@@ -3,9 +3,10 @@ from datetime import datetime
 from db import save_landing_order, initialize_database
 
 PLAN_PRICES = {
-    "基础版 - ¥39.9/月": 39.9,
-    "专业版 - ¥79.2/季度（推荐）": 79.2,
-    "终身版 - ¥399": 399.0,
+    "基础版 - ¥69/月": 69.0,
+    "专业版 - ¥169/季度（推荐）": 169.0,
+    "企业版 - ¥399/月": 399.0,
+    "终身版 - ¥1999": 1999.0,
 }
 
 def show_landing_page():
@@ -1103,9 +1104,9 @@ def show_landing_page():
     <div class="urgency-banner">
         <h3 style="margin: 0 0 0.3rem 0; font-size: 1.15rem;">🎉 累计服务800+卖家，首发专属：前 <strong>100</strong> 名新用户享 <strong>8折</strong></h3>
         <p style="margin: 0; font-size: 0.92rem; opacity: 0.95;">
-            专业版原价 ¥99/季度，现价 <strong style="font-size: 1.05rem;">¥79.2/季度</strong> |
+            专业版原价 ¥199/季度，现价 <strong style="font-size: 1.05rem;">¥169/季度</strong> |
             仅剩 <strong style="color: #FFE66D; font-size: 1.05rem;">23</strong> 个名额 |
-            ⏰ 截止：2026年5月19日
+            ⏰ 截止：2026年6月30日
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1323,7 +1324,8 @@ def show_landing_page():
             </div>
             <h3 style="margin-bottom: 0.3rem;">基础版</h3>
             <p style="font-size: 0.82rem; color: #888; margin-bottom: 0.5rem;">搞定利润核算和基础风控，不亏基础钱</p>
-            <div class="price-amount" style="color: #333;">¥39.9<span style="font-size: 1.15rem;">/月</span></div>
+            <div class="price-amount" style="color: #333;">¥69<span style="font-size: 1.15rem;">/月</span></div>
+            <p style="font-size: 0.82rem; color: #888;">年付 ¥588/年（省30%）</p>
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; color: #555; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 精准利润计算器（CSV导入+费用拆分）<br>
                 ✅ 基础核价自动化（单店核价规则）<br>
@@ -1343,8 +1345,8 @@ def show_landing_page():
             </div>
             <h3 style="margin-bottom: 0.3rem;">专业版</h3>
             <p style="font-size: 0.82rem; opacity: 0.85; margin-bottom: 0.5rem;">全流程辅助，轻松管理运营</p>
-            <div class="price-amount">¥79.2<span style="font-size: 1.15rem;">/季度</span><br><span class="price-savings">省40%</span></div>
-            <p style="font-size: 0.88rem; opacity: 0.9; margin: 0.4rem 0;">原价 ¥99/季度 | 限时8折</p>
+            <div class="price-amount">¥169<span style="font-size: 1.15rem;">/季度</span><br><span class="price-savings">省15%</span></div>
+            <p style="font-size: 0.88rem; opacity: 0.9; margin: 0.4rem 0;">原价 ¥199/季度 | 限时85折 | 年付 ¥588/年</p>
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; opacity: 0.95; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 包含所有基础版功能<br>
                 ✅ 智能辅助模块（核价/库存/调价/活动/消息）<br>
@@ -1360,21 +1362,32 @@ def show_landing_page():
         st.markdown("""
         <div class="pricing-card">
             <div style="margin-bottom: 0.5rem;">
-                <span class="user-tag">👤 长期经营卖家</span>
-                <span class="user-tag">👥 团队卖家</span>
+                <span class="user-tag">👤 规模化卖家</span>
+                <span class="user-tag">👥 企业团队</span>
             </div>
-            <h3 style="margin-bottom: 0.3rem;">终身版</h3>
-            <p style="font-size: 0.82rem; color: #888; margin-bottom: 0.5rem;">一劳永逸，永久免费更新</p>
-            <div class="price-amount" style="color: #28a745;">¥399<span style="font-size: 1.15rem;"> 一次付费</span></div>
+            <h3 style="margin-bottom: 0.3rem;">企业版</h3>
+            <p style="font-size: 0.82rem; color: #888; margin-bottom: 0.5rem;">多店矩阵管理，全方位运营覆盖</p>
+            <div class="price-amount" style="color: #333;">¥399<span style="font-size: 1.15rem;">/月</span></div>
+            <p style="font-size: 0.82rem; color: #888;">年付 ¥3999/年（省16%）</p>
             <ul style="text-align: left; list-style: none; padding: 0; line-height: 1.9; color: #555; margin: 1rem 0; font-size: 0.92rem;">
                 ✅ 包含所有专业版功能<br>
-                ✅ 终身免费更新+新功能优先体验<br>
-                ✅ 专属客户经理+定制化需求支持<br>
-                ✅ API接口权限+多店无限扩展<br>
+                ✅ 工厂成本管理+供应链协同<br>
+                ✅ 10+店铺统一管理+团队协作<br>
+                ✅ API优先调用+专属客户经理<br>
             </ul>
-            <a class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block; pointer-events: none; cursor: not-allowed; opacity: 0.65;" aria-disabled="true">🏆 升级终身版</a>
+            <a class="cta-button-secondary" style="color: white; text-decoration: none; display: inline-block; pointer-events: none; cursor: not-allowed; opacity: 0.65;" aria-disabled="true">选择企业版</a>
         </div>
         """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="text-align: center; margin: 1.5rem 0 0.5rem 0; padding: 1.2rem; background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%); border-radius: 14px; border: 2px dashed #667eea;">
+        <h3 style="margin: 0 0 0.3rem 0; color: #667eea; font-size: 1.2rem;">🏆 终身版 · 限时特惠</h3>
+        <p style="color: #555; margin: 0.3rem 0; font-size: 0.95rem;">一次付费，永久使用！终身免费更新+新功能优先体验</p>
+        <div style="font-size: 2rem; font-weight: bold; color: #28a745; margin: 0.5rem 0;">¥1,999 <span style="font-size: 1rem; color: #888; text-decoration: line-through;">¥4,788</span></div>
+        <p style="color: #888; font-size: 0.85rem;">相当于专业版不到1年的费用，永久使用 | 限前50名</p>
+        <a style="display: inline-block; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.65rem 2rem; border-radius: 35px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.35);" href="?plan=lifetime">🏆 抢购终身版</a>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -1391,9 +1404,10 @@ def show_landing_page():
 
     if selected_plan:
         plan_info = {
-            "basic": {"name": "基础版", "price": "¥39.9/月", "color": "#6c757d"},
-            "pro": {"name": "专业版（⭐推荐）", "price": "¥79.2/季度（原价¥99）", "color": "#667eea"},
-            "lifetime": {"name": "终身版", "price": "¥399 一次付费", "color": "#28a745"}
+            "basic": {"name": "基础版", "price": "¥69/月", "color": "#6c757d"},
+            "pro": {"name": "专业版（⭐推荐）", "price": "¥169/季度", "color": "#667eea"},
+            "enterprise": {"name": "企业版", "price": "¥399/月", "color": "#333"},
+            "lifetime": {"name": "终身版（限时）", "price": "¥1,999 一次付费", "color": "#28a745"}
         }
 
         plan = plan_info.get(selected_plan, plan_info["pro"])
@@ -1474,9 +1488,9 @@ def show_landing_page():
         with col_form2:
             wechat = st.text_input("💬 微信号", placeholder="可选，方便我们联系您")
 
-            plan_options = ["基础版 - ¥39.9/月", "专业版 - ¥79.2/季度（推荐）", "终身版 - ¥399"]
+            plan_options = ["基础版 - ¥69/月", "专业版 - ¥169/季度（推荐）", "企业版 - ¥399/月", "终身版 - ¥1999"]
             default_plan = 1 if not selected_plan else (
-                0 if selected_plan == "basic" else (1 if selected_plan == "pro" else 2)
+                0 if selected_plan == "basic" else (1 if selected_plan == "pro" else (2 if selected_plan == "enterprise" else 3))
             )
             selected_plan_form = st.selectbox(
                 "📦 选择套餐 *",

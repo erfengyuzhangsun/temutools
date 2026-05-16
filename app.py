@@ -337,7 +337,7 @@ if st.session_state.get('_needs_rerun', False):
 with st.sidebar:
     user_info = get_user_info()
     if user_info:
-        plan_names = {'basic': '基础版', 'pro': '专业版', 'lifetime': '终身版'}
+        plan_names = {'basic': '基础版', 'pro': '专业版', 'enterprise': '企业版', 'lifetime': '终身版'}
         plan_display = plan_names.get(user_info.get('plan_type', ''), user_info.get('plan_type', ''))
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);

@@ -92,17 +92,22 @@ RISK_THRESHOLDS = {
 PRICING_PLANS = {
     "basic": {
         "name": "基础版",
-        "price_monthly": 29.9,
+        "price_monthly": 69.0,
         "features": ["利润计算", "CSV 导入", "基础风险预警"]
     },
     "pro": {
         "name": "专业版",
-        "price_monthly": 39.9,
+        "price_quarterly": 169.0,
         "features": ["API 自动同步", "实时亏损预警", "90 天回款预测", "完整罚款监控"]
+    },
+    "enterprise": {
+        "name": "企业版",
+        "price_monthly": 399.0,
+        "features": ["多店管理", "工厂成本", "优先API", "专属客服"]
     },
     "lifetime": {
         "name": "终身版",
-        "price": 399,
+        "price": 1999.0,
         "features": ["所有功能", "永久更新", "专属社群"]
     }
 }

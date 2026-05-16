@@ -90,7 +90,7 @@ def show_admin_panel():
                 wechat = st.text_input("微信昵称 *", placeholder="用户微信昵称")
                 plan_type = st.selectbox(
                     "套餐类型 *",
-                    options=[("basic", "基础版 ¥39.9/月"), ("pro", "专业版 ¥79.2/季度"), ("lifetime", "终身版 ¥399")],
+                    options=[("basic", "基础版 ¥69/月"), ("pro", "专业版 ¥169/季度"), ("enterprise", "企业版 ¥399/月"), ("lifetime", "终身版 ¥1999")],
                     format_func=lambda x: x[1],
                     index=1
                 )
@@ -141,7 +141,7 @@ def show_admin_panel():
                 else:
                     expire_display = str(expire) if expire else "未知"
 
-                plan_names = {'basic': '基础版', 'pro': '专业版', 'lifetime': '终身版'}
+                plan_names = {'basic': '基础版', 'pro': '专业版', 'enterprise': '企业版', 'lifetime': '终身版'}
                 user_data.append({
                     'ID': u.get('user_id'),
                     '微信昵称': u.get('wechat_nickname', ''),

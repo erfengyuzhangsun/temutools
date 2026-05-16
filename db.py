@@ -185,7 +185,7 @@ def get_table_schemas():
                 user_id INTEGER AUTO_INCREMENT PRIMARY KEY,
                 access_password VARCHAR(255) NOT NULL COMMENT '用户访问密码',
                 wechat_nickname VARCHAR(100) NOT NULL COMMENT '微信昵称',
-                plan_type ENUM('basic', 'pro', 'lifetime') NOT NULL COMMENT '套餐类型',
+                plan_type ENUM('basic', 'pro', 'enterprise', 'lifetime') NOT NULL COMMENT '套餐类型',
                 start_date DATE NOT NULL COMMENT '付费开始日期',
                 expire_date DATE NOT NULL COMMENT '到期日期',
                 is_active TINYINT(1) DEFAULT 1 COMMENT '是否有效',
