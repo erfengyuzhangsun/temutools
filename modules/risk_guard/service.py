@@ -54,6 +54,30 @@ class RiskGuardService:
 
     def __init__(self, user_id: int):
         self.user_id = user_id
+        self._ensure_tables()
+
+    @staticmethod
+    def _ensure_tables():
+        try:
+            from db import get_connection
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS temu_risk_guard_logs (
+                    log_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    sku_code VARCHAR(100) DEFAULT '',
+                    operation VARCHAR(50) NOT NULL,
+                    detail TEXT DEFAULT '',
+                    risk_level VARCHAR(20) DEFAULT 'low',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"确保风控日志表存在时出错: {e}")
 
     def get_all_rules(self) -> List[RiskRule]:
         return self.RULES

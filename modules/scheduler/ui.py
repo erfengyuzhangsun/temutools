@@ -3,6 +3,7 @@ import asyncio
 import pandas as pd
 from datetime import datetime
 from modules.scheduler.service import SchedulerService
+from common.async_runner import run as run_async
 from modules.scheduler.schemas import TaskDefinition, TaskStatus
 from modules.scheduler.task_templates import (
     TASK_TEMPLATES, is_template_task, is_task_due,

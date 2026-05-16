@@ -13,6 +13,42 @@ logger = logging.getLogger(__name__)
 class FactoryCostService:
     def __init__(self, user_id: int):
         self.user_id = user_id
+        self._ensure_tables()
+
+    @staticmethod
+    def _ensure_tables():
+        try:
+            from db import get_connection, DB_MODE
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS temu_factory_products (
+                    product_id INTEGER AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    product_name VARCHAR(255) NOT NULL,
+                    sku_code VARCHAR(100) NOT NULL,
+                    category_name VARCHAR(100) DEFAULT '',
+                    material_cost DECIMAL(10,2) DEFAULT 0.00,
+                    labor_cost DECIMAL(10,2) DEFAULT 0.00,
+                    packaging_cost DECIMAL(10,2) DEFAULT 0.00,
+                    shipping_cost DECIMAL(10,2) DEFAULT 0.00,
+                    other_cost DECIMAL(10,2) DEFAULT 0.00,
+                    total_cost DECIMAL(10,2) DEFAULT 0.00,
+                    expected_profit_margin DECIMAL(5,2) DEFAULT 20.00,
+                    suggested_supply_price DECIMAL(10,2) DEFAULT 0.00,
+                    product_images TEXT DEFAULT '',
+                    product_description TEXT DEFAULT '',
+                    is_full_commission TINYINT(1) DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    UNIQUE KEY uk_user_sku (user_id, sku_code)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
+            cursor.close()
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"确保工厂成本表存在时出错: {e}")
 
     def save_product(self, product: ProductInfo) -> int:
         from db import execute_query
