@@ -68,11 +68,6 @@ class TemuApiClient:
         self._load_credentials_if_needed()
 
     def _load_credentials_if_needed(self):
-        app_key = os.environ.get("TEMU_APP_KEY", "")
-        app_secret = os.environ.get("TEMU_APP_SECRET", "")
-        if app_key and app_secret:
-            self.api_key = app_key
-            self.api_secret = app_secret
         try:
             from db import execute_query
             rows = execute_query(

@@ -100,42 +100,35 @@ def show_page():
 
     with tab2:
         st.markdown("#### 绑定新店铺")
-        st.caption("新版使用 access_token 授权（推荐）；旧版兼容 API Key + API Secret")
-
-        bind_mode = st.radio("绑定方式", ["🔑 access_token（新版）", "🔐 API Key + Secret（旧版）"],
-                             horizontal=True, label_visibility="collapsed")
+        st.caption("填入从 Temu 卖家中心获取的 API 凭证，加密存储，安全可靠")
 
         with st.form("bind_shop_form"):
             col_f1, col_f2 = st.columns(2)
             with col_f1:
                 shop_name = st.text_input("店铺名称", placeholder="例如：旗舰店-1")
-                if bind_mode.startswith("🔑"):
-                    access_token = st.text_input("Access Token", type="password",
-                        help="卖家授权后获取的 access_token")
-                    api_key = ""
-                    api_secret = ""
-                else:
-                    api_key = st.text_input("API Key", type="password")
-                    access_token = ""
+                api_key = st.text_input("App Key", placeholder="创建自研应用后获取")
+                api_secret = st.text_input("App Secret", type="password", placeholder="与 App Key 在同一页面")
+                access_token = st.text_input("Access Token", type="password",
+                    help="卖家中心 → 服务市场 → 授权管理 → 主账号授权后获取")
             with col_f2:
                 main_category = st.selectbox("主营类目", [
                     "家居百货", "3C数码", "服装鞋包", "美妆个护",
                     "玩具母婴", "食品饮料", "运动户外", "其他"
                 ])
-                if not bind_mode.startswith("🔑"):
-                    api_secret = st.text_input("API Secret", type="password")
-                else:
-                    api_secret = ""
+                st.markdown("##### ")
+                st.markdown("##### ")
+                st.markdown("##### ")
+                st.markdown('<div style="padding:0.5rem; background:#e7f3ff; border-radius:8px; font-size:0.85rem;">💡 不会申请？点击「API密钥管理」页面查看完整图文教程</div>', unsafe_allow_html=True)
 
             submitted = st.form_submit_button("🔗 绑定店铺", type="primary", use_container_width=True)
 
             if submitted:
                 if not shop_name:
                     st.error("请填写店铺名称")
-                elif bind_mode.startswith("🔑") and not access_token:
+                elif not api_key or not api_secret:
+                    st.error("请填写完整的 App Key 和 App Secret")
+                elif not access_token:
                     st.error("请填写 Access Token")
-                elif not bind_mode.startswith("🔑") and (not api_key or not api_secret):
-                    st.error("请填写完整的 API Key 和 API Secret")
                 else:
                     from modules.api_sync.schemas import ShopBindRequest
                     request = ShopBindRequest(

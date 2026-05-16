@@ -1,4 +1,3 @@
-import os
 import logging
 from typing import Optional
 
@@ -7,10 +6,16 @@ logger = logging.getLogger(__name__)
 _client_cache = {}
 
 
-def _has_real_credentials() -> bool:
-    app_key = os.environ.get("TEMU_APP_KEY", "")
-    app_secret = os.environ.get("TEMU_APP_SECRET", "")
-    return bool(app_key and app_secret)
+def _shop_has_credentials(shop_id: int) -> bool:
+    try:
+        from db import execute_query
+        rows = execute_query(
+            "SELECT cred_id FROM temu_shop_credentials WHERE shop_id = ?",
+            (shop_id,), fetch=True,
+        )
+        return bool(rows)
+    except Exception:
+        return False
 
 
 def get_api_client(shop_id: int, user_id: Optional[int] = None):
@@ -18,14 +23,14 @@ def get_api_client(shop_id: int, user_id: Optional[int] = None):
     if cache_key in _client_cache:
         return _client_cache[cache_key]
 
-    if _has_real_credentials():
+    if _shop_has_credentials(shop_id):
         from common.temu_client import TemuApiClient
         client = TemuApiClient(shop_id=shop_id)
         logger.info(f"🔌 使用真实API客户端 | shop_id={shop_id}")
     else:
         from common.mock_temu_client import MockTemuApiClient
         client = MockTemuApiClient(shop_id=shop_id)
-        logger.info(f"🧪 使用模拟API客户端 | shop_id={shop_id}（设置 TEMU_APP_KEY+TEMU_APP_SECRET 切换为真实模式）")
+        logger.info(f"🧪 使用模拟API客户端 | shop_id={shop_id}（请先在「店铺管理」中绑定API凭证）")
 
     _client_cache[cache_key] = client
     return client
@@ -36,4 +41,4 @@ def clear_client_cache():
 
 
 def is_mock_mode() -> bool:
-    return not _has_real_credentials()
+    return False

@@ -14,7 +14,7 @@ def show_page():
     engine = PricingEngine(user_id)
 
     if is_mock_mode():
-        st.info("🔔 当前为模拟模式，未接入真实API密钥。设置 TEMU_APP_KEY + TEMU_APP_SECRET 环境变量后自动切换为真实模式")
+        st.info("🔔 当前为模拟模式，未配置店铺API凭证。请先在「API对接与数据同步」→「店铺管理」中绑定店铺并填写API凭证")
 
     tab1, tab2, tab3 = st.tabs(["💰 成本测算", "📊 批量分析", "📈 调价风控"])
 
