@@ -32,7 +32,7 @@ def initialize_tables():
             user_id INT NOT NULL,
             sku_code VARCHAR(100) DEFAULT '',
             operation VARCHAR(50) NOT NULL COMMENT '操作类型',
-            detail TEXT DEFAULT '' COMMENT '详情',
+            detail TEXT COMMENT '详情',
             risk_level VARCHAR(20) DEFAULT 'low' COMMENT '风险等级',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='风控检测日志';

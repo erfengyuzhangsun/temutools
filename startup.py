@@ -70,8 +70,8 @@ def _create_table_direct(table_name: str):
                 total_cost DECIMAL(10,2) DEFAULT 0.00,
                 expected_profit_margin DECIMAL(5,2) DEFAULT 20.00,
                 suggested_supply_price DECIMAL(10,2) DEFAULT 0.00,
-                product_images TEXT DEFAULT '',
-                product_description TEXT DEFAULT '',
+                product_images TEXT,
+                product_description TEXT,
                 is_full_commission TINYINT(1) DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -84,7 +84,7 @@ def _create_table_direct(table_name: str):
                 user_id INT NOT NULL,
                 sku_code VARCHAR(100) DEFAULT '',
                 operation VARCHAR(50) NOT NULL,
-                detail TEXT DEFAULT '',
+                detail TEXT,
                 risk_level VARCHAR(20) DEFAULT 'low',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

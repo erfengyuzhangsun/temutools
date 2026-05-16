@@ -68,7 +68,7 @@ class RiskGuardService:
                     user_id INT NOT NULL,
                     sku_code VARCHAR(100) DEFAULT '',
                     operation VARCHAR(50) NOT NULL,
-                    detail TEXT DEFAULT '',
+                    detail TEXT,
                     risk_level VARCHAR(20) DEFAULT 'low',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
