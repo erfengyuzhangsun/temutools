@@ -44,3 +44,12 @@ build/
 
 # Trae IDE 提示词文件（用户本地保留，不入库）
 Trae*.md
+
+# Trae IDE 规则配置（含服务器IP等敏感信息，不入库）
+.trae/
+
+# 隐私政策文档（仅保留代码版privacy_policy.py，不入库）
+隐私政策*.md
+
+# 交接文档（含项目上下文，不入库）
+交接*.md

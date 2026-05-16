@@ -25,6 +25,13 @@ APP_SECRET = os.environ.get("TEMU_APP_SECRET", "请填入你的app_secret")
 ACCESS_TOKEN = os.environ.get("TEMU_ACCESS_TOKEN", "请填入你的access_token")
 API_BASE_URL = os.environ.get("TEMU_API_BASE", "https://openapi-b-global.temu.com")
 
+# 分区可选值：
+#   cn → https://openapi.kuajingmaihuo.com
+#   pa → https://openapi-b-partner.temu.com
+#   global → https://openapi-b-global.temu.com
+#   us → https://openapi-b-us.temu.com
+#   eu → https://openapi-b-eu.temu.com
+
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
@@ -49,25 +56,59 @@ def info(msg):
 
 
 def sign(params: dict, secret: str) -> str:
-    sorted_params = dict(sorted(params.items()))
+    filtered = {k: v for k, v in params.items() if k != "sign"}
+    sorted_items = sorted(filtered.items(), key=lambda x: x[0])
     sign_str = secret
-    for key, value in sorted_params.items():
-        if value is not None:
+    for key, value in sorted_items:
+        if value is None:
+            continue
+        if isinstance(value, bool):
+            sign_str += f"{key}{str(value).lower()}"
+        elif isinstance(value, (dict, list)):
+            sign_str += f"{key}{json.dumps(value, separators=(',', ':'), ensure_ascii=False)}"
+        else:
             sign_str += f"{key}{value}"
     sign_str += secret
     return hashlib.md5(sign_str.encode("utf-8")).hexdigest().upper()
 
 
 TEST_ENDPOINTS = [
-    {"name": "📦 订单列表(v2)", "type": "bg.order.list.v2.get",
+    {"name": "📦 订单列表", "type": "bg.order.list.get",
      "params": {"pageSize": 10, "pageNumber": 1}},
+    {"name": "📦 订单详情", "type": "bg.order.detail.get",
+     "params": {"parentOrderSn": "test"}},
+    {"name": "📦 订单收货地址", "type": "bg.order.shippinginfo.get",
+     "params": {"parentOrderSn": "test"}},
+    {"name": "� 订单金额查询", "type": "bg.order.amount.query",
+     "params": {"parentOrderSn": "test"}},
+    {"name": "� 可合并发货分组", "type": "bg.order.combinedshipment.list.get",
+     "params": {"pageSize": 10, "pageNumber": 1}},
+    {"name": "🏪 商品列表", "type": "bg.local.goods.list.query",
+     "params": {"pageNo": 1, "pageSize": 10}},
+    {"name": "🏪 商品SKU查询", "type": "bg.local.goods.sku.list.query",
+     "params": {"skuIdList": []}},
+    {"name": "� SKU供货价查询", "type": "bg.local.goods.sku.list.price.query",
+     "params": {"skuIdList": []}},
+    {"name": "💵 核价单查询", "type": "bg.local.goods.priceorder.query",
+     "params": {"page": 1, "pageSize": 10}},
+    {"name": "✅ 接受核价", "type": "bg.local.goods.priceorder.accept",
+     "params": {"priceOrderId": "test"}},
+    {"name": "� 核价调价", "type": "bg.local.goods.priceorder.change.sku.price",
+     "params": {"priceOrderId": "test", "reason": "test"}},
+    {"name": "🤝 核价协商", "type": "bg.local.goods.priceorder.negotiate",
+     "params": {"priceOrderId": "test", "price": 50.0}},
+    {"name": "📦 库存编辑", "type": "bg.local.goods.stock.edit",
+     "params": {"goodsId": "test_goods", "skuStockTargetList": [{"skuId": "test_sku", "stockTarget": 100}]}},
+    {"name": "🏷️ 上下架状态", "type": "bg.local.goods.sale.status.set",
+     "params": {"goodsId": "test", "status": "ONLINE"}},
     {"name": "🎯 活动列表", "type": "bg.promotion.activity.query",
      "params": {"pageSize": 10, "pageNumber": 1}},
-    {"name": "📦 订单详情(v2)", "type": "bg.order.detail.v2.get",
-     "params": {"parentOrderSn": "test"}},
     {"name": "📋 Token信息", "type": "bg.open.accesstoken.info.get"},
-    {"name": "🏪 商品SKU查询", "type": "bg.local.goods.sku.list.query",
-     "params": {"skuIdList": "[]"}},
+    {"name": "📋 合规商品列表", "type": "bg.local.compliance.goods.list.query",
+     "params": {"page": 1, "pageSize": 10}},
+    {"name": "📋 运费模板", "type": "bg.freight.template.list.query"},
+    {"name": "🔄 售后列表", "type": "bg.aftersales.aftersales.list.get",
+     "params": {"page": 1, "pageSize": 10}},
 ]
 
 
@@ -83,10 +124,10 @@ def make_request(api_type: str, extra_params: dict = None) -> dict:
         body.update(extra_params)
     body["sign"] = sign(body, APP_SECRET)
     url = f"{API_BASE_URL}/openapi/router"
-    data = json.dumps(body).encode("utf-8")
+    data = json.dumps(body, separators=(',', ':'), ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(
         url, data=data,
-        headers={"Content-Type": "application/json;charset=UTF-8"},
+        headers={"Content-Type": "application/json"},
         method="POST",
     )
     try:

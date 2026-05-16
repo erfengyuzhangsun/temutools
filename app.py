@@ -27,6 +27,10 @@ from modules.batch_ops import ui as batch_ops_ui
 from modules.review_monitor import ui as review_monitor_ui
 from modules.product_research import ui as product_research_ui
 from modules.supplier import ui as supplier_ui
+from modules.factory_cost import ui as factory_cost_ui
+from modules.pricing_engine import ui as pricing_engine_ui
+from modules.risk_guard import ui as risk_guard_ui
+from modules.api_guide import ui as api_guide_ui
 def save_analysis_to_db(user_id, summary, results_df, risk_report):
     try:
         shop_id = get_or_create_shop(user_id)
@@ -302,6 +306,10 @@ MODULE_PAGES = {
     "review_monitor": review_monitor_ui.show_page,
     "product_research": product_research_ui.show_page,
     "supplier": supplier_ui.show_page,
+    "factory_cost": factory_cost_ui.show_page,
+    "pricing_engine": pricing_engine_ui.show_page,
+    "risk_guard": risk_guard_ui.show_page,
+    "api_guide": api_guide_ui.show_page,
 }
 
 if 'calculator' not in st.session_state:
@@ -363,7 +371,10 @@ with st.sidebar:
         nav_button("利润分析", "app", "💰")
         nav_button("多店铺大屏", "dashboard", "📊")
         nav_button("API数据同步", "api_sync", "🔄")
+        nav_button("API密钥管理", "api_guide", "🔑")
         nav_button("核价自动化", "pricing", "💵")
+        nav_button("全托管核价引擎", "pricing_engine", "🧮")
+        nav_button("工厂成本管理", "factory_cost", "🏭")
         nav_button("定时任务", "scheduler", "⏰")
 
     with st.expander("📦 运营管理", expanded=False):
@@ -377,6 +388,7 @@ with st.sidebar:
         nav_button("消息售后", "message", "💬")
         nav_button("活动报名", "activity", "🎯")
         nav_button("风控体检", "risk_inspection", "🔍")
+        nav_button("风控防二次核价", "risk_guard", "🛡️")
         nav_button("批量运营", "batch_ops", "📋")
         nav_button("差评监控", "review_monitor", "⭐")
         nav_button("选品辅助", "product_research", "🔬")

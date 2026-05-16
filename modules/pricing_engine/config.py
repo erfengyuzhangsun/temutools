@@ -1,0 +1,51 @@
+MODULE_CONFIG = {
+    "full_commission_commission_rate": {
+        "default": 0.15,
+        "min": 0.05,
+        "max": 0.30,
+        "type": "float",
+        "description": "全托管平台佣金率",
+    },
+    "half_commission_commission_rate": {
+        "default": 0.05,
+        "min": 0.01,
+        "max": 0.15,
+        "type": "float",
+        "description": "半托管平台佣金率",
+    },
+    "full_commission_shipping_subsidy": {
+        "default": 5.0,
+        "min": 0.0,
+        "max": 20.0,
+        "type": "float",
+        "description": "全托管平台运费补贴(元/件)",
+    },
+    "safe_margin_buffer": {
+        "default": 3.0,
+        "min": 0.0,
+        "max": 20.0,
+        "type": "float",
+        "description": "安全毛利率缓冲值(%)，高于最低线N%才算安全",
+    },
+    "price_adjustment_step_ratio": {
+        "default": 0.03,
+        "min": 0.01,
+        "max": 0.10,
+        "type": "float",
+        "description": "单次调价幅度上限(相对当前价)",
+    },
+    "max_price_adjustments_per_day": {
+        "default": 3,
+        "min": 1,
+        "max": 10,
+        "type": "int",
+        "description": "单SKU每日最大调价次数",
+    },
+    "price_adjustment_cooldown_hours": {
+        "default": 24,
+        "min": 6,
+        "max": 168,
+        "type": "int",
+        "description": "调价冷却时间(小时)",
+    },
+}

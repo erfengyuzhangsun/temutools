@@ -1,4 +1,4 @@
-import logging; from datetime import datetime; from typing import List; from modules.pricing_adj.schemas import ServiceResult, PriceAdjustment; from modules.pricing_adj.config import MODULE_CONFIG; logger=logging.getLogger(__name__)
+import logging; from datetime import datetime; from typing import List; from modules.pricing_adj.schemas import ServiceResult, PriceAdjustment; from modules.pricing_adj.config import MODULE_CONFIG; from common.api_client_factory import get_api_client; logger=logging.getLogger(__name__)
 
 class PricingAdjustmentService:
     def __init__(self, user_id: int): self.user_id = user_id

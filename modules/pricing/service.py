@@ -5,7 +5,8 @@ from modules.pricing.schemas import (
     PricingResult, PricingAction, PricingLogItem, ServiceResult,
 )
 from modules.pricing.config import MODULE_CONFIG
-from common.temu_client import TemuApiClient, TemuApiError
+from common.temu_client import TemuApiError
+from common.api_client_factory import get_api_client
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class PricingService:
     async def auto_handle_pricing(self, shop_id: int) -> ServiceResult:
         logger.info(f"开始自动核价处理 | user_id={self.user_id} | shop_id={shop_id}")
 
-        client = TemuApiClient(shop_id=shop_id)
+        client = get_api_client(shop_id=shop_id, user_id=self.user_id)
 
         try:
             page_size = MODULE_CONFIG["max_notices_per_page"]["default"]

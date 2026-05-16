@@ -83,9 +83,11 @@ def initialize_all_tables():
             logger.warning(f"{mod_name}表初始化失败: {e}")
     logger.info("[7/8] 调价/财务/大屏表初始化完成")
 
-    # 8. P2+P3: 消息+发货/活动/风控/选品/供应商等
+    # 8. P2+P3: 消息/发货/活动/风控/选品/供应商等
     for mod_name, mod_import in [
         ("message", "modules.message.models"),
+        ("factory_cost", "modules.factory_cost.models"),
+        ("risk_guard", "modules.risk_guard.models"),
     ]:
         try:
             mod = __import__(mod_import, fromlist=["initialize_tables"])

@@ -28,7 +28,7 @@ class TestPricingFix:
         service._get_cost_price = AsyncMock(return_value=80.0)
         service._get_profit_threshold = AsyncMock(return_value=20.0)
 
-        with patch('modules.pricing.service.TemuApiClient') as MockClient:
+        with patch('modules.pricing.service.get_api_client') as mock_factory:
             mock_instance = MagicMock()
             mock_instance.get_pricing_notices = AsyncMock(return_value=type('Resp', (), {
                 'success': True, 'data': {'notices': [], 'total': 0}
@@ -36,7 +36,7 @@ class TestPricingFix:
             mock_instance.accept_pricing = AsyncMock()
             mock_instance.reject_pricing = AsyncMock()
             mock_instance.close = AsyncMock()
-            MockClient.return_value = mock_instance
+            mock_factory.return_value = mock_instance
 
             result = await service.auto_handle_pricing(shop_id=1)
 

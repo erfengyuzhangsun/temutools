@@ -47,6 +47,8 @@ class TemuApiResponse:
 
 
 API_REGION_MAP = {
+    "cn": "https://openapi.kuajingmaihuo.com",
+    "pa": "https://openapi-b-partner.temu.com",
     "global": "https://openapi-b-global.temu.com",
     "us": "https://openapi-b-us.temu.com",
     "eu": "https://openapi-b-eu.temu.com",
@@ -103,10 +105,17 @@ class TemuApiClient:
 
     @staticmethod
     def _sign(params: dict, secret: str) -> str:
-        sorted_params = dict(sorted(params.items()))
+        filtered = {k: v for k, v in params.items() if k != "sign"}
+        sorted_items = sorted(filtered.items(), key=lambda x: x[0])
         sign_str = secret
-        for key, value in sorted_params.items():
-            if value is not None:
+        for key, value in sorted_items:
+            if value is None:
+                continue
+            if isinstance(value, bool):
+                sign_str += f"{key}{str(value).lower()}"
+            elif isinstance(value, (dict, list)):
+                sign_str += f"{key}{json.dumps(value, separators=(',', ':'), ensure_ascii=False)}"
+            else:
                 sign_str += f"{key}{value}"
         sign_str += secret
         return hashlib.md5(sign_str.encode("utf-8")).hexdigest().upper()
@@ -124,9 +133,13 @@ class TemuApiClient:
             filtered = {k: v for k, v in params.items() if v is not None}
             body.update(filtered)
         body["sign"] = self._sign(body, self.api_secret)
+        body_str = json.dumps(body, separators=(',', ':'), ensure_ascii=False)
         url = f"{self.base_url}/openapi/router"
         try:
-            response = await self._http_client.post(url, json=body)
+            response = await self._http_client.post(
+                url, content=body_str,
+                headers={"Content-Type": "application/json"},
+            )
             if response.status_code == 401:
                 raise TemuApiAuthError("API认证失败(401)，请检查 app_key 或 access_token", status_code=401, error_code="AUTH_FAILED")
             elif response.status_code == 403:
@@ -175,7 +188,7 @@ class TemuApiClient:
 
     @async_retry(RETRY_CONFIG)
     async def get_orders(self, page: int = 1, page_size: int = 100, **kwargs) -> TemuApiResponse:
-        return await self.request("bg.order.list.v2.get", {
+        return await self.request("bg.order.list.get", {
             "pageSize": page_size,
             "pageNumber": page,
             **kwargs,
@@ -183,27 +196,35 @@ class TemuApiClient:
 
     @async_retry(RETRY_CONFIG)
     async def get_order_detail(self, parent_order_sn: str) -> TemuApiResponse:
-        return await self.request("bg.order.detail.v2.get", {
+        return await self.request("bg.order.detail.get", {
             "parentOrderSn": parent_order_sn,
         })
 
     @async_retry(RETRY_CONFIG)
     async def get_inventory(self, sku_codes: list = None) -> TemuApiResponse:
         return await self.request("bg.local.goods.sku.list.query", {
-            "skuIdList": json.dumps(sku_codes or [], ensure_ascii=False),
+            "skuIdList": sku_codes or [],
         })
 
     @async_retry(RETRY_CONFIG)
     async def get_pricing_notices(self, page: int = 1, page_size: int = 50) -> TemuApiResponse:
-        raise TemuApiError("核价通知API(price notice)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
+        return await self.request("bg.local.goods.priceorder.query", {
+            "page": page,
+            "pageSize": page_size,
+        })
 
     @async_retry(RETRY_CONFIG)
-    async def accept_pricing(self, notice_id: str) -> TemuApiResponse:
-        raise TemuApiError("接受核价API(price accept)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
+    async def accept_pricing(self, price_order_id: str) -> TemuApiResponse:
+        return await self.request("bg.local.goods.priceorder.accept", {
+            "priceOrderId": price_order_id,
+        })
 
     @async_retry(RETRY_CONFIG)
-    async def reject_pricing(self, notice_id: str, reason: str = "") -> TemuApiResponse:
-        raise TemuApiError("拒绝核价API(price reject)未在Temu开放平台公开接口中提供", status_code=0, error_code="API_NOT_AVAILABLE")
+    async def reject_pricing(self, price_order_id: str, reason: str = "") -> TemuApiResponse:
+        return await self.request("bg.local.goods.priceorder.change.sku.price", {
+            "priceOrderId": price_order_id,
+            "reason": reason,
+        })
 
     @async_retry(RETRY_CONFIG)
     async def get_settlements(self, date_from: str, date_to: str, page: int = 1) -> TemuApiResponse:
@@ -228,4 +249,80 @@ class TemuApiClient:
     async def get_access_token(self, code: str) -> TemuApiResponse:
         return await self.request("bg.open.accesstoken.create", {
             "code": code,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def check_access_token(self) -> TemuApiResponse:
+        return await self.request("bg.open.accesstoken.info.get")
+
+    @async_retry(RETRY_CONFIG)
+    async def get_goods_list(self, page: int = 1, page_size: int = 10) -> TemuApiResponse:
+        return await self.request("bg.local.goods.list.query", {
+            "pageNo": page,
+            "pageSize": page_size,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_order_shipping_info(self, parent_order_sn: str) -> TemuApiResponse:
+        return await self.request("bg.order.shippinginfo.get", {
+            "parentOrderSn": parent_order_sn,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_order_amount(self, parent_order_sn: str) -> TemuApiResponse:
+        return await self.request("bg.order.amount.query", {
+            "parentOrderSn": parent_order_sn,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_combined_shipment_list(self, page: int = 1, page_size: int = 10) -> TemuApiResponse:
+        return await self.request("bg.order.combinedshipment.list.get", {
+            "pageSize": page_size,
+            "pageNumber": page,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_sku_price_list(self, sku_codes: list = None) -> TemuApiResponse:
+        return await self.request("bg.local.goods.sku.list.price.query", {
+            "skuIdList": sku_codes or [],
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def update_stock(self, goods_id: str, sku_stock_list: list) -> TemuApiResponse:
+        return await self.request("bg.local.goods.stock.edit", {
+            "goodsId": goods_id,
+            "skuStockTargetList": sku_stock_list,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def negotiate_pricing(self, price_order_id: str, price: float, reason: str = "") -> TemuApiResponse:
+        return await self.request("bg.local.goods.priceorder.negotiate", {
+            "priceOrderId": price_order_id,
+            "price": price,
+            "reason": reason,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def set_sale_status(self, goods_id: str, status: str) -> TemuApiResponse:
+        return await self.request("bg.local.goods.sale.status.set", {
+            "goodsId": goods_id,
+            "status": status,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_freight_templates(self) -> TemuApiResponse:
+        return await self.request("bg.freight.template.list.query")
+
+    @async_retry(RETRY_CONFIG)
+    async def get_compliance_goods_list(self, page: int = 1, page_size: int = 10) -> TemuApiResponse:
+        return await self.request("bg.local.compliance.goods.list.query", {
+            "page": page,
+            "pageSize": page_size,
+        })
+
+    @async_retry(RETRY_CONFIG)
+    async def get_aftersales_list(self, page: int = 1, page_size: int = 10) -> TemuApiResponse:
+        return await self.request("bg.aftersales.aftersales.list.get", {
+            "page": page,
+            "pageSize": page_size,
         })
