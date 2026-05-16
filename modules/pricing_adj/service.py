@@ -16,7 +16,9 @@ class PricingAdjustmentService:
         min_price = cost_price * (1 + min_margin) if cost_price and cost_price > 0 else current_price * 0.7
         competitor_price = self._get_competitor_price(sku)
         if competitor_price and competitor_price < current_price:
-            new_price = max(min_price, competitor_price * (1 + MODULE_CONFIG["competitor_price_drop_ratio"]["default"] * 0.5))
+            drop_ratio = MODULE_CONFIG["competitor_price_drop_ratio"]["default"]
+            gap = current_price - competitor_price
+            new_price = max(min_price, current_price - gap * drop_ratio)
             if abs(new_price - current_price) / current_price < 0.01:
                 return ServiceResult(success=True,message="价格已为最优，无需调整",data={"sku":sku,"old_price":current_price,"new_price":current_price})
             self._save_adjustment(shop_id, sku, current_price, round(new_price,2), f"竞品降价跟进({competitor_price}→{new_price})")

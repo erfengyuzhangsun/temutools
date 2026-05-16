@@ -46,7 +46,6 @@ def _init_test_db():
 
 @pytest.fixture
 def mock_temu_client():
-    with patch("modules.pricing.service.TemuApiClient") as mock:
-        client = AsyncMock()
-        mock.return_value = client
+    client = AsyncMock()
+    with patch("modules.pricing.service.get_api_client", return_value=client):
         yield client
