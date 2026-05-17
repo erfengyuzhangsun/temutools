@@ -26,6 +26,13 @@
 - ❌ **不查文件内容就改**：改文件前完整阅读目标代码段确认上下文
 - ❌ **给复杂方案代替简单方案**：优先最小改动
 - ❌ **不检查就交付**：命令发出去前逐字检查路径、分支名、参数
+- ❌ **改 route.go 用 SearchReplace 多次修改**：route.go 的大括号嵌套复杂，多次 SearchReplace 会导致闭括号失衡。必须一次重写完整文件或只做 1 次精确替换后立即 `go build` 验证
+- ✅ **本地必验清单（每次改代码后必须执行）**：
+  1. `go build ./...` — 零编译错误
+  2. `go test ./...` — 全部通过
+  3. `cd web && npm run build` — 前端构建成功（如果改了前端文件）
+  4. 以上全部通过后，再 `git add`、`git commit`、`git push`
+  5. 最后给出部署命令 `docker compose build && docker compose up -d --no-deps app`
 
 ## Docker 部署三层检查清单（每次部署前逐条确认）
 

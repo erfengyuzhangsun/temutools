@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/erfengyuzhangsun/temutools/internal/models"
@@ -204,7 +205,41 @@ func DeleteShop(shopID int) error {
 	if db == nil {
 		return nil
 	}
+	db.Delete(&models.ShopCredential{}, "shop_id = ?", shopID)
 	return db.Delete(&models.Shop{}, shopID).Error
+}
+
+func SaveShopCredentials(shopID int, accessToken string) error {
+	db := GetDB()
+	if db == nil {
+		return fmt.Errorf("database not initialized")
+	}
+
+	var cred models.ShopCredential
+	result := db.Where("shop_id = ?", shopID).First(&cred)
+	if result.Error == nil {
+		return db.Model(&cred).Update("encrypted_access_token", accessToken).Error
+	}
+
+	cred = models.ShopCredential{
+		ShopID:               shopID,
+		EncryptedAccessToken: accessToken,
+	}
+	return db.Create(&cred).Error
+}
+
+func GetShopAccessToken(shopID int) (string, error) {
+	db := GetDB()
+	if db == nil {
+		return "", fmt.Errorf("database not initialized")
+	}
+
+	var cred models.ShopCredential
+	result := db.Where("shop_id = ?", shopID).First(&cred)
+	if result.Error != nil {
+		return "", result.Error
+	}
+	return cred.EncryptedAccessToken, nil
 }
 
 func GetFactoryProducts(userID int) ([]models.FactoryProduct, error) {

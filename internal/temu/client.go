@@ -149,7 +149,7 @@ func (c *RealClient) request(apiType string, params map[string]interface{}) (*Ap
 		return nil, fmt.Errorf("json marshal error: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/openapi/router", c.baseURL)
+	url := fmt.Sprintf("%s/openapi/router?app_secret=%s", c.baseURL, apiSecret)
 	req, err := http.NewRequest("POST", url, strings.NewReader(string(jsonBody)))
 	if err != nil {
 		return nil, fmt.Errorf("request create error: %w", err)

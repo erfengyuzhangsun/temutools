@@ -48,13 +48,19 @@ func CreateUser(email, password, planType string) (*models.User, error) {
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
+	now := time.Now()
 	user := models.User{
 		Email:        email,
 		PasswordHash: string(hashedBytes),
 		PlanType:     planType,
 		IsActive:     true,
-		StartDate:    nil,
+		StartDate:    &now,
 		ExpireDate:   nil,
+	}
+
+	if planType != "lifetime" {
+		expire := now.AddDate(0, 0, 30)
+		user.ExpireDate = &expire
 	}
 
 	if err := db.Create(&user).Error; err != nil {

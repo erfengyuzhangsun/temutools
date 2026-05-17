@@ -11,6 +11,7 @@ import (
 
 	"github.com/erfengyuzhangsun/temutools/internal/api/middleware"
 	"github.com/erfengyuzhangsun/temutools/internal/auth"
+	"github.com/erfengyuzhangsun/temutools/internal/config"
 	"github.com/erfengyuzhangsun/temutools/internal/models"
 	"github.com/erfengyuzhangsun/temutools/internal/repository"
 	"github.com/erfengyuzhangsun/temutools/internal/scheduler"
@@ -346,6 +347,12 @@ func BindShop(c *gin.Context) {
 	if err != nil {
 		slog.Error("failed to create shop", "error", err)
 		Error(c, http.StatusInternalServerError, ErrInternal, "店铺创建失败")
+		return
+	}
+
+	if err := repository.SaveShopCredentials(shopID, req.AccessToken); err != nil {
+		slog.Error("failed to save shop credentials", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "保存凭证失败")
 		return
 	}
 
@@ -956,7 +963,26 @@ func getScheduler(c *gin.Context) *scheduler.Scheduler {
 }
 
 func getTemuClient(shopID int) temu.ApiClient {
-	return temu.NewMockClient(shopID)
+	cfg := config.Cfg
+	if cfg == nil {
+		return temu.NewMockClient(shopID)
+	}
+
+	appKey := cfg.Temu.AppKey
+	appSecret := cfg.Temu.AppSecret
+	if appKey == "" || appSecret == "" {
+		return temu.NewMockClient(shopID)
+	}
+
+	accessToken, err := repository.GetShopAccessToken(shopID)
+	if err != nil || accessToken == "" {
+		slog.Warn("shop credentials not found, using mock", "shop_id", shopID, "error", err)
+		return temu.NewMockClient(shopID)
+	}
+
+	client := temu.NewClient(shopID, appKey, appSecret, accessToken, cfg.Temu.Region, cfg.Temu.Proxy)
+	slog.Info("created real Temu API client", "shop_id", shopID, "region", cfg.Temu.Region)
+	return client
 }
 
 func round2(val float64) float64 {
