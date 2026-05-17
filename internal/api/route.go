@@ -149,6 +149,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			admin.POST("/orders/delete", AdminDeleteOrder)
 			admin.GET("/monitor", AdminMonitor)
 		}
+	}
 
 	r.GET("/health", HealthCheck)
 
