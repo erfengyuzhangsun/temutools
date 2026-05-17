@@ -823,7 +823,6 @@ func TestToggleUserActive(t *testing.T) {
 }
 
 func TestCreateAndListOrders(t *testing.T) {
-	email := "test-order@test.com"
 	t.Cleanup(func() {
 		GetDB().Exec("DELETE FROM temu_orders WHERE contact_name LIKE 'test-order-%'")
 	})
