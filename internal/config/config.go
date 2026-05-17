@@ -75,9 +75,9 @@ func LoadConfig(path string) *Config {
 		Database: DatabaseConfig{
 			Host:     getEnvOrDefault("DB_HOST", v.GetString("DB_HOST"), "localhost"),
 			Port:     v.GetInt("DB_PORT"),
-			User:     v.GetString("DB_USER"),
+			User:     getEnvOrDefault("DB_USER", v.GetString("DB_USER"), "root"),
 			Password: os.Getenv("DB_PASSWORD"),
-			DBName:   v.GetString("DB_NAME"),
+			DBName:   getEnvOrDefault("DB_NAME", v.GetString("DB_NAME"), "temu_tools"),
 		},
 		Auth: AuthConfig{
 			JWTSecret:     os.Getenv("JWT_SECRET"),
