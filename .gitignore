@@ -13,6 +13,10 @@ bin/
 web/node_modules/
 web/dist/
 
+# Go SDK 本地缓存
+go_dist/
+.gopath/
+
 # IDE
 .vscode/
 .idea/
