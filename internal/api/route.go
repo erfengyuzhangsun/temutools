@@ -139,6 +139,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 
 			admin := protected.Group("/admin")
 			admin.Use(middleware.PlanGuardMiddleware("admin"))
+			admin.GET("/users", AdminListUsers)
 			admin.POST("/upgrade-plan", AdminUpgradePlan)
 		}
 	}
@@ -147,6 +148,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 
 	staticDir := filepath.Join(".", "web", "dist")
 	r.Static("/assets", filepath.Join(staticDir, "assets"))
+	r.Static("/payment", filepath.Join(staticDir, "payment"))
 	r.StaticFile("/vite.svg", filepath.Join(staticDir, "vite.svg"))
 	r.GET("/login", func(c *gin.Context) {
 		c.File(filepath.Join(staticDir, "index.html"))

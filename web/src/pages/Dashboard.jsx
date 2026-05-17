@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Table, Spin, Alert, Tag, Typography } from 'antd';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Row, Col, Card, Statistic, Table, Spin, Alert, Tag, Typography, Button } from 'antd';
 import {
   DollarOutlined, ShoppingCartOutlined, WarningOutlined,
   RiseOutlined, FallOutlined, AlertOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { getDashboardOverview, getDashboardAlerts } from '../api/client';
 
 const { Title } = Typography;
@@ -12,6 +13,12 @@ export default function DashboardPage() {
   const [overview, setOverview] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const expiry = useMemo(() => {
+    const raw = localStorage.getItem('expiry');
+    return raw ? JSON.parse(raw) : {};
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -48,6 +55,31 @@ export default function DashboardPage() {
   return (
     <div>
       <Title level={4} style={{ marginBottom: 16 }}>数据看板</Title>
+
+      {expiry.is_expired && (
+        <Alert
+          message="套餐已过期"
+          description="您的套餐已过期，部分功能可能受限。请联系客服续费。"
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          action={
+            <Button size="small" danger onClick={() => navigate('/admin')}>
+              联系客服
+            </Button>
+          }
+        />
+      )}
+
+      {expiry.is_expiring_soon && !expiry.is_expired && (
+        <Alert
+          message={`套餐即将到期（剩余 ${expiry.days_remaining} 天）`}
+          description={`您的套餐将在 ${expiry.days_remaining} 天后到期，请及时联系客服续费以免影响使用。`}
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card><Statistic title="总利润" value={overview.total_profit || 0} prefix={<RiseOutlined />} precision={2} suffix="元" valueStyle={{ color: '#3f8600' }} /></Card>

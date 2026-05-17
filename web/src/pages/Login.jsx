@@ -22,6 +22,7 @@ export default function LoginPage() {
       const resp = await login(values.email, values.password);
       localStorage.setItem('token', resp.data.token);
       localStorage.setItem('user', JSON.stringify(resp.data.user));
+      localStorage.setItem('expiry', JSON.stringify(resp.data.expiry || {}));
       message.success('登录成功');
       navigate('/dashboard');
     } catch (err) {
@@ -41,6 +42,7 @@ export default function LoginPage() {
       const resp = await register(values.email, values.password);
       localStorage.setItem('token', resp.data.token);
       localStorage.setItem('user', JSON.stringify(resp.data.user));
+      localStorage.setItem('expiry', JSON.stringify(resp.data.expiry || {}));
       message.success('注册成功');
       navigate('/dashboard');
     } catch (err) {

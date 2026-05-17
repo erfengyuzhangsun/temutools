@@ -21,6 +21,7 @@ import ActivityPage from './pages/Activity';
 import RiskGuardPage from './pages/RiskGuard';
 import ShippingPage from './pages/Shipping';
 import ApiGuidePage from './pages/ApiGuide';
+import AdminPage from './pages/Admin';
 import PlaceholderPage from './pages/PlaceholderPage';
 import {
   ShoppingCartOutlined, BarChartOutlined, DollarOutlined,
@@ -70,6 +71,7 @@ export default function App() {
               <Route path="/risk-guard" element={<RiskGuardPage />} />
               <Route path="/shipping" element={<ShippingPage />} />
               <Route path="/api-guide" element={<ApiGuidePage />} />
+              <Route path="/admin" element={<AdminPage />} />
               {placeholderModules.map((m) => (
                 <Route key={m.path} path={`/${m.path}`} element={<PlaceholderPage title={m.label} icon={m.icon} />} />
               ))}

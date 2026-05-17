@@ -94,6 +94,46 @@ func UpdateUserPlan(email, planType string) error {
 	return nil
 }
 
+type UserListItem struct {
+	UserID         int        `json:"user_id"`
+	Email          string     `json:"email"`
+	WechatNickname string     `json:"nickname"`
+	PlanType       string     `json:"plan"`
+	StartDate      *time.Time `json:"start_date"`
+	ExpireDate     *time.Time `json:"expire_date"`
+	IsActive       bool       `json:"is_active"`
+	CreatedAt      time.Time  `json:"created_at"`
+}
+
+func ListUsers(search string, page, pageSize int) ([]UserListItem, int64, error) {
+	db := GetDB()
+	if db == nil {
+		return nil, 0, fmt.Errorf("database not initialized")
+	}
+
+	query := db.Model(&models.User{})
+	if search != "" {
+		query = query.Where("email LIKE ?", "%"+search+"%")
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("count users: %w", err)
+	}
+
+	var users []UserListItem
+	result := query.Select("user_id, email, wechat_nickname, plan_type, start_date, expire_date, is_active, created_at").
+		Order("user_id DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&users)
+	if result.Error != nil {
+		return nil, 0, fmt.Errorf("list users: %w", result.Error)
+	}
+
+	return users, total, nil
+}
+
 func SeedAdmin(email, password string) {
 	if email == "" || password == "" {
 		slog.Warn("admin seed skipped: ADMIN_EMAIL or ADMIN_PASSWORD not set")

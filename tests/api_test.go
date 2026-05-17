@@ -420,3 +420,27 @@ func TestInventory_BasicAccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.Code)
 	_ = requireSuccess(t, resp.Body.Bytes())
 }
+
+func TestAdminListUsers_LifetimeOnly(t *testing.T) {
+	skipIfNoDB(t)
+
+	t.Run("basic user gets 403", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/users", testUserToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusForbidden, resp.Code)
+		requireError(t, resp.Body.Bytes(), "PLAN_ACCESS_DENIED", http.StatusForbidden)
+	})
+
+	t.Run("lifetime user gets 200", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/users", lifetimeToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		data := requireSuccess(t, resp.Body.Bytes())
+		var result map[string]interface{}
+		err := json.Unmarshal(data.Data, &result)
+		require.NoError(t, err)
+		assert.Contains(t, result, "users")
+		assert.Contains(t, result, "total")
+		assert.Contains(t, result, "page")
+	})
+}

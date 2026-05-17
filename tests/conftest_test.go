@@ -21,13 +21,14 @@ import (
 )
 
 var (
-	testRouter      *gin.Engine
-	testAuthService *auth.AuthService
-	testUserID      int
-	testUserToken   string
-	proToken        string
-	enterpriseToken string
-	testDBReady     bool
+	testRouter       *gin.Engine
+	testAuthService  *auth.AuthService
+	testUserID       int
+	testUserToken    string
+	proToken         string
+	enterpriseToken  string
+	lifetimeToken    string
+	testDBReady      bool
 )
 
 func TestMain(m *testing.M) {
@@ -121,6 +122,10 @@ func seedTestData() error {
 	enterpriseToken, err = testAuthService.GenerateToken(testUserID, "enterprise")
 	if err != nil {
 		return fmt.Errorf("generate enterprise token: %w", err)
+	}
+	lifetimeToken, err = testAuthService.GenerateToken(testUserID, "lifetime")
+	if err != nil {
+		return fmt.Errorf("generate lifetime token: %w", err)
 	}
 
 	return nil

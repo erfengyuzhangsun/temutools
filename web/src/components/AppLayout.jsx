@@ -17,6 +17,7 @@ import {
   GiftOutlined,
   UserOutlined,
   LogoutOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
@@ -42,9 +43,11 @@ const menuItems = [
   { key: 'factory-cost', icon: <ToolOutlined />, label: '工厂成本', plan: 'enterprise' },
   { key: 'supplier', icon: <TeamOutlined />, label: '供应商', plan: 'enterprise' },
   { key: 'product-research', icon: <SearchOutlined />, label: '选品分析', plan: 'enterprise' },
+  { type: 'divider' },
+  { key: 'admin', icon: <CrownOutlined />, label: '管理后台', plan: 'lifetime' },
 ];
 
-const planLabels = { basic: '基础版', pro: '专业版', enterprise: '企业版' };
+const planLabels = { basic: '基础版', pro: '专业版', enterprise: '企业版', lifetime: '终身版' };
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);

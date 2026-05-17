@@ -152,4 +152,12 @@ export function getApiGuide() {
   return client.get('/api-guide/guide');
 }
 
+export function adminListUsers(params) {
+  return client.get('/admin/users', { params });
+}
+
+export function adminUpgradePlan(email, planType) {
+  return client.post('/admin/upgrade-plan', { email, plan_type: planType });
+}
+
 export default client;

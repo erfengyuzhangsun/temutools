@@ -653,16 +653,12 @@ export default function LandingPage() {
         <div className="grid-2" style={{ marginBottom: 24 }}>
           <div style={{ textAlign: 'center', padding: 20, background: 'white', borderRadius: 12, boxShadow: '0 3px 10px rgba(0,0,0,0.07)' }}>
             <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 12, color: '#07C160' }}>💚 微信支付</div>
-            <div style={{ width: 230, height: 230, margin: '0 auto', background: '#f5f5f5', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: 14 }}>
-              微信收款码（联系客服获取）
-            </div>
+            <img src="/payment/wechat.png" alt="微信收款码" style={{ width: 230, height: 230, objectFit: 'contain', borderRadius: 8 }} />
             <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>微信扫码付款</p>
           </div>
           <div style={{ textAlign: 'center', padding: 20, background: 'white', borderRadius: 12, boxShadow: '0 3px 10px rgba(0,0,0,0.07)' }}>
             <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 12, color: '#1677FF' }}>💙 支付宝</div>
-            <div style={{ width: 230, height: 230, margin: '0 auto', background: '#f5f5f5', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: 14 }}>
-              支付宝收款码（联系客服获取）
-            </div>
+            <img src="/payment/alipay.jpg" alt="支付宝收款码" style={{ width: 230, height: 230, objectFit: 'contain', borderRadius: 8 }} />
             <p style={{ color: '#888', fontSize: 13, marginTop: 8 }}>支付宝扫码付款</p>
           </div>
         </div>

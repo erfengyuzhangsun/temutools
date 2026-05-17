@@ -681,3 +681,50 @@ func TestGetShopProfit_MultipleStatsAggregation(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 15000.00, revenue)
 }
+
+func TestListUsers_WithSearch(t *testing.T) {
+	user := createTestUser(t, "list-search")
+	users, total, err := ListUsers("list-search", 1, 20)
+	require.NoError(t, err)
+	assert.GreaterOrEqual(t, total, int64(1))
+	found := false
+	for _, u := range users {
+		if u.Email == user.Email {
+			found = true
+			assert.Equal(t, user.PlanType, u.Plan)
+			assert.True(t, u.IsActive)
+			break
+		}
+	}
+	assert.True(t, found, "created user should be found by email search")
+}
+
+func TestListUsers_Pagination(t *testing.T) {
+	for i := 0; i < 3; i++ {
+		createTestUser(t, fmt.Sprintf("list-pg-%d", i))
+	}
+
+	page1, total, err := ListUsers("list-pg-", 1, 2)
+	require.NoError(t, err)
+	assert.GreaterOrEqual(t, total, int64(3))
+	assert.Len(t, page1, 2)
+
+	page2, total2, err := ListUsers("list-pg-", 2, 2)
+	require.NoError(t, err)
+	assert.Equal(t, total, total2)
+	assert.Len(t, page2, 1)
+}
+
+func TestListUsers_EmptySearch(t *testing.T) {
+	users, total, err := ListUsers("", 1, 20)
+	require.NoError(t, err)
+	assert.Greater(t, total, int64(0))
+	assert.NotEmpty(t, users)
+}
+
+func TestListUsers_NoMatch(t *testing.T) {
+	users, total, err := ListUsers("zzzz-nonexistent-email-xxxx", 1, 20)
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), total)
+	assert.Empty(t, users)
+}

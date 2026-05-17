@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -72,13 +73,28 @@ func LoginHandler(c *gin.Context) {
 
 	slog.Info("login successful", "user_id", user.UserID, "email", user.Email, "plan", user.PlanType)
 
+	var daysRemaining int
+	var isExpiringSoon bool
+	if user.ExpireDate != nil {
+		daysRemaining = int(time.Until(*user.ExpireDate).Hours() / 24)
+		isExpiringSoon = daysRemaining > 0 && daysRemaining <= 7
+	}
+
 	Success(c, gin.H{
 		"token": token,
 		"user": gin.H{
-			"user_id":  user.UserID,
-			"email":    user.Email,
-			"nickname": user.WechatNickname,
-			"plan":     user.PlanType,
+			"user_id":   user.UserID,
+			"email":     user.Email,
+			"nickname":  user.WechatNickname,
+			"plan":      user.PlanType,
+			"start_date": user.StartDate,
+			"expire_date": user.ExpireDate,
+		},
+		"expiry": gin.H{
+			"expire_date":     user.ExpireDate,
+			"days_remaining":  daysRemaining,
+			"is_expiring_soon": isExpiringSoon,
+			"is_expired":      false,
 		},
 	})
 }
@@ -727,6 +743,33 @@ func TestAPIConnection(c *gin.Context) {
 		return
 	}
 	Success(c, gin.H{"connected": true, "message": "API连接正常（Mock模式）"})
+}
+
+func AdminListUsers(c *gin.Context) {
+	search := c.DefaultQuery("search", "")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	users, total, err := repository.ListUsers(search, page, pageSize)
+	if err != nil {
+		slog.Error("failed to list users", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "获取用户列表失败")
+		return
+	}
+
+	Success(c, gin.H{
+		"users":      users,
+		"total":      total,
+		"page":       page,
+		"page_size":  pageSize,
+		"total_pages": (int(total) + pageSize - 1) / pageSize,
+	})
 }
 
 func AdminUpgradePlan(c *gin.Context) {
