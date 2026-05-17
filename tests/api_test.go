@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/erfengyuzhangsun/temutools/internal/models"
 	"github.com/erfengyuzhangsun/temutools/internal/repository"
 )
 
@@ -443,6 +445,151 @@ func TestAdminListUsers_LifetimeOnly(t *testing.T) {
 		assert.Contains(t, result, "total")
 		assert.Contains(t, result, "page")
 	})
+}
+
+func TestAdminUpgradePlan_Success(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-upgrade@test.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	_, err := repository.CreateUser(email, "testPass123", "basic")
+	require.NoError(t, err)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/upgrade-plan",
+		lifetimeToken, `{"email":"`+email+`","plan_type":"pro"}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+	data := requireSuccess(t, resp.Body.Bytes())
+	var result map[string]interface{}
+	err = json.Unmarshal(data.Data, &result)
+	require.NoError(t, err)
+	assert.Contains(t, result["message"], email)
+	assert.Contains(t, result["message"], "pro")
+}
+
+func TestAdminUpgradePlan_InvalidPlan(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/upgrade-plan",
+		lifetimeToken, `{"email":"test@test.com","plan_type":"vip"}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
+
+func TestAdminUpgradePlan_UserNotFound(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/upgrade-plan",
+		lifetimeToken, `{"email":"nobody@test.com","plan_type":"pro"}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestAdminCompleteOrder_Success(t *testing.T) {
+	skipIfNoDB(t)
+
+	order := &models.Order{
+		ContactName: "test-complete",
+		Phone:       "13800138000",
+		PlanName:    "pro",
+		Amount:      199,
+		Status:      "pending",
+	}
+	err := repository.CreateOrder(order)
+	require.NoError(t, err)
+	require.Greater(t, order.OrderID, 0)
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_orders WHERE order_id = ?", order.OrderID)
+	})
+
+	req := makeAuthRequest("POST", "/api/v1/admin/orders/complete",
+		lifetimeToken, `{"order_id":`+strconv.Itoa(order.OrderID)+`}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+	data := requireSuccess(t, resp.Body.Bytes())
+	var result map[string]interface{}
+	err = json.Unmarshal(data.Data, &result)
+	require.NoError(t, err)
+	assert.Contains(t, result["message"], "已标记为已处理")
+}
+
+func TestAdminCompleteOrder_NotFound(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/orders/complete",
+		lifetimeToken, `{"order_id":999999999}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestAdminDeleteOrder_Success(t *testing.T) {
+	skipIfNoDB(t)
+
+	order := &models.Order{
+		ContactName: "test-delete",
+		Phone:       "13800138001",
+		PlanName:    "basic",
+		Amount:      99,
+		Status:      "pending",
+	}
+	err := repository.CreateOrder(order)
+	require.NoError(t, err)
+	require.Greater(t, order.OrderID, 0)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/orders/delete",
+		lifetimeToken, `{"order_id":`+strconv.Itoa(order.OrderID)+`}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+	data := requireSuccess(t, resp.Body.Bytes())
+	var result map[string]interface{}
+	err = json.Unmarshal(data.Data, &result)
+	require.NoError(t, err)
+	assert.Contains(t, result["message"], "已删除")
+}
+
+func TestAdminDeleteOrder_NotFound(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/orders/delete",
+		lifetimeToken, `{"order_id":999999999}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestAdminListUsers_SearchPagination(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("GET", "/api/v1/admin/users?search=integ-test&page=1&page_size=5", lifetimeToken, "")
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+	data := requireSuccess(t, resp.Body.Bytes())
+	var result map[string]interface{}
+	err := json.Unmarshal(data.Data, &result)
+	require.NoError(t, err)
+	assert.Contains(t, result, "users")
+	assert.Contains(t, result, "total")
+	assert.GreaterOrEqual(t, result["total"].(float64), float64(1))
+}
+
+func TestAdminRenewUser_NotFound(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/users/renew",
+		lifetimeToken, `{"email":"no-such-user@test.com","days":30}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestAdminToggleUser_NotFound(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/users/toggle",
+		lifetimeToken, `{"email":"no-such-user@test.com","active":false}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestLogin_WithOriginalPasswordAfterSeedAdmin(t *testing.T) {
