@@ -747,7 +747,7 @@ func TestListUsers_WithSearch(t *testing.T) {
 	for _, u := range users {
 		if u.Email == user.Email {
 			found = true
-			assert.Equal(t, user.PlanType, u.Plan)
+			assert.Equal(t, user.PlanType, u.PlanType)
 			assert.True(t, u.IsActive)
 			break
 		}
