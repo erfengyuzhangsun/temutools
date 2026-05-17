@@ -150,6 +150,22 @@ fi
 docker network connect "$NETWORK_NAME" "$MYSQL_CONTAINER" 2>/dev/null || true
 
 # ============================================
+# Step 7.5: 数据迁移（可选）
+# ============================================
+log "Step 7.5/9: 数据迁移（可选）..."
+if [ -f /tmp/temu_tools_export.sql ] || [ -f /tmp/temu_tools_export.sql.gz ]; then
+    log "检测到阿里云导出文件，自动导入数据..."
+    bash "$PROJECT_DIR/deploy/deploy-migrate-db.sh" import /tmp/temu_tools_export.sql.gz 2>/dev/null || \
+    bash "$PROJECT_DIR/deploy/deploy-migrate-db.sh" import /tmp/temu_tools_export.sql 2>/dev/null || true
+else
+    info "未检测到数据文件，跳过迁移"
+    info "如需迁移阿里云数据，请在部署完成后执行："
+    info "  # 1. 阿里云上导出:  bash deploy/deploy-migrate-db.sh export"
+    info "  # 2. 传到 DO:       scp /tmp/temu_tools_export.sql.gz root@你的DO_IP:/tmp/"
+    info "  # 3. DO 上导入:     bash deploy/deploy-migrate-db.sh import /tmp/temu_tools_export.sql.gz"
+fi
+
+# ============================================
 # Step 8: 构建 & 启动 Go + Nginx
 # ============================================
 log "Step 8/9: 构建并启动服务..."
