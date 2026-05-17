@@ -257,6 +257,62 @@ func TestIsUserExpired_Expired(t *testing.T) {
 	assert.True(t, IsUserExpired(user))
 }
 
+// ====== SeedAdmin Tests ======
+
+func TestSeedAdmin_CreatesNewUser(t *testing.T) {
+	email := "test-seed-admin-new@test.com"
+	t.Cleanup(func() {
+		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
+	})
+
+	SeedAdmin(email, "adminPass123")
+
+	user, err := FindByEmail(email)
+	require.NoError(t, err)
+	require.NotNil(t, user, "SeedAdmin should create the user")
+	assert.Equal(t, "lifetime", user.PlanType, "admin should have lifetime plan")
+	assert.True(t, CheckPassword("adminPass123", user.PasswordHash), "admin should be able to login with env password")
+}
+
+func TestSeedAdmin_UpgradesExistingPlan(t *testing.T) {
+	email := "test-seed-admin-upgrade@test.com"
+	t.Cleanup(func() {
+		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
+	})
+
+	user, err := CreateUser(email, "userPassword123", "basic")
+	require.NoError(t, err)
+	assert.Equal(t, "basic", user.PlanType, "should start as basic")
+
+	SeedAdmin(email, "userPassword123")
+
+	updated, err := FindByEmail(email)
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	assert.Equal(t, "lifetime", updated.PlanType, "SeedAdmin should upgrade plan to lifetime")
+}
+
+func TestSeedAdmin_DoesNotOverwriteUserPassword(t *testing.T) {
+	email := "test-seed-admin-pw@test.com"
+	t.Cleanup(func() {
+		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
+	})
+
+	_, err := CreateUser(email, "myRealPassword", "basic")
+	require.NoError(t, err)
+
+	SeedAdmin(email, "adminEnvPassword")
+
+	user, err := FindByEmail(email)
+	require.NoError(t, err)
+	require.NotNil(t, user)
+	assert.Equal(t, "lifetime", user.PlanType, "plan should be upgraded to lifetime")
+	assert.True(t, CheckPassword("myRealPassword", user.PasswordHash),
+		"user's original password should NOT be overwritten by SeedAdmin")
+	assert.False(t, CheckPassword("adminEnvPassword", user.PasswordHash),
+		"SeedAdmin's env password should NOT work after overwriting")
+}
+
 // ====== Shop Repository Tests ======
 
 func TestCreateAndGetUserShops(t *testing.T) {

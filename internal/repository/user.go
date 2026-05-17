@@ -141,22 +141,10 @@ func SeedAdmin(email, password string) {
 	}
 	existing, _ := FindByEmail(email)
 	if existing != nil {
-		needsUpdate := false
 		if existing.PlanType != "lifetime" {
 			_ = UpdateUserPlan(email, "lifetime")
 			slog.Info("admin plan upgraded to lifetime", "email", email)
-			needsUpdate = true
-		}
-		if !CheckPassword(password, existing.PasswordHash) {
-			hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-			if err == nil {
-				db := GetDB()
-				db.Model(&models.User{}).Where("email = ?", email).Update("password_hash", string(hashedBytes))
-				slog.Info("admin password updated", "email", email)
-				needsUpdate = true
-			}
-		}
-		if !needsUpdate {
+		} else {
 			slog.Info("admin account already exists", "email", email)
 		}
 		return

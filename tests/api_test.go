@@ -444,3 +444,40 @@ func TestAdminListUsers_LifetimeOnly(t *testing.T) {
 		assert.Contains(t, result, "page")
 	})
 }
+
+func TestLogin_WithOriginalPasswordAfterSeedAdmin(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-seed-login@test.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	_, err := repository.CreateUser(email, "originalPass123", "basic")
+	require.NoError(t, err, "user should register first")
+
+	repository.SeedAdmin(email, "adminEnvPass456")
+
+	t.Run("login with original password succeeds", func(t *testing.T) {
+		req := makeJSONRequest("POST", "/api/v1/auth/login",
+			`{"email":"`+email+`","password":"originalPass123"}`)
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		data := requireSuccess(t, resp.Body.Bytes())
+		var result map[string]interface{}
+		err := json.Unmarshal(data.Data, &result)
+		require.NoError(t, err)
+		assert.Contains(t, result, "token")
+		user, ok := result["user"].(map[string]interface{})
+		require.True(t, ok)
+		assert.Equal(t, "lifetime", user["plan"], "plan should be upgraded to lifetime")
+	})
+
+	t.Run("login with admin env password fails", func(t *testing.T) {
+		req := makeJSONRequest("POST", "/api/v1/auth/login",
+			`{"email":"`+email+`","password":"adminEnvPass456"}`)
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusUnauthorized, resp.Code,
+			"admin env password should NOT work after SeedAdmin")
+	})
+}
