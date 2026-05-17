@@ -10,21 +10,22 @@
 - **本地**：`d:\develop\code\temu_tools_go\`
 - **服务器**：`/opt/temu_tools_go/`
 - **远程**：`origin https://github.com/erfengyuzhangsun/temutools.git`（master 分支）
-- **访问地址**：http://www.jinpuhuang.com
+- **访问地址**：https://www.jinpuhuang.com
 
-## 当前系统状态（2026-05-17）
+## 当前系统状态（2026-05-18）
 
 - Go 服务：✅ Healthy，DB 连接成功，AutoMigrate 完成
-- Nginx：✅ 正常运行（80 → Go 8080）
+- Nginx：✅ 正常运行（80 + 443 → Go 8080）
+- HTTPS：✅ Let's Encrypt 证书已配置（到期 2026-08-15，自动续签已配置）
+- HTTP→HTTPS：⏳ 暂未强制跳转，两个协议均可访问
 - 注册/登录/JWT：✅ 全链路正常
 - **基础版到期时间**：✅ 已修复为 30 天（线上验证通过）
 - **店铺绑定**：✅ access_token 持久化到 DB
 - **Temu API请求**：✅ URL 对齐官方规范
-- **Temu 自研应用审批**：❌ 被拒绝（根因：阿里云 ECS）
-- **服务器**：✅ 已从阿里云迁移到 DigitalOcean（新加坡，152.42.226.188）
+- **Temu 自研应用审批**：⏳ DNS/HTTPS 已就绪，可重新提交审批
+- **服务器**：✅ DigitalOcean（新加坡，152.42.226.188）
 - **数据迁移**：✅ 所有用户数据已从阿里云导入 DO
-- **DNS**：⏳ 待将 www.jinpuhuang.com 指向 DO IP
-- **HTTPS**：⏳ 待配置 Let's Encrypt 证书
+- **DNS**：✅ www.jinpuhuang.com 已指向 DO IP（裸域名 jinpuhuang.com 未解析）
 - 24 个 API 端点：✅ 全部通过测试
 - 前端 16 页面：✅ 全部实现（7 个基础版可访问，9 个带 🔒 锁定）
 
@@ -49,6 +50,41 @@
 2. MySQL 监听 0.0.0.0？temu@'%' 有权限？
 3. docker-compose.yml 有 extra_hosts + environment 覆写？
 ```
+
+## HTTPS（Docker + Let's Encrypt）操作流程
+
+### 首次配置
+```bash
+# 1. 停 Docker Nginx
+docker compose stop nginx
+
+# 2. 申请证书（只用主域名，裸域名若未解析会失败）
+certbot certonly --standalone -d www.jinpuhuang.com
+
+# 3. 重启 Docker Nginx
+docker compose up -d
+
+# 4. 创建续期钩子（certbot 自动执行）
+cat > /etc/letsencrypt/renewal-hooks/pre/stop-nginx.sh << 'SCRIPT'
+#!/bin/sh
+/usr/bin/docker compose -f /opt/temu_tools_go/docker-compose.yml stop nginx
+SCRIPT
+
+cat > /etc/letsencrypt/renewal-hooks/post/start-nginx.sh << 'SCRIPT'
+#!/bin/sh
+/usr/bin/docker compose -f /opt/temu_tools_go/docker-compose.yml up -d nginx
+SCRIPT
+
+chmod +x /etc/letsencrypt/renewal-hooks/pre/stop-nginx.sh
+chmod +x /etc/letsencrypt/renewal-hooks/post/start-nginx.sh
+```
+
+### 踩坑记录
+- ⚠️ certbot 的 standalone 模式需要 80 端口空闲，Docker Nginx 必须先停
+- ⚠️ 裸域名（jinpuhuang.com）没有 A 记录时，不能和 www 域名一并申请，会全部失败
+- ⚠️ root 用户直接执行 certbot，不要加 sudo（DO 默认 root）
+- ⚠️ docker-compose.yml 必须挂载 `/etc/letsencrypt:/etc/letsencrypt:ro` 才能让 Nginx 容器读到证书
+- ✅ 续期 pre-hook/post-hook 用 `/usr/bin/docker compose` 绝对路径，避免 PATH 问题
 
 ## 架构规范
 

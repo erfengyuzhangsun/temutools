@@ -100,6 +100,26 @@ func UpdateUserPlan(email, planType string) error {
 	return nil
 }
 
+func UpdateUserPassword(email, password string) error {
+	db := GetDB()
+	if db == nil {
+		return fmt.Errorf("database not initialized")
+	}
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+	result := db.Model(&models.User{}).Where("email = ?", email).Update("password_hash", string(hashedBytes))
+	if result.Error != nil {
+		return fmt.Errorf("update password: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+	slog.Info("admin password synced from env", "email", email)
+	return nil
+}
+
 type UserListItem struct {
 	UserID         int        `json:"user_id"`
 	Email          string     `json:"email"`
@@ -147,11 +167,9 @@ func SeedAdmin(email, password string) {
 	}
 	existing, _ := FindByEmail(email)
 	if existing != nil {
+		_ = UpdateUserPassword(email, password)
 		if existing.PlanType != "lifetime" {
 			_ = UpdateUserPlan(email, "lifetime")
-			slog.Info("admin plan upgraded to lifetime", "email", email)
-		} else {
-			slog.Info("admin account already exists", "email", email)
 		}
 		return
 	}
