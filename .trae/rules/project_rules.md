@@ -12,30 +12,36 @@
 - **远程**：`origin https://github.com/erfengyuzhangsun/temutools.git`（master 分支）
 - **访问地址**：https://www.jinpuhuang.com
 
-## 当前系统状态（2026-05-18）
+## 当前系统状态（2026-05-18 修复后）
 
 - Go 服务：✅ Healthy，DB 连接成功，AutoMigrate 完成
 - Nginx：✅ 正常运行（80 + 443 → Go 8080）
 - HTTPS：✅ Let's Encrypt 证书已配置（到期 2026-08-15，自动续签已配置）
 - HTTP→HTTPS：⏳ 暂未强制跳转，两个协议均可访问
-- 注册/登录/JWT：✅ 全链路正常
+- 注册/登录/JWT：✅ 全链路正常（管理员登录已修复）
+- **DB_HOST**：✅ 改为 `temu-mysql`（Docker MySQL 容器直连）
+- **外键冲突**：✅ 已删除所有不兼容外键约束，AutoMigrate 通过
 - **基础版到期时间**：✅ 已修复为 30 天（线上验证通过）
 - **店铺绑定**：✅ access_token 持久化到 DB
 - **Temu API请求**：✅ URL 对齐官方规范
-- **Temu 自研应用审批**：⏳ DNS/HTTPS 已就绪，可重新提交审批
+- **Temu 自研应用审批**：⏳ 已配 HTTPS，可重新提交审批（Server: DO Singapore）
 - **服务器**：✅ DigitalOcean（新加坡，152.42.226.188）
 - **数据迁移**：✅ 所有用户数据已从阿里云导入 DO
-- **DNS**：✅ www.jinpuhuang.com 已指向 DO IP（裸域名 jinpuhuang.com 未解析）
+- **DNS**：✅ www.jinpuhuang.com 已指向 DO IP
+- **HTTPS 证书**：✅ Let's Encrypt，到期 2026-08-15，自动续签已配置
 - 24 个 API 端点：✅ 全部通过测试
 - 前端 16 页面：✅ 全部实现（7 个基础版可访问，9 个带 🔒 锁定）
 
 ## 模型行为红线（交付前必须逐条对照）
 
+- ❌ **跳过对话前文档阅读**：每次对话开始必须先完整阅读 `模型高效驱动提示词.md`，尤其是"六、教训记录"和当前状态。跳过此步骤是最高优先级错误！
+- ❌ **远程猜行号改文件**：远程文件必须先用 `grep -n` 精确定位行号，不得用 `sed -n` + `nl` 猜偏移量。一次只改一行，改完立刻构建验证
 - ❌ **PowerShell 和 Bash 命令混用**：Windows 用 `;`，Linux 用 `&&`，必须标注"本地"还是"服务器"
 - ❌ **不查文件内容就改**：改文件前完整阅读目标代码段确认上下文
 - ❌ **给复杂方案代替简单方案**：优先最小改动
 - ❌ **不检查就交付**：命令发出去前逐字检查路径、分支名、参数
 - ❌ **改 route.go 用 SearchReplace 多次修改**：route.go 的大括号嵌套复杂，多次 SearchReplace 会导致闭括号失衡。必须一次重写完整文件或只做 1 次精确替换后立即 `go build` 验证
+- ❌ **已知问题不查教训记录**：每次遇到问题先查"六、教训记录"和"踩坑复盘"中有无同类问题，禁止重复踩坑
 - ✅ **本地必验清单（每次改代码后必须执行）**：
   1. `go build ./...` — 零编译错误
   2. `go test ./...` — 全部通过
@@ -49,6 +55,36 @@
 1. .env 文件存在？DB_HOST/DB_USER/DB_PASSWORD 正确？
 2. MySQL 监听 0.0.0.0？temu@'%' 有权限？
 3. docker-compose.yml 有 extra_hosts + environment 覆写？
+```
+
+## DB_HOST 选择决策树
+
+```
+MySQL 在哪里？
+├── 宿主机（非容器）→ DB_HOST=host.docker.internal
+│   └── 需 extra_hosts: ["host.docker.internal:host-gateway"]
+└── Docker 容器（temu-mysql）
+    └── MySQL 是否暴露到宿主机？
+        ├── 暴露了 → DB_HOST=host.docker.internal 也可行
+        └── 未暴露 → DB_HOST=temu-mysql（需 docker network connect 到同一网络）
+```
+
+## AutoMigrate 失败标准处理流程
+
+```
+1. 查所有外键约束：
+   docker exec -i temu-mysql mysql -u root -p$PASS -e \
+   "SELECT TABLE_NAME, CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+    WHERE REFERENCED_TABLE_SCHEMA='temu_tools' AND REFERENCED_TABLE_NAME IS NOT NULL;"
+
+2. 一次性删除全部外键：
+   docker exec -i temu-mysql mysql -u root -p$PASS -N -e \
+   "SELECT CONCAT('ALTER TABLE temu_tools.', TABLE_NAME, ' DROP FOREIGN KEY ',
+    CONSTRAINT_NAME, ';') FROM information_schema.KEY_COLUMN_USAGE
+    WHERE REFERENCED_TABLE_SCHEMA='temu_tools' AND REFERENCED_TABLE_NAME IS NOT NULL" \
+   | docker exec -i temu-mysql mysql -u root -p$PASS temu_tools
+
+3. 重启 app 容器：docker compose up -d --no-deps --force-recreate app
 ```
 
 ## HTTPS（Docker + Let's Encrypt）操作流程
