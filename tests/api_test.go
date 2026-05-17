@@ -156,6 +156,73 @@ func TestRegister_ShortPassword(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
+func TestRegister_BasicExpiresIn30Days(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-expire-basic@example.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"`+email+`","password":"securePass123"}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+	user, err := repository.FindByEmail(email)
+	require.NoError(t, err)
+	require.NotNil(t, user)
+
+	assert.NotNil(t, user.StartDate, "basic user should have start_date set")
+	assert.NotNil(t, user.ExpireDate, "basic user should have expire_date set")
+	assert.Equal(t, "basic", user.PlanType)
+
+	daysDiff := int(user.ExpireDate.Sub(*user.StartDate).Hours() / 24)
+	assert.Equal(t, 30, daysDiff, "basic plan should expire in 30 days from start_date")
+
+	expired := repository.IsUserExpired(user)
+	assert.False(t, expired, "newly registered basic user should not be expired")
+}
+
+func TestRegister_LifetimeNeverExpires(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-expire-lifetime@example.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	user, err := repository.CreateUser(email, "securePass123", "lifetime")
+	require.NoError(t, err)
+	require.NotNil(t, user)
+
+	assert.Equal(t, "lifetime", user.PlanType)
+	assert.NotNil(t, user.StartDate, "lifetime user should have start_date set")
+	assert.Nil(t, user.ExpireDate, "lifetime user should have nil expire_date (never expires)")
+
+	expired := repository.IsUserExpired(user)
+	assert.False(t, expired, "lifetime user should never expire")
+}
+
+func TestLogin_ShowsExpiryInfo(t *testing.T) {
+	skipIfNoDB(t)
+
+	req := makeJSONRequest("POST", "/api/v1/auth/login", `{"email":"integ-test@example.com","password":"test-pass-123"}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+	respData := requireSuccess(t, resp.Body.Bytes())
+	var data map[string]interface{}
+	err := json.Unmarshal(respData.Data, &data)
+	require.NoError(t, err)
+
+	expiry, ok := data["expiry"].(map[string]interface{})
+	require.True(t, ok, "login response should have expiry field")
+	assert.NotNil(t, expiry["expire_date"])
+	assert.NotNil(t, expiry["days_remaining"])
+	assert.NotNil(t, expiry["is_expiring_soon"])
+	assert.Equal(t, false, expiry["is_expired"])
+}
+
 func TestAuthMiddleware_NoToken(t *testing.T) {
 	req := makeJSONRequest("GET", "/api/v1/auth/me", "")
 	resp := executeRequest(req)
