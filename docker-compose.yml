@@ -4,8 +4,6 @@ services:
     container_name: temu-tools-go
     env_file:
       - .env
-    environment:
-      - DB_HOST=host.docker.internal
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
