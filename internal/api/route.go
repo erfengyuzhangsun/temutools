@@ -150,7 +150,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			admin.GET("/monitor", AdminMonitor)
 		}
 	}
-	}
+}
 
 	r.GET("/health", HealthCheck)
 
