@@ -21,7 +21,10 @@
 - **店铺绑定**：✅ access_token 持久化到 DB
 - **Temu API请求**：✅ URL 对齐官方规范
 - **Temu 自研应用审批**：❌ 被拒绝（根因：阿里云 ECS）
-- **AWS Lightsail 迁移**：⏳ 待执行
+- **服务器**：✅ 已从阿里云迁移到 DigitalOcean（新加坡，152.42.226.188）
+- **数据迁移**：✅ 所有用户数据已从阿里云导入 DO
+- **DNS**：⏳ 待将 www.jinpuhuang.com 指向 DO IP
+- **HTTPS**：⏳ 待配置 Let's Encrypt 证书
 - 24 个 API 端点：✅ 全部通过测试
 - 前端 16 页面：✅ 全部实现（7 个基础版可访问，9 个带 🔒 锁定）
 
