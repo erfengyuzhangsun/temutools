@@ -828,7 +828,7 @@ func TestCreateAndListOrders(t *testing.T) {
 		GetDB().Exec("DELETE FROM temu_orders WHERE contact_name LIKE 'test-order-%'")
 	})
 
-	order := &Order{
+	order := &models.Order{
 		ContactName: "test-order-user",
 		Phone:       "13800138000",
 		Wechat:      "test-wechat",
@@ -857,7 +857,7 @@ func TestCreateAndListOrders(t *testing.T) {
 }
 
 func TestMarkOrderCompleted(t *testing.T) {
-	order := &Order{
+	order := &models.Order{
 		ContactName: "test-complete-order",
 		Phone:       "13900139000",
 		PlanName:    "基础版 - ¥69/月",
@@ -885,7 +885,7 @@ func TestMarkOrderCompleted(t *testing.T) {
 }
 
 func TestDeleteOrder(t *testing.T) {
-	order := &Order{
+	order := &models.Order{
 		ContactName: "test-del-order",
 		Phone:       "13700137000",
 		PlanName:    "测试套餐",

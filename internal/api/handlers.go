@@ -83,18 +83,18 @@ func LoginHandler(c *gin.Context) {
 	Success(c, gin.H{
 		"token": token,
 		"user": gin.H{
-			"user_id":   user.UserID,
-			"email":     user.Email,
-			"nickname":  user.WechatNickname,
-			"plan":      user.PlanType,
-			"start_date": user.StartDate,
+			"user_id":     user.UserID,
+			"email":       user.Email,
+			"nickname":    user.WechatNickname,
+			"plan":        user.PlanType,
+			"start_date":  user.StartDate,
 			"expire_date": user.ExpireDate,
 		},
 		"expiry": gin.H{
-			"expire_date":     user.ExpireDate,
-			"days_remaining":  daysRemaining,
+			"expire_date":      user.ExpireDate,
+			"days_remaining":   daysRemaining,
 			"is_expiring_soon": isExpiringSoon,
-			"is_expired":      false,
+			"is_expired":       false,
 		},
 	})
 }
@@ -376,14 +376,14 @@ func GetTasks(c *gin.Context) {
 	sch := getScheduler(c)
 	tasks := sch.GetAllTasks()
 	type taskResp struct {
-		TaskID         string  `json:"task_id"`
-		Name           string  `json:"name"`
-		CronExpression string  `json:"cron_expression"`
-		Enabled        bool    `json:"enabled"`
-		Description    string  `json:"description"`
-		Status         string  `json:"status"`
-		RunCount       int     `json:"run_count"`
-		FailCount      int     `json:"fail_count"`
+		TaskID         string `json:"task_id"`
+		Name           string `json:"name"`
+		CronExpression string `json:"cron_expression"`
+		Enabled        bool   `json:"enabled"`
+		Description    string `json:"description"`
+		Status         string `json:"status"`
+		RunCount       int    `json:"run_count"`
+		FailCount      int    `json:"fail_count"`
 	}
 	result := make([]taskResp, len(tasks))
 	for i, t := range tasks {
@@ -764,10 +764,10 @@ func AdminListUsers(c *gin.Context) {
 	}
 
 	Success(c, gin.H{
-		"users":      users,
-		"total":      total,
-		"page":       page,
-		"page_size":  pageSize,
+		"users":       users,
+		"total":       total,
+		"page":        page,
+		"page_size":   pageSize,
 		"total_pages": (int(total) + pageSize - 1) / pageSize,
 	})
 }
@@ -908,7 +908,7 @@ func AdminDeleteOrder(c *gin.Context) {
 
 func AdminMonitor(c *gin.Context) {
 	report := service.RunHealthCheck()
-	Success(c, gin.H(report))
+	Success(c, report)
 }
 
 func SubmitOrder(c *gin.Context) {
