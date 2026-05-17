@@ -67,6 +67,9 @@ func AutoMigrate() error {
 	}
 
 	slog.Info("running auto migration")
+
+	db.Exec("SET FOREIGN_KEY_CHECKS = 0")
+
 	if err := db.AutoMigrate(
 		&models.User{},
 		&models.Shop{},
@@ -81,8 +84,11 @@ func AutoMigrate() error {
 		&models.FactoryProduct{},
 		&models.Supplier{},
 	); err != nil {
+		db.Exec("SET FOREIGN_KEY_CHECKS = 1")
 		return err
 	}
+
+	db.Exec("SET FOREIGN_KEY_CHECKS = 1")
 
 	migrator := db.Migrator()
 
