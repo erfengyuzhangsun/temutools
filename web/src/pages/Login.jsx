@@ -68,7 +68,7 @@ export default function LoginPage() {
       <Card style={{ width: 420, borderRadius: 16, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
         <Space direction="vertical" style={{ width: '100%', textAlign: 'center', marginBottom: 24 }}>
           <RobotOutlined style={{ fontSize: 48, color: '#667eea' }} />
-          <Title level={3} style={{ margin: 0 }}>跨境卖家运营辅助工具</Title>
+          <Title level={3} style={{ margin: 0 }}>🐋 鲸云策</Title>
           <Text type="secondary">请输入邮箱和密码，开启您的运营管理之旅</Text>
         </Space>
 

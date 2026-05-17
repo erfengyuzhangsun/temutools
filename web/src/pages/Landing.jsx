@@ -261,7 +261,7 @@ export default function LandingPage() {
 
       {/* ==================== 1️⃣ Hero ==================== */}
       <div className="hero">
-        <div className="hero-badge">🤖 跨境卖家运营辅助工具</div>
+        <div className="hero-badge">🐋 鲸云策 · 全流程智能运营</div>
         <div className="hero-title">智能运营辅助<br />让数据帮你做决策，高效管理店铺</div>
         <div className="hero-desc">
           核价、库存、调价、活动、发货、售后一站式管理<br />
@@ -792,7 +792,7 @@ export default function LandingPage() {
       </div>
 
       <div className="footer">
-        <p style={{ margin: '4px 0', fontSize: 14 }}>© 2026 跨境卖家运营辅助工具 | 专注数据与运营管理 🤖</p>
+        <p style={{ margin: '4px 0', fontSize: 14 }}>© 2026 鲸云策 | 专注数据与运营管理 🐋</p>
         <p style={{ margin: '4px 0', fontSize: 13, color: '#aaa' }}>本工具仅用于辅助商家进行数据分析和运营决策，不构成任何投资建议</p>
       </div>
     </div>
