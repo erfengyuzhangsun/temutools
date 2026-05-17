@@ -669,11 +669,29 @@ export default function LandingPage() {
           <h4 style={{ color: '#333', marginBottom: 16, textAlign: 'center', fontSize: 17 }}>📋 提交订单（付款后填写）</h4>
 
           {!orderSubmitted ? (
-            <form onSubmit={(e) => { e.preventDefault(); setOrderSubmitted(true); }}>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target;
+              const data = {
+                plan_name: form.plan_name.value,
+                contact_name: form.contact_name.value,
+                phone: form.phone.value,
+                wechat: form.wechat.value,
+                notes: form.notes.value,
+              };
+              try {
+                await fetch('/api/v1/submit-order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data),
+                });
+              } catch {}
+              setOrderSubmitted(true);
+            }}>
               <div className="grid-2">
                 <div className="form-group">
                   <label className="form-label">选择套餐</label>
-                  <select className="select-input" required>
+                  <select className="select-input" name="plan_name" required>
                     <option value="">-- 请选择套餐 --</option>
                     <option>基础版 - ¥69/月</option>
                     <option>专业版 - ¥169/季度（推荐）</option>
@@ -683,22 +701,22 @@ export default function LandingPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">您的姓名</label>
-                  <input className="text-input" placeholder="请输入联系人姓名" required />
+                  <input className="text-input" name="contact_name" placeholder="请输入联系人姓名" required />
                 </div>
               </div>
               <div className="grid-2">
                 <div className="form-group">
                   <label className="form-label">手机号</label>
-                  <input className="text-input" placeholder="请输入手机号" required />
+                  <input className="text-input" name="phone" placeholder="请输入手机号" required />
                 </div>
                 <div className="form-group">
                   <label className="form-label">微信号（选填）</label>
-                  <input className="text-input" placeholder="微信号，方便客服联系" />
+                  <input className="text-input" name="wechat" placeholder="微信号，方便客服联系" />
                 </div>
               </div>
               <div className="form-group">
                 <label className="form-label">备注（选填）</label>
-                <textarea style={{ width: '100%', borderRadius: 6, border: '1px solid #d9d9d9', padding: 10, fontSize: 14 }} rows={2} placeholder="如有特殊需求请在此说明..." />
+                <textarea name="notes" style={{ width: '100%', borderRadius: 6, border: '1px solid #d9d9d9', padding: 10, fontSize: 14 }} rows={2} placeholder="如有特殊需求请在此说明..." />
               </div>
               <div style={{ textAlign: 'center' }}>
                 <button className="btn-primary" style={{ fontSize: 16, padding: '12px 40px' }} type="submit">✅ 我已付款，提交订单</button>

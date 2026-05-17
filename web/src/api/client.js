@@ -160,4 +160,32 @@ export function adminUpgradePlan(email, planType) {
   return client.post('/admin/upgrade-plan', { email, plan_type: planType });
 }
 
+export function adminRenewUser(email, days) {
+  return client.post('/admin/users/renew', { email, days });
+}
+
+export function adminToggleUser(email, active) {
+  return client.post('/admin/users/toggle', { email, active });
+}
+
+export function adminListOrders() {
+  return client.get('/admin/orders');
+}
+
+export function adminCompleteOrder(orderId) {
+  return client.post('/admin/orders/complete', { order_id: orderId });
+}
+
+export function adminDeleteOrder(orderId) {
+  return client.post('/admin/orders/delete', { order_id: orderId });
+}
+
+export function adminMonitor() {
+  return client.get('/admin/monitor');
+}
+
+export function submitOrder(data) {
+  return client.post('/submit-order', data);
+}
+
 export default client;

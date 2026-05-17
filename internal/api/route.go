@@ -28,6 +28,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 	{
 		apiGroup.POST("/auth/login", LoginHandler)
 		apiGroup.POST("/auth/register", RegisterHandler)
+		apiGroup.POST("/submit-order", SubmitOrder)
 
 		protected := apiGroup.Group("")
 		protected.Use(middleware.AuthMiddleware(authService))
@@ -141,8 +142,13 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			admin.Use(middleware.PlanGuardMiddleware("admin"))
 			admin.GET("/users", AdminListUsers)
 			admin.POST("/upgrade-plan", AdminUpgradePlan)
+			admin.POST("/users/renew", AdminRenewUser)
+			admin.POST("/users/toggle", AdminToggleUser)
+			admin.GET("/orders", AdminListOrders)
+			admin.POST("/orders/complete", AdminCompleteOrder)
+			admin.POST("/orders/delete", AdminDeleteOrder)
+			admin.GET("/monitor", AdminMonitor)
 		}
-	}
 
 	r.GET("/health", HealthCheck)
 

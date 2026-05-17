@@ -376,10 +376,10 @@ func TestGetShopProfit_WithData(t *testing.T) {
 	shop := createTestShop(t, user.UserID, "profit")
 
 	stat := models.ProfitStat{
-		UserID:      user.UserID,
-		ShopID:      shop.ShopID,
-		StatDate:    "2026-05-01",
-		TotalProfit: 1500.00,
+		UserID:       user.UserID,
+		ShopID:       shop.ShopID,
+		StatDate:     "2026-05-01",
+		TotalProfit:  1500.00,
 		TotalRevenue: 10000.00,
 	}
 	err := GetDB().Create(&stat).Error
@@ -405,10 +405,10 @@ func TestGetShopRevenue_WithData(t *testing.T) {
 	shop := createTestShop(t, user.UserID, "revenue")
 
 	stat := models.ProfitStat{
-		UserID:      user.UserID,
-		ShopID:      shop.ShopID,
-		StatDate:    "2026-05-01",
-		TotalProfit: 500.00,
+		UserID:       user.UserID,
+		ShopID:       shop.ShopID,
+		StatDate:     "2026-05-01",
+		TotalProfit:  500.00,
 		TotalRevenue: 8000.00,
 	}
 	err := GetDB().Create(&stat).Error
@@ -719,10 +719,10 @@ func TestGetShopProfit_MultipleStatsAggregation(t *testing.T) {
 
 	for _, day := range []string{"2026-05-01", "2026-05-02", "2026-05-03"} {
 		stat := models.ProfitStat{
-			UserID:      user.UserID,
-			ShopID:      shop.ShopID,
-			StatDate:    day,
-			TotalProfit: 1000.00,
+			UserID:       user.UserID,
+			ShopID:       shop.ShopID,
+			StatDate:     day,
+			TotalProfit:  1000.00,
 			TotalRevenue: 5000.00,
 		}
 		GetDB().Create(&stat)
@@ -783,4 +783,126 @@ func TestListUsers_NoMatch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(0), total)
 	assert.Empty(t, users)
+}
+
+// ====== Admin Repository Tests ======
+
+func TestUpdateUserExpiry(t *testing.T) {
+	user := createTestUser(t, "expiry-upd")
+	require.NotNil(t, user.ExpireDate)
+	oldExpire := *user.ExpireDate
+
+	err := UpdateUserExpiry(user.Email, 30)
+	require.NoError(t, err)
+
+	updated, err := FindByEmail(user.Email)
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.NotNil(t, updated.ExpireDate)
+	assert.True(t, updated.ExpireDate.After(oldExpire),
+		"expire date should be extended by 30 days")
+}
+
+func TestToggleUserActive(t *testing.T) {
+	user := createTestUser(t, "toggle-act")
+	assert.True(t, user.IsActive)
+
+	err := ToggleUserActive(user.Email, false)
+	require.NoError(t, err)
+
+	var dbUser models.User
+	result := GetDB().Unscoped().Where("email = ?", user.Email).First(&dbUser)
+	require.NoError(t, result.Error)
+	assert.False(t, dbUser.IsActive)
+
+	err = ToggleUserActive(user.Email, true)
+	require.NoError(t, err)
+
+	GetDB().Unscoped().Where("email = ?", user.Email).First(&dbUser)
+	assert.True(t, dbUser.IsActive)
+}
+
+func TestCreateAndListOrders(t *testing.T) {
+	email := "test-order@test.com"
+	t.Cleanup(func() {
+		GetDB().Exec("DELETE FROM temu_orders WHERE contact_name LIKE 'test-order-%'")
+	})
+
+	order := &Order{
+		ContactName: "test-order-user",
+		Phone:       "13800138000",
+		Wechat:      "test-wechat",
+		PlanName:    "专业版 - ¥169/季度",
+		Amount:      169,
+		Notes:       "测试订单",
+		Status:      "pending",
+	}
+	err := CreateOrder(order)
+	require.NoError(t, err)
+	assert.Greater(t, order.OrderID, 0)
+
+	orders, err := ListOrders()
+	require.NoError(t, err)
+	assert.NotEmpty(t, orders)
+
+	found := false
+	for _, o := range orders {
+		if o.ContactName == "test-order-user" {
+			found = true
+			assert.Equal(t, "pending", o.Status)
+			break
+		}
+	}
+	assert.True(t, found, "created order should be in list")
+}
+
+func TestMarkOrderCompleted(t *testing.T) {
+	order := &Order{
+		ContactName: "test-complete-order",
+		Phone:       "13900139000",
+		PlanName:    "基础版 - ¥69/月",
+		Amount:      69,
+		Status:      "pending",
+	}
+	err := CreateOrder(order)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		GetDB().Exec("DELETE FROM temu_orders WHERE contact_name = 'test-complete-order'")
+	})
+
+	err = MarkOrderCompleted(order.OrderID)
+	require.NoError(t, err)
+
+	orders, err := ListOrders()
+	require.NoError(t, err)
+	for _, o := range orders {
+		if o.OrderID == order.OrderID {
+			assert.Equal(t, "completed", o.Status)
+			return
+		}
+	}
+	t.Error("order not found after mark complete")
+}
+
+func TestDeleteOrder(t *testing.T) {
+	order := &Order{
+		ContactName: "test-del-order",
+		Phone:       "13700137000",
+		PlanName:    "测试套餐",
+		Amount:      99,
+		Status:      "pending",
+	}
+	err := CreateOrder(order)
+	require.NoError(t, err)
+
+	err = DeleteOrder(order.OrderID)
+	require.NoError(t, err)
+
+	orders, err := ListOrders()
+	require.NoError(t, err)
+	for _, o := range orders {
+		if o.OrderID == order.OrderID {
+			t.Error("order should have been deleted")
+		}
+	}
 }

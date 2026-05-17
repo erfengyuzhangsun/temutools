@@ -802,6 +802,149 @@ func AdminUpgradePlan(c *gin.Context) {
 	Success(c, gin.H{"message": fmt.Sprintf("已将 %s 的套餐升级为 %s", req.Email, req.PlanType)})
 }
 
+func AdminRenewUser(c *gin.Context) {
+	var req struct {
+		Email string `json:"email" binding:"required"`
+		Days  int    `json:"days" binding:"required,min=1"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "邮箱和续费天数不能为空")
+		return
+	}
+
+	if err := repository.UpdateUserExpiry(req.Email, req.Days); err != nil {
+		if err.Error() == "user not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "用户不存在")
+			return
+		}
+		slog.Error("failed to renew user", "email", req.Email, "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "续费失败")
+		return
+	}
+
+	slog.Info("user renewed by admin", "email", req.Email, "days", req.Days)
+	Success(c, gin.H{"message": fmt.Sprintf("已将 %s 续费 %d 天", req.Email, req.Days)})
+}
+
+func AdminToggleUser(c *gin.Context) {
+	var req struct {
+		Email  string `json:"email" binding:"required"`
+		Active bool   `json:"active"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "邮箱不能为空")
+		return
+	}
+
+	if err := repository.ToggleUserActive(req.Email, req.Active); err != nil {
+		if err.Error() == "user not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "用户不存在")
+			return
+		}
+		slog.Error("failed to toggle user", "email", req.Email, "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "操作失败")
+		return
+	}
+
+	action := "启用"
+	if !req.Active {
+		action = "禁用"
+	}
+	slog.Info("user toggled by admin", "email", req.Email, "active", req.Active)
+	Success(c, gin.H{"message": fmt.Sprintf("已将 %s %s", req.Email, action)})
+}
+
+func AdminListOrders(c *gin.Context) {
+	orders, err := repository.ListOrders()
+	if err != nil {
+		slog.Error("failed to list orders", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "获取订单列表失败")
+		return
+	}
+	Success(c, gin.H{"orders": orders})
+}
+
+func AdminCompleteOrder(c *gin.Context) {
+	var req struct {
+		OrderID int `json:"order_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "订单ID不能为空")
+		return
+	}
+
+	if err := repository.MarkOrderCompleted(req.OrderID); err != nil {
+		if err.Error() == "order not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "订单不存在")
+			return
+		}
+		Error(c, http.StatusInternalServerError, ErrInternal, "操作失败")
+		return
+	}
+
+	Success(c, gin.H{"message": "订单已标记为已处理"})
+}
+
+func AdminDeleteOrder(c *gin.Context) {
+	var req struct {
+		OrderID int `json:"order_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "订单ID不能为空")
+		return
+	}
+
+	if err := repository.DeleteOrder(req.OrderID); err != nil {
+		if err.Error() == "order not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "订单不存在")
+			return
+		}
+		Error(c, http.StatusInternalServerError, ErrInternal, "删除失败")
+		return
+	}
+
+	Success(c, gin.H{"message": "订单已删除"})
+}
+
+func AdminMonitor(c *gin.Context) {
+	report := service.RunHealthCheck()
+	Success(c, gin.H(report))
+}
+
+func SubmitOrder(c *gin.Context) {
+	var req struct {
+		ContactName string  `json:"contact_name" binding:"required"`
+		Phone       string  `json:"phone" binding:"required"`
+		Wechat      string  `json:"wechat"`
+		PlanName    string  `json:"plan_name" binding:"required"`
+		Amount      float64 `json:"amount"`
+		Notes       string  `json:"notes"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "请填写必要信息")
+		return
+	}
+
+	order := &models.Order{
+		ContactName: req.ContactName,
+		Phone:       req.Phone,
+		Wechat:      req.Wechat,
+		PlanName:    req.PlanName,
+		Amount:      req.Amount,
+		Notes:       req.Notes,
+		Status:      "pending",
+	}
+
+	if err := repository.CreateOrder(order); err != nil {
+		slog.Error("failed to submit order", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "订单提交失败")
+		return
+	}
+
+	slog.Info("order submitted", "order_id", order.OrderID, "plan", req.PlanName)
+	Success(c, gin.H{"message": "订单提交成功, 我们将在10分钟内联系您", "order_id": order.OrderID})
+}
+
 func getScheduler(c *gin.Context) *scheduler.Scheduler {
 	if v, exists := c.Get("scheduler"); exists {
 		if s, ok := v.(*scheduler.Scheduler); ok {

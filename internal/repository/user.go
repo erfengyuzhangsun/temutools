@@ -156,3 +156,35 @@ func SeedAdmin(email, password string) {
 	}
 	slog.Info("admin account seeded successfully", "user_id", user.UserID, "email", email)
 }
+
+func UpdateUserExpiry(email string, extraDays int) error {
+	db := GetDB()
+	if db == nil {
+		return fmt.Errorf("database not initialized")
+	}
+	result := db.Model(&models.User{}).Where("email = ?", email).
+		Update("expire_date", gorm.Expr("DATE_ADD(expire_date, INTERVAL ? DAY)", extraDays))
+	if result.Error != nil {
+		return fmt.Errorf("update expiry: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}
+
+func ToggleUserActive(email string, active bool) error {
+	db := GetDB()
+	if db == nil {
+		return fmt.Errorf("database not initialized")
+	}
+	result := db.Model(&models.User{}).Where("email = ?", email).
+		Update("is_active", active)
+	if result.Error != nil {
+		return fmt.Errorf("toggle active: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+	return nil
+}

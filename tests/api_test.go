@@ -481,3 +481,83 @@ func TestLogin_WithOriginalPasswordAfterSeedAdmin(t *testing.T) {
 			"admin env password should NOT work after SeedAdmin")
 	})
 }
+
+func TestAdminRenewUser(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-renew@test.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	_, err := repository.CreateUser(email, "testPass123", "basic")
+	require.NoError(t, err)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/users/renew",
+		lifetimeToken, `{"email":"`+email+`","days":30}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+	t.Run("basic user gets 403", func(t *testing.T) {
+		req := makeAuthRequest("POST", "/api/v1/admin/users/renew",
+			testUserToken, `{"email":"`+email+`","days":30}`)
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusForbidden, resp.Code)
+	})
+}
+
+func TestAdminToggleUser(t *testing.T) {
+	skipIfNoDB(t)
+
+	email := "test-toggle@test.com"
+	t.Cleanup(func() {
+		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
+	})
+
+	_, err := repository.CreateUser(email, "testPass123", "basic")
+	require.NoError(t, err)
+
+	req := makeAuthRequest("POST", "/api/v1/admin/users/toggle",
+		lifetimeToken, `{"email":"`+email+`","active":false}`)
+	resp := executeRequest(req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+}
+
+func TestAdminOrders(t *testing.T) {
+	skipIfNoDB(t)
+
+	t.Run("rejects non-lifetime", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/orders", testUserToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusForbidden, resp.Code)
+	})
+
+	t.Run("lifetime gets 200", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/orders", lifetimeToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusOK, resp.Code)
+	})
+}
+
+func TestAdminMonitor(t *testing.T) {
+	skipIfNoDB(t)
+
+	t.Run("rejects non-lifetime", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/monitor", testUserToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusForbidden, resp.Code)
+	})
+
+	t.Run("lifetime gets 200", func(t *testing.T) {
+		req := makeAuthRequest("GET", "/api/v1/admin/monitor", lifetimeToken, "")
+		resp := executeRequest(req)
+		assert.Equal(t, http.StatusOK, resp.Code)
+		var result map[string]interface{}
+		data := requireSuccess(t, resp.Body.Bytes())
+		err := json.Unmarshal(data.Data, &result)
+		require.NoError(t, err)
+		assert.Contains(t, result, "cpu")
+		assert.Contains(t, result, "memory")
+		assert.Contains(t, result, "disk")
+	})
+}
