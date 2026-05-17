@@ -1,8 +1,17 @@
 #!/bin/bash
 # ===== DigitalOcean 一键迁移部署脚本 =====
-# 用法: SSH 登录到 DO 服务器后执行:
-#   curl -fsSL https://raw.githubusercontent.com/erfengyuzhangsun/temutools/master/deploy/deploy-do.sh | bash
-# 或上传后: bash deploy/deploy-do.sh
+# 用法:
+#   方式1（推荐）: 传入 GitHub Token
+#     export GITHUB_TOKEN=你的token
+#     bash deploy/deploy-do.sh
+#
+#   方式2: 作为参数传入
+#     bash deploy/deploy-do.sh 你的GitHubToken
+#
+#   方式3: 交互式输入（脚本会提示）
+#     bash deploy/deploy-do.sh
+#
+# GitHub Token 获取: https://github.com/settings/tokens -> 勾选 repo 权限
 set -euo pipefail
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BLUE='\033[0;34m'; NC='\033[0m'
@@ -22,6 +31,35 @@ sep
 echo -e "${BLUE}  DigitalOcean 一键迁移部署${NC}"
 echo -e "${BLUE}  项目: Temu Tools Go${NC}"
 sep
+
+# ============================================
+# Step 0: GitHub 认证配置
+# ============================================
+log "Step 0/9: 配置 GitHub 访问..."
+GITHUB_TOKEN="${1:-${GITHUB_TOKEN:-}}"
+if [ -z "$GITHUB_TOKEN" ]; then
+    warn "未检测到 GitHub Token"
+    warn "仓库 erfengyuzhangsun/temutools 是私有的，需要 Token 才能拉取代码"
+    echo ""
+    echo -e "  如何获取 Token:"
+    echo -e "    1. 打开 https://github.com/settings/tokens"
+    echo -e "    2. 点击 Generate new token → Generate new token (classic)"
+    echo -e "    3. 勾选 repo 权限（全选）"
+    echo -e "    4. 生成后复制 token 字符串"
+    echo ""
+    read -rsp "  请输入你的 GitHub Token: " GITHUB_TOKEN
+    echo ""
+    if [ -z "$GITHUB_TOKEN" ]; then
+        err "Token 不能为空，退出"
+        exit 1
+    fi
+fi
+
+# 配置 Git 使用 Token 认证
+git config --global credential.helper "store --file ~/.git-credentials"
+echo "https://erfengyuzhangsun:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+chmod 600 ~/.git-credentials
+log "GitHub 认证已配置"
 
 # ============================================
 # Step 1: 系统初始化
