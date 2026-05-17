@@ -22,6 +22,7 @@ import RiskGuardPage from './pages/RiskGuard';
 import ShippingPage from './pages/Shipping';
 import ApiGuidePage from './pages/ApiGuide';
 import AdminPage from './pages/Admin';
+import PrivacyPage from './pages/Privacy';
 import PlaceholderPage from './pages/PlaceholderPage';
 import {
   ShoppingCartOutlined, BarChartOutlined, DollarOutlined,
@@ -54,6 +55,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/inventory" element={<InventoryPage />} />

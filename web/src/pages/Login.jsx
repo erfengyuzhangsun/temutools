@@ -117,7 +117,7 @@ export default function LoginPage() {
 
         <Checkbox checked={agreePolicy} onChange={(e) => setAgreePolicy(e.target.checked)} style={{ marginBottom: 8 }}>
           我已阅读并同意
-          <a href="/privacy" target="_blank" rel="noreferrer">《隐私政策》</a>
+          <a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a>
         </Checkbox>
 
         <Divider />
