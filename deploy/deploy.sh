@@ -16,7 +16,7 @@ fi
 log "==================== 热更新 ===================="
 
 log "Step 1/3: 拉取最新代码..."
-git pull origin main 2>/dev/null || true
+git pull origin master 2>/dev/null || true
 
 log "Step 2/3: 构建新镜像..."
 docker compose build
