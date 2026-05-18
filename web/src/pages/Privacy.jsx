@@ -30,15 +30,15 @@ export default function PrivacyPage() {
         }}>
           <Title level={2} style={{ textAlign: 'center', marginBottom: 8 }}>隐私政策</Title>
           <p style={{ textAlign: 'center', color: '#999', marginBottom: 24, fontSize: 13 }}>
-            最后更新日期：2026 年 05 月 15 日
+            最后更新日期：2026 年 05 月 18 日
           </p>
 
           <h2 style={{ fontSize: '1.15rem', marginTop: 20, marginBottom: 8, color: '#1a1a2e', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
             1. 总则
           </h2>
-          <p>1.1 感谢您使用本 Temu 卖家辅助工具（以下简称"本工具"）。我们严格遵循合法、正当、必要、诚信原则，恪守法律法规及行业规范，致力于保护您的个人信息、店铺数据及敏感信息安全。</p>
+          <p>1.1 感谢您使用 CloudAuto（鲸云策）（以下简称"本工具"）。我们严格遵循合法、正当、必要、诚信原则，恪守法律法规及行业规范，致力于保护您的个人信息、店铺数据及敏感信息安全。</p>
           <p>1.2 本隐私政策旨在清晰告知您，我们如何收集、使用、存储、保护、传输您的相关信息，以及您依法享有的权利、行使权利的方式，同时界定双方在数据处理过程中的责任边界。</p>
-          <p>1.3 本隐私政策仅适用于本工具的全部功能及服务，不适用于第三方平台（包括但不限于 Temu 开放平台、阿里云服务器提供商等）的服务及隐私政策。</p>
+          <p>1.3 本隐私政策仅适用于本工具的全部功能及服务，不适用于第三方平台（包括但不限于 Temu 开放平台、DigitalOcean 云服务提供商等）的服务及隐私政策。</p>
           <p>1.4 您在使用本工具前，应仔细阅读并充分理解本隐私政策的全部条款；您点击"同意"、继续使用本工具，即视为您已阅读、理解并完全同意本隐私政策的全部内容；若您不同意本政策，应立即停止使用本工具。</p>
 
           <h2 style={{ fontSize: '1.15rem', marginTop: 20, marginBottom: 8, color: '#1a1a2e', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
@@ -89,7 +89,7 @@ export default function PrivacyPage() {
             5. 数据存储与保护
           </h2>
           <p><strong>5.1 存储方式</strong></p>
-          <p>您的所有信息均存储于阿里云服务器，服务器由阿里云提供安全保障。</p>
+          <p>您的所有信息均存储于 DigitalOcean 新加坡节点服务器，服务器由 DigitalOcean 提供安全保障。</p>
           <p><strong>5.2 安全保护措施</strong></p>
           <p><strong>加密保护</strong>：您的 API 信息、访问密码，采用 AES-256 加密算法进行加密后存储；所有数据传输过程均通过 HTTPS 加密通道进行</p>
           <p><strong>数据隔离</strong>：采用用户 ID 严格隔离机制，每个用户的信息、店铺数据单独存储</p>
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
             7. 第三方服务
           </h2>
           <p><strong>Temu 开放平台</strong>：我们通过 Temu 官方 API 接口获取数据，数据使用受 Temu《开发者协议》约束</p>
-          <p><strong>阿里云服务器提供商</strong>：我们使用阿里云服务器存储您的信息，服务器安全保障由阿里云负责</p>
+          <p><strong>DigitalOcean 云服务提供商</strong>：我们使用 DigitalOcean 新加坡节点服务器存储您的信息，服务器安全保障由 DigitalOcean 负责</p>
           <p>我们不会将您的信息委托给任何其他第三方处理</p>
 
           <h2 style={{ fontSize: '1.15rem', marginTop: 20, marginBottom: 8, color: '#1a1a2e', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
@@ -133,7 +133,7 @@ export default function PrivacyPage() {
           <p>因不可抗力（自然灾害、战争、政策调整、网络中断、服务器故障等）导致的信息泄露等，我们不承担法律责任，但将尽力采取补救措施</p>
           <p>因您自身原因（泄露密码、转借账号、使用不安全网络等）导致的信息泄露，由您自行承担</p>
           <p>因 Temu 开放平台 API 接口故障、数据错误、政策调整等原因导致的问题，我们不承担责任</p>
-          <p>因阿里云服务器故障、安全漏洞等原因导致的问题，我们不承担直接责任，但将协助您追责</p>
+          <p>因 DigitalOcean 服务器故障、安全漏洞等原因导致的问题，我们不承担直接责任，但将协助您追责</p>
           <p>因网络安全技术的局限性、黑客攻击等不可防范的原因导致的问题，且我们无过错的，我们不承担责任</p>
           <p>您因违反本隐私政策、法律法规、Temu 平台规则导致损失的，由您自行承担</p>
 

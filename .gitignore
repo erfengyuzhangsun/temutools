@@ -32,3 +32,7 @@ Thumbs.db
 
 # 日志
 *.log
+
+# Temu 审核临时文件
+DPF_TIA_说明.pdf
+截图_加密存储说明.png
