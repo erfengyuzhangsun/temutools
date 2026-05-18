@@ -90,6 +90,10 @@ export function bindShop(shopName, accessToken, region = 'us', appKey = '', appS
   });
 }
 
+export function getTemuAuthUrl(shopName = '') {
+  return client.get('/temu/auth', { params: { shop_name: shopName } });
+}
+
 export function syncOrders(shopId) {
   return client.post('/api-sync/sync-orders', { shop_id: shopId });
 }

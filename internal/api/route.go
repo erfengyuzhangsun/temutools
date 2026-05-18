@@ -29,11 +29,13 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 		apiGroup.POST("/auth/login", LoginHandler)
 		apiGroup.POST("/auth/register", RegisterHandler)
 		apiGroup.POST("/submit-order", SubmitOrder)
+		apiGroup.GET("/temu/callback", HandleTemuCallback)
 
 		protected := apiGroup.Group("")
 		protected.Use(middleware.AuthMiddleware(authService))
 		{
 			protected.GET("/auth/me", GetCurrentUser)
+			protected.GET("/temu/auth", HandleGetAuthURL)
 
 			dashboard := protected.Group("/dashboard")
 			dashboard.Use(middleware.PlanGuardMiddleware("dashboard"))

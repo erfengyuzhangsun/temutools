@@ -396,3 +396,10 @@ func (c *RealClient) UpdateCredentials(apiKey, apiSecret, accessToken string) {
 func init() {
 	slog.Info("Temu API client initialized", "region_count", len(regionMap))
 }
+
+func GetRegionBaseURL(region string) string {
+	if u, ok := regionMap[region]; ok {
+		return u
+	}
+	return regionMap["global"]
+}
