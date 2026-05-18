@@ -118,12 +118,14 @@ export default function LoginPage() {
                 ]}>
                   <Input.Password prefix={<LockOutlined />} placeholder="密码（至少6位）" autoComplete="new-password" />
                 </Form.Item>
-                <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginBottom: 4, display: 'flex' }}>
-                  <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
-                </Checkbox>
-                <Checkbox checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} style={{ marginBottom: 12, display: 'flex' }}>
-                  <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
-                </Checkbox>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
+                  <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)}>
+                    <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
+                  </Checkbox>
+                  <Checkbox checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)}>
+                    <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
+                  </Checkbox>
+                </div>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block style={{ borderRadius: 8 }}>
                     注册
