@@ -91,7 +91,7 @@ export default function PrivacyPage() {
           <p><strong>5.1 存储方式</strong></p>
           <p>您的所有信息均存储于 DigitalOcean 新加坡节点服务器，服务器由 DigitalOcean 提供安全保障。</p>
           <p><strong>5.2 安全保护措施</strong></p>
-          <p><strong>加密保护</strong>：您的 API 信息、访问密码，采用 AES-256 加密算法进行加密后存储；所有数据传输过程均通过 HTTPS 加密通道进行</p>
+          <p><strong>加密保护</strong>：您的 API 信息、访问密码，采用 AES-256 加密算法进行加密后存储；所有数据传输过程均通过 TLS 1.2+ 加密通道进行</p>
           <p><strong>数据隔离</strong>：采用用户 ID 严格隔离机制，每个用户的信息、店铺数据单独存储</p>
           <p><strong>访问控制</strong>：仅授权的技术、运营人员（签订保密协议）可访问相关数据，日志记录所有访问行为</p>
           <p><strong>日志脱敏</strong>：系统日志中不记录完整的 API 信息、访问密码等敏感数据</p>
