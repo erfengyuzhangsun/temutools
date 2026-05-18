@@ -10,11 +10,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeLoginTerms, setAgreeLoginTerms] = useState(false);
+  const [agreeLoginPrivacy, setAgreeLoginPrivacy] = useState(false);
   const policyVersion = '2026-05-18';
   const navigate = useNavigate();
   const { message } = App.useApp();
 
   const handleLogin = async (values) => {
+    if (!agreeLoginTerms || !agreeLoginPrivacy) {
+      message.warning('请先阅读并同意《用户服务协议》和《隐私政策》');
+      return;
+    }
     setLoading(true);
     try {
       const resp = await login(values.email, values.password);
@@ -58,14 +64,6 @@ export default function LoginPage() {
     }
   };
 
-  const agreementLinks = (
-    <>
-      <a href="/terms" target="_blank" rel="noreferrer">《用户服务协议》</a>
-      和
-      <a href="/privacy" target="_blank" rel="noreferrer">《隐私政策》</a>
-    </>
-  );
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -94,9 +92,14 @@ export default function LoginPage() {
                 <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
                   <Input.Password prefix={<LockOutlined />} placeholder="密码" autoComplete="current-password" />
                 </Form.Item>
-                <Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 12 }}>
-                  登录即表示您仍同意{agreementLinks}
-                </Paragraph>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 12 }}>
+                  <Checkbox checked={agreeLoginTerms} onChange={(e) => setAgreeLoginTerms(e.target.checked)}>
+                    <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
+                  </Checkbox>
+                  <Checkbox checked={agreeLoginPrivacy} onChange={(e) => setAgreeLoginPrivacy(e.target.checked)}>
+                    <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
+                  </Checkbox>
+                </div>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block style={{ borderRadius: 8 }}>
                     登录
