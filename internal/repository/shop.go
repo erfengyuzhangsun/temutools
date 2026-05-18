@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/erfengyuzhangsun/temutools/internal/crypto"
 	"github.com/erfengyuzhangsun/temutools/internal/models"
 )
 
@@ -222,30 +223,30 @@ func SaveShopCredentials(shopID int, accessToken string, region string, appKey s
 		return fmt.Errorf("database not initialized")
 	}
 
+	encryptedToken, _ := crypto.EncryptPII(accessToken)
+	encryptedKey, _ := crypto.EncryptPII(appKey)
+	encryptedSecret, _ := crypto.EncryptPII(appSecret)
+
 	var cred models.ShopCredential
 	result := db.Where("shop_id = ?", shopID).First(&cred)
 	if result.Error == nil {
 		updates := map[string]interface{}{
-			"encrypted_access_token": accessToken,
+			"encrypted_access_token": encryptedToken,
+			"encrypted_api_key":      encryptedKey,
+			"encrypted_api_secret":   encryptedSecret,
 		}
 		if region != "" {
 			updates["region"] = region
-		}
-		if appKey != "" {
-			updates["encrypted_api_key"] = appKey
-		}
-		if appSecret != "" {
-			updates["encrypted_api_secret"] = appSecret
 		}
 		return db.Model(&cred).Updates(updates).Error
 	}
 
 	cred = models.ShopCredential{
 		ShopID:               shopID,
-		EncryptedAccessToken: accessToken,
+		EncryptedAccessToken: encryptedToken,
 		Region:               region,
-		EncryptedAPIKey:      appKey,
-		EncryptedAPISecret:   appSecret,
+		EncryptedAPIKey:      encryptedKey,
+		EncryptedAPISecret:   encryptedSecret,
 	}
 	if cred.Region == "" {
 		cred.Region = "us"
@@ -268,11 +269,14 @@ func GetShopCredentials(shopID int) (*ShopCredBrief, error) {
 	if region == "" {
 		region = "us"
 	}
+	accessToken := tryDecrypt(cred.EncryptedAccessToken)
+	appKey := tryDecrypt(cred.EncryptedAPIKey)
+	appSecret := tryDecrypt(cred.EncryptedAPISecret)
 	return &ShopCredBrief{
-		AccessToken: cred.EncryptedAccessToken,
+		AccessToken: accessToken,
 		Region:      region,
-		AppKey:      cred.EncryptedAPIKey,
-		AppSecret:   cred.EncryptedAPISecret,
+		AppKey:      appKey,
+		AppSecret:   appSecret,
 	}, nil
 }
 
@@ -287,7 +291,18 @@ func GetShopAccessToken(shopID int) (string, error) {
 	if result.Error != nil {
 		return "", result.Error
 	}
-	return cred.EncryptedAccessToken, nil
+	return tryDecrypt(cred.EncryptedAccessToken), nil
+}
+
+func tryDecrypt(encrypted string) string {
+	if encrypted == "" {
+		return ""
+	}
+	decrypted, err := crypto.DecryptPII(encrypted)
+	if err != nil {
+		return encrypted
+	}
+	return decrypted
 }
 
 func GetFactoryProducts(userID int) ([]models.FactoryProduct, error) {

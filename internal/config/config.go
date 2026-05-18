@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Auth     AuthConfig
+	Security SecurityConfig
 	Temu     TemuConfig
 }
 
@@ -34,6 +35,10 @@ type AuthConfig struct {
 	TokenExpire   int
 	AdminEmail    string
 	AdminPassword string
+}
+
+type SecurityConfig struct {
+	EncryptionKey string
 }
 
 type TemuConfig struct {
@@ -84,6 +89,9 @@ func LoadConfig(path string) *Config {
 			TokenExpire:   v.GetInt("TOKEN_EXPIRE"),
 			AdminEmail:    os.Getenv("ADMIN_EMAIL"),
 			AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+		},
+		Security: SecurityConfig{
+			EncryptionKey: os.Getenv("ENCRYPTION_KEY"),
 		},
 		Temu: TemuConfig{
 			AppKey:    os.Getenv("TEMU_APP_KEY"),

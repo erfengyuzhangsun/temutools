@@ -132,17 +132,20 @@ if [ ! -f .env ]; then
     DB_PASS=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 20)
     JWT_SECRET=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 40)
     ADMIN_PASS=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
+    ENC_KEY=$(openssl rand -base64 32)
 
     sed -i "s/DB_PASSWORD=your_db_password_here/DB_PASSWORD=$DB_PASS/" .env
     sed -i "s|JWT_SECRET=change_me_to_a_random_string_at_least_32_chars|JWT_SECRET=$JWT_SECRET|" .env
     sed -i "s/ADMIN_PASSWORD=your_admin_password_here/ADMIN_PASSWORD=$ADMIN_PASS/" .env
+    sed -i "s|ENCRYPTION_KEY=your_encryption_key_at_least_32_chars_long_here|ENCRYPTION_KEY=$ENC_KEY|" .env
     sed -i "s/DB_HOST=host.docker.internal/DB_HOST=$MYSQL_CONTAINER/" .env
 
     log ".env 已生成"
     info "DB_PASSWORD:  $DB_PASS"
     info "JWT_SECRET:   $JWT_SECRET"
+    info "ENCRYPTION_KEY: $ENC_KEY"
     info "ADMIN_PASSWORD: $ADMIN_PASS"
-    warn "请保存以上密码！仅首次显示"
+    warn "请保存以上密码和密钥！仅首次显示"
 else
     log ".env 已存在, 跳过"
 fi

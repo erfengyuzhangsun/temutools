@@ -50,12 +50,12 @@ func CreateUser(email, password, planType string, policyVersion string, termsAgr
 
 	now := time.Now()
 	user := models.User{
-		Email:        email,
-		PasswordHash: string(hashedBytes),
-		PlanType:     planType,
-		IsActive:     true,
-		StartDate:    &now,
-		ExpireDate:   nil,
+		Email:         email,
+		PasswordHash:  string(hashedBytes),
+		PlanType:      planType,
+		IsActive:      true,
+		StartDate:     &now,
+		ExpireDate:    nil,
 		PolicyVersion: policyVersion,
 	}
 	if termsAgreed {
