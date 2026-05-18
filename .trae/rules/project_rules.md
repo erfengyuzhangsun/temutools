@@ -156,3 +156,36 @@ docker compose logs -f app --tail 30 # Go 日志
 docker compose logs -f nginx --tail 10 # Nginx 日志
 curl http://localhost:8080/health    # 健康检查
 ```
+
+## 云主机迁移快速参考
+
+完整方法论见 `模型高效驱动提示词.md` 第 25 节。
+
+### 迁移前必填的架构配置矩阵
+```
+填好源和目标两边的：MySQL位置/DB_HOST/extra_hosts/Nginx位置/部署方式
+差异项 → 抽到 .env；相同项 → 放 docker-compose.yml
+```
+
+### DB_HOST 决策树
+```
+MySQL 在宿主机 → DB_HOST=host.docker.internal（需 extra_hosts）
+MySQL 在 Docker 容器，暴露了 3306 → DB_HOST=host.docker.internal
+MySQL 在 Docker 容器，未暴露 3306 → DB_HOST=temu-mysql（需 network connect）
+```
+
+### 迁移后验证（6层，不可跳步）
+```
+Level 1: curl localhost:8080/health
+Level 2: docker compose logs app | grep "database connected"
+Level 3: curl login API → 返回 token
+Level 4: curl -I https://www.domain.com
+Level 5: 浏览器打开页面
+Level 6: go test ./tests/ -v -count=1
+```
+
+### 回滚黄金规则
+```
+旧服务器至少保留 72 小时不释放
+DNS 切回旧 IP = 最快回滚方式
+```
