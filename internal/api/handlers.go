@@ -338,6 +338,8 @@ func BindShop(c *gin.Context) {
 		ShopName    string `json:"shop_name" binding:"required"`
 		AccessToken string `json:"access_token" binding:"required"`
 		Region      string `json:"region"`
+		AppKey      string `json:"app_key"`
+		AppSecret   string `json:"app_secret"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少必填字段")
@@ -356,7 +358,7 @@ func BindShop(c *gin.Context) {
 		return
 	}
 
-	if err := repository.SaveShopCredentials(shopID, req.AccessToken, region); err != nil {
+	if err := repository.SaveShopCredentials(shopID, req.AccessToken, region, req.AppKey, req.AppSecret); err != nil {
 		slog.Error("failed to save shop credentials", "error", err)
 		Error(c, http.StatusInternalServerError, ErrInternal, "保存凭证失败")
 		return
@@ -994,28 +996,46 @@ func getScheduler(c *gin.Context) *scheduler.Scheduler {
 
 func getTemuClient(shopID int) temu.ApiClient {
 	cfg := config.Cfg
-	if cfg == nil {
-		return temu.NewMockClient(shopID)
-	}
 
 	appKey := cfg.Temu.AppKey
 	appSecret := cfg.Temu.AppSecret
+	region := cfg.Temu.Region
+	accessToken := ""
+
+	if shopID > 0 {
+		cred, err := repository.GetShopCredentials(shopID)
+		if err == nil && cred != nil {
+			if cred.AppKey != "" {
+				appKey = cred.AppKey
+			}
+			if cred.AppSecret != "" {
+				appSecret = cred.AppSecret
+			}
+			if cred.AccessToken == "" {
+				slog.Warn("shop has no access token, using mock", "shop_id", shopID)
+				return temu.NewMockClient(shopID)
+			}
+			accessToken = cred.AccessToken
+			if cred.Region != "" {
+				region = cred.Region
+			}
+		} else {
+			slog.Warn("shop credentials not found, using mock", "shop_id", shopID, "error", err)
+			return temu.NewMockClient(shopID)
+		}
+	}
+
 	if appKey == "" || appSecret == "" {
+		slog.Warn("app_key or app_secret not configured, using mock")
 		return temu.NewMockClient(shopID)
 	}
 
-	cred, err := repository.GetShopCredentials(shopID)
-	if err != nil || cred == nil || cred.AccessToken == "" {
-		slog.Warn("shop credentials not found, using mock", "shop_id", shopID, "error", err)
+	if accessToken == "" {
+		slog.Warn("access_token not available, using mock")
 		return temu.NewMockClient(shopID)
 	}
 
-	region := cred.Region
-	if region == "" {
-		region = cfg.Temu.Region
-	}
-
-	client := temu.NewClient(shopID, appKey, appSecret, cred.AccessToken, region, cfg.Temu.Proxy)
+	client := temu.NewClient(shopID, appKey, appSecret, accessToken, region, cfg.Temu.Proxy)
 	slog.Info("created real Temu API client", "shop_id", shopID, "region", region)
 	return client
 }

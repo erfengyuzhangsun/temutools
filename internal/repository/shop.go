@@ -212,9 +212,11 @@ func DeleteShop(shopID int) error {
 type ShopCredBrief struct {
 	AccessToken string
 	Region      string
+	AppKey      string
+	AppSecret   string
 }
 
-func SaveShopCredentials(shopID int, accessToken string, region string) error {
+func SaveShopCredentials(shopID int, accessToken string, region string, appKey string, appSecret string) error {
 	db := GetDB()
 	if db == nil {
 		return fmt.Errorf("database not initialized")
@@ -229,6 +231,12 @@ func SaveShopCredentials(shopID int, accessToken string, region string) error {
 		if region != "" {
 			updates["region"] = region
 		}
+		if appKey != "" {
+			updates["encrypted_api_key"] = appKey
+		}
+		if appSecret != "" {
+			updates["encrypted_api_secret"] = appSecret
+		}
 		return db.Model(&cred).Updates(updates).Error
 	}
 
@@ -236,6 +244,8 @@ func SaveShopCredentials(shopID int, accessToken string, region string) error {
 		ShopID:               shopID,
 		EncryptedAccessToken: accessToken,
 		Region:               region,
+		EncryptedAPIKey:      appKey,
+		EncryptedAPISecret:   appSecret,
 	}
 	if cred.Region == "" {
 		cred.Region = "us"
@@ -261,6 +271,8 @@ func GetShopCredentials(shopID int) (*ShopCredBrief, error) {
 	return &ShopCredBrief{
 		AccessToken: cred.EncryptedAccessToken,
 		Region:      region,
+		AppKey:      cred.EncryptedAPIKey,
+		AppSecret:   cred.EncryptedAPISecret,
 	}, nil
 }
 

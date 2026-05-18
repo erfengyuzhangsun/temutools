@@ -12,6 +12,9 @@ export default function ApiSyncPage() {
   const [shopName, setShopName] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [region, setRegion] = useState('us');
+  const [appKey, setAppKey] = useState('');
+  const [appSecret, setAppSecret] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [syncing, setSyncing] = useState(null);
 
   const fetchShops = () => {
@@ -24,12 +27,15 @@ export default function ApiSyncPage() {
   const handleBind = async () => {
     if (!shopName || !accessToken) { message.warning('请填写店铺名称和Access Token'); return; }
     try {
-      await bindShop(shopName, accessToken, region);
+      await bindShop(shopName, accessToken, region, appKey, appSecret);
       message.success('店铺绑定成功');
       setBindModal(false);
       setShopName('');
       setAccessToken('');
       setRegion('us');
+      setAppKey('');
+      setAppSecret('');
+      setShowAdvanced(false);
       fetchShops();
     } catch (err) {
       message.error(err?.error?.message || '绑定失败');
@@ -72,7 +78,7 @@ export default function ApiSyncPage() {
       <Card>
         <Table dataSource={shops} columns={columns} rowKey="shop_id" pagination={false} />
       </Card>
-      <Modal title="绑定店铺" open={bindModal} onOk={handleBind} onCancel={() => setBindModal(false)}>
+      <Modal title="绑定店铺" open={bindModal} onOk={handleBind} onCancel={() => setBindModal(false)} width={500}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Input value={shopName} onChange={(e) => setShopName(e.target.value)} placeholder="店铺名称" />
           <Input value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Access Token" />
@@ -83,6 +89,15 @@ export default function ApiSyncPage() {
               { value: 'eu', label: '🇪🇺 欧洲 (eu)' },
             ]}
           />
+          <Button type="link" size="small" onClick={() => setShowAdvanced(!showAdvanced)} style={{ padding: 0 }}>
+            {showAdvanced ? '收起' : '展开'}高级设置（自定义 App Key/Secret）
+          </Button>
+          {showAdvanced && (
+            <>
+              <Input value={appKey} onChange={(e) => setAppKey(e.target.value)} placeholder="App Key（选填，留空使用系统默认）" />
+              <Input.Password value={appSecret} onChange={(e) => setAppSecret(e.target.value)} placeholder="App Secret（选填，留空使用系统默认）" />
+            </>
+          )}
         </Space>
       </Modal>
     </div>

@@ -80,8 +80,14 @@ export function getApiSyncShops() {
   return client.get('/api-sync/shops');
 }
 
-export function bindShop(shopName, accessToken, region = 'us') {
-  return client.post('/api-sync/bind-shop', { shop_name: shopName, access_token: accessToken, region });
+export function bindShop(shopName, accessToken, region = 'us', appKey = '', appSecret = '') {
+  return client.post('/api-sync/bind-shop', {
+    shop_name: shopName,
+    access_token: accessToken,
+    region,
+    app_key: appKey || undefined,
+    app_secret: appSecret || undefined,
+  });
 }
 
 export function syncOrders(shopId) {
