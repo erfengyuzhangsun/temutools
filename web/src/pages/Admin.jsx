@@ -44,7 +44,6 @@ function UserManagement() {
   const [upgrading, setUpgrading] = useState(false);
   const [renewModal, setRenewModal] = useState(null);
   const [renewDays, setRenewDays] = useState(30);
-  const [deleteModal, setDeleteModal] = useState(null);
   const [resetPwdModal, setResetPwdModal] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const { message } = App.useApp();
@@ -101,12 +100,10 @@ function UserManagement() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteModal) return;
+  const handleDelete = async (record) => {
     try {
-      await adminDeleteUser(deleteModal.user_id);
-      message.success(`已删除用户 ${deleteModal.email}`);
-      setDeleteModal(null);
+      await adminDeleteUser(record.user_id);
+      message.success(`已删除用户 ${record.email}`);
       fetchUsers();
     } catch (err) {
       message.error(err?.error?.message || '删除失败');
