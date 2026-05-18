@@ -219,3 +219,60 @@ func ToggleUserActive(email string, active bool) error {
 	}
 	return nil
 }
+
+func FindByUserID(userID int) (*models.User, error) {
+	db := GetDB()
+	if db == nil {
+		return nil, fmt.Errorf("database not initialized")
+	}
+
+	var user models.User
+	result := db.First(&user, userID)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
+func DeleteUser(userID int) error {
+	db := GetDB()
+	if db == nil {
+		return fmt.Errorf("database not initialized")
+	}
+
+	user, err := FindByUserID(userID)
+	if err != nil {
+		return fmt.Errorf("find user: %w", err)
+	}
+	if user == nil {
+		return fmt.Errorf("user not found")
+	}
+
+	shops, err := GetUserShops(userID)
+	if err != nil {
+		return fmt.Errorf("get user shops: %w", err)
+	}
+
+	for _, shop := range shops {
+		db.Delete(&models.ShopCredential{}, "shop_id = ?", shop.ShopID)
+		db.Delete(&models.PricingLog{}, "shop_id = ?", shop.ShopID)
+		db.Delete(&models.SyncRecord{}, "shop_id = ?", shop.ShopID)
+		db.Delete(&models.SkuProfit{}, "shop_id = ?", shop.ShopID)
+		db.Delete(&models.ProfitStat{}, "shop_id = ?", shop.ShopID)
+		db.Delete(&models.Shop{}, shop.ShopID)
+	}
+
+	result := db.Delete(&models.User{}, userID)
+	if result.Error != nil {
+		return fmt.Errorf("delete user: %w", result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	slog.Info("user deleted", "user_id", userID, "email", user.Email, "shop_count", len(shops))
+	return nil
+}

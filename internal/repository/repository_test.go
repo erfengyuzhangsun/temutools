@@ -313,6 +313,52 @@ func TestSeedAdmin_DoesNotOverwriteUserPassword(t *testing.T) {
 		"SeedAdmin's env password should NOT work after overwriting")
 }
 
+// ====== DeleteUser Tests ======
+
+func TestDeleteUser_Success(t *testing.T) {
+	user := createTestUser(t, "del-success")
+	shop := createTestShop(t, user.UserID, "del-success")
+
+	err := DeleteUser(user.UserID)
+	require.NoError(t, err)
+
+	deletedUser, err := FindByUserID(user.UserID)
+	require.NoError(t, err)
+	assert.Nil(t, deletedUser, "user should be deleted")
+
+	var shopCount int64
+	GetDB().Model(&models.Shop{}).Where("shop_id = ?", shop.ShopID).Count(&shopCount)
+	assert.Equal(t, int64(0), shopCount, "user's shops should also be deleted")
+}
+
+func TestDeleteUser_NotFound(t *testing.T) {
+	err := DeleteUser(999999)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "user not found")
+}
+
+func TestFindByUserID_Success(t *testing.T) {
+	user := createTestUser(t, "find-id")
+
+	found, err := FindByUserID(user.UserID)
+	require.NoError(t, err)
+	require.NotNil(t, found)
+	assert.Equal(t, user.UserID, found.UserID)
+	assert.Equal(t, user.Email, found.Email)
+}
+
+func TestFindByUserID_NotFound(t *testing.T) {
+	found, err := FindByUserID(999999)
+	require.NoError(t, err)
+	assert.Nil(t, found)
+}
+
+func TestFindByUserID_Negative(t *testing.T) {
+	found, err := FindByUserID(-1)
+	require.NoError(t, err)
+	assert.Nil(t, found)
+}
+
 // ====== Shop Repository Tests ======
 
 func TestCreateAndGetUserShops(t *testing.T) {

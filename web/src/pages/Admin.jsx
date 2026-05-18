@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, Card, Input, Button, Tag, Modal, Select, Space, Typography, App, Badge, Tabs, Form, InputNumber, Popconfirm, Statistic, Row, Col, Descriptions } from 'antd';
+import { Table, Card, Input, Button, Tag, Modal, Select, Space, Typography, App, Badge, Tabs, Form, InputNumber, Popconfirm, Statistic, Row, Col } from 'antd';
 import { SearchOutlined, CrownOutlined, ReloadOutlined, UserOutlined, ShoppingCartOutlined, MonitorOutlined, ToolOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   adminListUsers, adminUpgradePlan, adminRenewUser, adminToggleUser,
+  adminDeleteUser, adminResetPassword,
   adminListOrders, adminCompleteOrder, adminDeleteOrder, adminMonitor
 } from '../api/client';
 
@@ -43,6 +44,9 @@ function UserManagement() {
   const [upgrading, setUpgrading] = useState(false);
   const [renewModal, setRenewModal] = useState(null);
   const [renewDays, setRenewDays] = useState(30);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [resetPwdModal, setResetPwdModal] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
   const { message } = App.useApp();
 
   const fetchUsers = useCallback(async () => {
@@ -97,6 +101,35 @@ function UserManagement() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteModal) return;
+    try {
+      await adminDeleteUser(deleteModal.user_id);
+      message.success(`已删除用户 ${deleteModal.email}`);
+      setDeleteModal(null);
+      fetchUsers();
+    } catch (err) {
+      message.error(err?.error?.message || '删除失败');
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPwdModal) return;
+    if (!newPassword || newPassword.length < 6) {
+      message.error('密码至少6位');
+      return;
+    }
+    try {
+      await adminResetPassword(resetPwdModal.email, newPassword);
+      message.success(`已将 ${resetPwdModal.email} 的密码重置成功`);
+      setResetPwdModal(null);
+      setNewPassword('');
+      fetchUsers();
+    } catch (err) {
+      message.error(err?.error?.message || '密码重置失败');
+    }
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'user_id', key: 'user_id', width: 60 },
     { title: '邮箱', dataIndex: 'email', key: 'email', ellipsis: true },
@@ -123,7 +156,7 @@ function UserManagement() {
     { title: '注册时间', dataIndex: 'created_at', key: 'created_at', width: 110, render: (v) => v ? new Date(v).toLocaleDateString() : '-' },
     { title: '状态', dataIndex: 'is_active', key: 'is_active', width: 70, render: (v) => v ? <Tag color="green">正常</Tag> : <Tag color="red">禁用</Tag> },
     {
-      title: '操作', key: 'action', width: 240,
+      title: '操作', key: 'action', width: 340,
       render: (_, record) => (
         <Space>
           <Button type="link" size="small" icon={<CrownOutlined />}
@@ -132,6 +165,10 @@ function UserManagement() {
           <Button type="link" size="small" onClick={() => { setRenewModal(record); setRenewDays(30); }}>续费</Button>
           <Popconfirm title={`确定${record.is_active ? '禁用' : '启用'}该用户？`} onConfirm={() => handleToggle(record.email, !record.is_active)}>
             <Button type="link" size="small" danger={record.is_active}>{record.is_active ? '禁用' : '启用'}</Button>
+          </Popconfirm>
+          <Button type="link" size="small" onClick={() => setResetPwdModal(record)}>重置密码</Button>
+          <Popconfirm title={`确定删除用户 ${record.email}？此操作不可恢复，用户的所有店铺数据也将一同删除！`} onConfirm={() => handleDelete(record)}>
+            <Button type="link" size="small" danger>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -168,6 +205,17 @@ function UserManagement() {
             <p>用户：<strong>{renewModal.email}</strong></p>
             <p>当前到期：{renewModal.expire_date ? new Date(renewModal.expire_date).toLocaleDateString() : '永久'}</p>
             <Form.Item label="续费天数"><InputNumber min={1} max={3650} value={renewDays} onChange={setRenewDays} style={{ width: '100%' }} /></Form.Item>
+          </Space>
+        )}
+      </Modal>
+
+      <Modal title="重置用户密码" open={!!resetPwdModal} onOk={handleResetPassword} onCancel={() => { setResetPwdModal(null); setNewPassword(''); }} okText="确认重置" cancelText="取消">
+        {resetPwdModal && (
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <p>用户：<strong>{resetPwdModal.email}</strong></p>
+            <Form.Item label="新密码" required>
+              <Input.Password value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="输入新密码（至少6位）" />
+            </Form.Item>
           </Space>
         )}
       </Modal>

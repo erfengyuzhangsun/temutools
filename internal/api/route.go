@@ -146,6 +146,8 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			admin.POST("/upgrade-plan", AdminUpgradePlan)
 			admin.POST("/users/renew", AdminRenewUser)
 			admin.POST("/users/toggle", AdminToggleUser)
+			admin.POST("/users/delete", AdminDeleteUser)
+			admin.POST("/users/reset-password", AdminResetUserPassword)
 			admin.GET("/orders", AdminListOrders)
 			admin.POST("/orders/complete", AdminCompleteOrder)
 			admin.POST("/orders/delete", AdminDeleteOrder)

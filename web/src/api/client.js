@@ -185,6 +185,14 @@ export function adminToggleUser(email, active) {
   return client.post('/admin/users/toggle', { email, active });
 }
 
+export function adminDeleteUser(userId) {
+  return client.post('/admin/users/delete', { user_id: userId });
+}
+
+export function adminResetPassword(email, newPassword) {
+  return client.post('/admin/users/reset-password', { email, new_password: newPassword });
+}
+
 export function adminListOrders() {
   return client.get('/admin/orders');
 }

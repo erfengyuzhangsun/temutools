@@ -910,6 +910,53 @@ func AdminToggleUser(c *gin.Context) {
 	Success(c, gin.H{"message": fmt.Sprintf("已将 %s %s", req.Email, action)})
 }
 
+func AdminDeleteUser(c *gin.Context) {
+	var req struct {
+		UserID int `json:"user_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "用户ID不能为空")
+		return
+	}
+
+	if err := repository.DeleteUser(req.UserID); err != nil {
+		if err.Error() == "user not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "用户不存在")
+			return
+		}
+		slog.Error("failed to delete user", "user_id", req.UserID, "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "删除用户失败")
+		return
+	}
+
+	slog.Info("user deleted by admin", "user_id", req.UserID)
+	Success(c, gin.H{"message": "用户已删除"})
+}
+
+func AdminResetUserPassword(c *gin.Context) {
+	var req struct {
+		Email       string `json:"email" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required,min=6"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "邮箱和新密码不能为空（密码至少6位）")
+		return
+	}
+
+	if err := repository.UpdateUserPassword(req.Email, req.NewPassword); err != nil {
+		if err.Error() == "user not found" {
+			Error(c, http.StatusNotFound, ErrNotFound, "用户不存在")
+			return
+		}
+		slog.Error("failed to reset password", "email", req.Email, "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "密码重置失败")
+		return
+	}
+
+	slog.Info("password reset by admin", "email", req.Email)
+	Success(c, gin.H{"message": fmt.Sprintf("已将 %s 的密码重置成功", req.Email)})
+}
+
 func AdminListOrders(c *gin.Context) {
 	orders, err := repository.ListOrders()
 	if err != nil {
