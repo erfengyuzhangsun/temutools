@@ -303,35 +303,34 @@ export default function LandingPage() {
               <>
                 <h4 style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 18, marginBottom: 16 }}>
                   <span style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 'bold' }}>1</span>
-                  🔑 绑定店铺 — 三步完成
+                  🔑 绑定店铺 — 一键授权
                 </h4>
                 <div className="mock-window">
-                  <div className="mock-header"><span><span className="dot dot-r"></span><span className="dot dot-y"></span><span className="dot dot-g"></span></span><span>🔑 店铺绑定 — 三步开启全功能</span></div>
+                  <div className="mock-header"><span><span className="dot dot-r"></span><span className="dot dot-y"></span><span className="dot dot-g"></span></span><span>🔑 店铺绑定 — 支持一键授权 + 手动绑定</span></div>
                   <div className="mock-body">
                     <div className="flex-2">
                       <div className="mock-col" style={{ border: '2px solid #667eea', background: '#f8f9ff' }}>
-                        <div className="mock-col-t">📋 三步绑定店铺</div>
+                        <div className="mock-col-t">🚀 推荐：一键授权（自动）</div>
                         <div style={{ padding: '8px 0', fontSize: 14 }}>
-                          <div style={{ padding: '8px 10px', background: '#e8f4fd', borderRadius: 8, marginBottom: 8 }}><strong>Step 1</strong> — 登录Temu卖家中心 → 获取Access Token</div>
-                          <div style={{ padding: '8px 10px', background: '#e8f4fd', borderRadius: 8, marginBottom: 8 }}><strong>Step 2</strong> — 在系统中填写店铺名称、Access Token、选择区域</div>
-                          <div style={{ padding: '8px 10px', background: '#e8f4fd', borderRadius: 8 }}><strong>Step 3</strong> — 保存并开始同步数据</div>
+                          <div style={{ padding: '8px 10px', background: '#e8f4fd', borderRadius: 8, marginBottom: 8 }}><strong>Step 1</strong> — 系统生成授权链接发给客户</div>
+                          <div style={{ padding: '8px 10px', background: '#e8f4fd', borderRadius: 8, marginBottom: 8 }}><strong>Step 2</strong> — 客户登录Temu卖家中心→点击授权</div>
+                          <div style={{ padding: '8px 10px', background: '#d4edda', borderRadius: 8, color: '#155724' }}><strong>Step 3</strong> — ✅ 系统自动绑定，无需手动操作</div>
                         </div>
                       </div>
                       <div className="mock-col" style={{ border: '2px solid #667eea', background: '#f8f9ff' }}>
                         <div className="mock-col-t">🔐 绑定店铺界面</div>
                         <div style={{ padding: '8px 0', fontSize: 14 }}>
-                          <div style={{ padding: '6px 10px', background: '#f0f0f0', borderRadius: 6, marginBottom: 6 }}>店铺名称: <strong style={{ color: '#667eea' }}>美国站主店</strong></div>
-                          <div style={{ padding: '6px 10px', background: '#f0f0f0', borderRadius: 6, marginBottom: 6 }}>区域: <strong style={{ color: '#667eea' }}>🇺🇸 美国 (us)</strong></div>
-                          <div style={{ padding: '6px 10px', background: '#f0f0f0', borderRadius: 6, marginBottom: 6 }}>Access Token: <strong style={{ color: '#667eea' }}>•••••e4b1</strong></div>
-                          <div style={{ padding: '6px', background: '#d4edda', borderRadius: 6, fontSize: 13, color: '#155724', marginTop: 6 }}>✅ 密钥已预配，无需填写App Key/Secret</div>
+                          <div style={{ padding: '6px 10px', background: '#f0f0f0', borderRadius: 6, marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}><span>店铺名称:</span> <strong style={{ color: '#667eea' }}>张三优选</strong></div>
+                          <div style={{ padding: '6px 10px', background: '#f0f0f0', borderRadius: 6, marginBottom: 6 }}><strong style={{ color: '#667eea' }}>[生成授权链接]</strong> 复制发给客户</div>
+                          <div style={{ padding: '6px 10px', background: '#d4edda', borderRadius: 6, fontSize: 13, color: '#155724', marginTop: 6 }}>✅ 密钥已预配，客户授权后自动绑定</div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="annotation"><div className="ann-arrow">①</div><div><strong>无需成为Temu开发者</strong> — 平台已预配好API凭证，您只需提供Access Token</div></div>
+                <div className="annotation"><div className="ann-arrow">①</div><div><strong>无需成为Temu开发者</strong> — 平台已预配好API凭证，一键生成授权链接发给客户</div></div>
                 <div className="annotation"><div className="ann-arrow">②</div><div><strong>没有Token也能用！</strong> — 系统内置模拟数据模式，不填密钥即可体验全部功能</div></div>
-                <div className="demo-footer">💡 <strong>提示：</strong>系统支持多区域店铺（🇺🇸美国/🌐全球/🇪🇺欧洲），一个账号管理所有店铺</div>
+                <div className="demo-footer">💡 <strong>提示：</strong>系统支持多区域店铺（🇺🇸美国/🌐全球/🇪🇺欧洲），一个账号管理所有店铺。也支持手动输入Access Token绑定</div>
               </>
             )}
             {demoStep === 2 && (

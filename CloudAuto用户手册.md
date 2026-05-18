@@ -176,9 +176,27 @@ CloudAuto（鲸云策）是一款面向 Temu 跨境卖家的全流程店铺管�
 
 ### 5.1 绑定店铺
 
-将您的 Temu 店铺与本系统关联。
+将您的 Temu 店铺与本系统关联。支持 **两种绑定方式**，任选其一。
 
-**对于普通卖家（最常用方式，只需填3项）：**
+---
+
+**方式一：一键授权（推荐，最快捷）**
+
+> 无需手动复制 Token，客户在 Temu 卖家中心点击授权即可自动完成绑定。
+
+1. 点击 **"一键授权"** 按钮
+2. 在弹出的窗口中输入客户的 **店铺名称**（如"张三优选"）
+3. 点击 **"生成授权链接"**
+4. 将生成的链接复制后发给客户（微信/邮件/其他方式）
+5. 客户打开链接 → 登录 Temu 卖家中心 → 点击 **"授权"**
+6. 系统自动完成绑定，客户和您都能看到绑定成功的提示
+
+> 授权链接示例：  
+> `https://openapi-b-us.temu.com/openapi/oauth?app_key=01b78xxx&redirect_url=https://www.jinpuhuang.com/api/v1/temu/callback&state=xxx`
+
+**方式二：手动绑定（备用方式）**
+
+如果您已经拿到了客户的 Access Token，也可以手动输入：
 
 1. 点击 **"绑定店铺"** 按钮
 2. 填写：
@@ -779,16 +797,24 @@ CloudAuto（鲸云策）是一款面向 Temu 跨境卖家的全流程店铺管�
 
 **获取 Access Token 的流程（二选一）：**
 
-**方式一：手动获取（当前可用）**
+**方式一：一键授权（推荐）**
 
-1. 联系管理员获取授权链接
-2. 在浏览器中打开，登录您的 Temu 卖家中心
-3. 点击"授权"，系统会生成一个 Access Token
-4. 复制该 Token，回到 CloudAuto → API 同步管理 → 绑定店铺 → 填入即可
+> 联系您的服务商，他们会提供一个授权链接。点击后在 Temu 卖家中心授权，系统自动完成绑定，无需手动复制粘贴 Token。
 
-**方式二：自动回调（开发中）**
+1. 联系服务商（系统管理员）获取 Temu 授权链接
+2. 在浏览器中打开该链接
+3. 登录您的 Temu 卖家中心
+4. 点击 **"授权"** 按钮
+5. 页面自动跳转回 CloudAuto，显示"店铺绑定成功"
 
-> 未来版本将支持在 Temu 卖家中心直接点击授权，系统自动接收 Token，无需手动复制粘贴。
+**方式二：手动输入（备用）**
+
+如果您已经拿到了 Access Token，也可以手动输入：
+
+1. 登录 CloudAuto → **API 同步管理**
+2. 点击 **"绑定店铺"** 按钮
+3. 填写店铺名称、Access Token，选择区域
+4. 点击 **"确定"** 完成绑定
 
 ### 19.2 我是开发者/管理员，如何配置？
 
@@ -799,9 +825,19 @@ CloudAuto（鲸云策）是一款面向 Temu 跨境卖家的全流程店铺管�
 | 1 | 注册 Temu 开发者账号 | 访问 https://partner-us.temu.com |
 | 2 | 创建自研应用获取凭证 | 获取 App Key、App Secret |
 | 3 | 在服务器 `.env` 中配置 | 设置 `TEMU_APP_KEY` 和 `TEMU_APP_SECRET` |
-| 4 | 在系统中绑定店铺 | 普通卖家只需填 Access Token + 选择区域即可 |
+| 4 | 在 Temu 平台设置 OAuth 回调地址 | 填入 `https://www.jinpuhuang.com/api/v1/temu/callback` |
+| 5 | 重启系统 | `docker compose up -d --no-deps app` |
+| 6 | 在 CloudAuto 中生成授权链接 | API 同步管理 → 一键授权 → 发给客户即可 |
 
-### 19.3 测试 API 连接
+**OAuth 回调地址配置位置：**
+
+Temu Partner Platform（https://partner-us.temu.com）→ 应用管理 → 选择您的应用 → 安全设置 → **OAuth 回调地址** → 填入：
+
+```
+https://www.jinpuhuang.com/api/v1/temu/callback
+```
+
+> 配置后，客户点击授权链接时会自动回调到本系统，系统自动用 code 换取 Access Token 并绑定店铺。
 
 点击 **"测试连接"** 按钮，验证系统与 Temu API 的连通性。
 
