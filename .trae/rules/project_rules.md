@@ -12,7 +12,7 @@
 - **远程**：`origin https://github.com/erfengyuzhangsun/temutools.git`（master 分支）
 - **访问地址**：https://www.jinpuhuang.com
 
-## 当前系统状态（2026-05-18 修复后）
+## 当前系统状态（2026-05-18 多密钥+OAuth+多区域）
 
 - Go 服务：✅ Healthy，DB 连接成功，AutoMigrate 完成
 - Nginx：✅ 正常运行（80 + 443 → Go 8080）
@@ -22,9 +22,13 @@
 - **DB_HOST**：✅ 改为 `temu-mysql`（Docker MySQL 容器直连）
 - **外键冲突**：✅ 已删除所有不兼容外键约束，AutoMigrate 通过
 - **基础版到期时间**：✅ 已修复为 30 天（线上验证通过）
-- **店铺绑定**：✅ access_token 持久化到 DB
+- **店铺绑定**：✅ 支持手动绑定（Access Token + 区域）和 OAuth 一键授权（自动回调）
+- **多密钥支持**：✅ 每个店铺可自定义 App Key/Secret，优先使用店铺级密钥，无则 fallback 到 `.env`
+- **OAuth 回调**：✅ `GET /temu/callback` 接收授权 code 自动换 token 并绑定店铺；`GET /temu/auth` 生成授权链接
 - **Temu API请求**：✅ URL 对齐官方规范
-- **Temu 自研应用审批**：⏳ 已配 HTTPS，可重新提交审批（Server: DO Singapore）
+- **Temu 自研应用审批**：⏳ 已提交 US 区"鲸云策"，等待审核（Server: DO Singapore）
+- **OAuth 回调地址**：⏳ 审核通过后需在 Temu Partner Platform 配置 `https://www.jinpuhuang.com/api/v1/temu/callback`
+- **消费者操作流程**：管理员配好密钥 → 系统生成授权链接 → 发给客户 → 客户点链接授权 → 自动完成绑定
 - **服务器**：✅ DigitalOcean（新加坡，152.42.226.188）
 - **数据迁移**：✅ 所有用户数据已从阿里云导入 DO
 - **DNS**：✅ www.jinpuhuang.com 已指向 DO IP
@@ -42,6 +46,10 @@
 - ❌ **不检查就交付**：命令发出去前逐字检查路径、分支名、参数
 - ❌ **改 route.go 用 SearchReplace 多次修改**：route.go 的大括号嵌套复杂，多次 SearchReplace 会导致闭括号失衡。必须一次重写完整文件或只做 1 次精确替换后立即 `go build` 验证
 - ❌ **已知问题不查教训记录**：每次遇到问题先查"六、教训记录"和"踩坑复盘"中有无同类问题，禁止重复踩坑
+- ❌ **自研应用当成第三方应用设计**：Temu 自研应用是一套 App Key 服务所有店铺，不是每个客户一套密钥。每个客户通过 OAuth 授权拿自己的 Access Token
+- ❌ **OAuth 流程缺回调端点**：必须实现 `GET /callback` 端点接收授权 code 并自动换 token 保存，不能只让客户手动复制粘贴
+- ❌ **跨区域共享同一 App Key**：Temu 限制每个自研应用只能一个区域，多区域需要多组 App Key 或审批后扩展
+- ❌ **改代码不同步更新 Landing 页和用户手册**：涉及前端流程变更，Landing 页演示、用户手册、代码三者必须同步更新
 - ✅ **本地必验清单（每次改代码后必须执行）**：
   1. `go build ./...` — 零编译错误
   2. `go test ./...` — 全部通过
