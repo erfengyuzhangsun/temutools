@@ -407,17 +407,18 @@ go test ./tests/... -count=1 -v
 
 ## 十二、给 Cursor 的行为规则
 
-1. **每次对话开始，先完整阅读本文档**，了解项目最新状态
+1. **每次对话开始，先完整阅读本文档**，并阅读 `.trae/rules/project_rules.md`（含 **TDD 与提交门禁**）
 2. **改代码前先完整阅读目标文件**，确认上下文
 3. **只改当前任务必需的文件**，不触碰无关模块
-4. **改完代码后必须执行**：
+4. **每次更新必须遵循 TDD**：先写/补测试 → 实现代码 → **终测全部通过后** 才 `git commit` / `git push`（详见 `project_rules.md`「TDD 与提交门禁」）
+5. **终测清单（不可跳过）**：
    - `go build ./...` — 零编译错误
-   - `go test ./... -count=1` — 全部通过
+   - `go test ./... -count=1` — 全部通过（发布前建议在 MySQL 环境跑通 `go test ./tests/...`）
    - 如果改了前端：`cd web && npm run build` — 构建成功
-5. **route.go 修改规则**：
+6. **route.go 修改规则**：
    - 大括号嵌套复杂，建议一次完整重写
    - 改完立即 `go build ./...` 验证
    - 禁止多次 SearchReplace 编辑此文件
-6. **远程文件修改**：必须先 `grep -n` 精确定位行号，一次只改一行，改完立刻构建验证
-7. **Windows vs Linux 命令区分**：本地 Windows 用 Powershell，服务器 Linux 用 bash
-8. **不要创建不必要的文档文件**，除非用户明确要求
+7. **远程文件修改**：必须先 `grep -n` 精确定位行号，一次只改一行，改完立刻构建验证
+8. **Windows vs Linux 命令区分**：本地 Windows 用 Powershell，服务器 Linux 用 bash
+9. **不要创建不必要的文档文件**，除非用户明确要求

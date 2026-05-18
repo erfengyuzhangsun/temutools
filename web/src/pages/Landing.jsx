@@ -1,9 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function LandingPage() {
   const [showDemo, setShowDemo] = useState(false);
   const [demoStep, setDemoStep] = useState(1);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [flash, setFlash] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const error = params.get('error');
+    if (success) {
+      setFlash({ type: 'success', text: decodeURIComponent(success) });
+    } else if (error) {
+      setFlash({ type: 'error', text: decodeURIComponent(error) });
+    }
+    if (success || error) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('success');
+      url.searchParams.delete('error');
+      window.history.replaceState({}, '', url.pathname + url.hash);
+    }
+  }, []);
 
   const goLogin = () => { window.location.href = '/login'; };
 
@@ -247,6 +265,24 @@ export default function LandingPage() {
           border: 1px solid #d0d5ff;
         }
       `}</style>
+
+      {flash && (
+        <div style={{
+          margin: '12px 0',
+          padding: '14px 18px',
+          borderRadius: 10,
+          fontSize: 15,
+          lineHeight: 1.6,
+          background: flash.type === 'success' ? '#d4edda' : '#f8d7da',
+          color: flash.type === 'success' ? '#155724' : '#721c24',
+          border: `1px solid ${flash.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+        }}>
+          {flash.type === 'success' ? '✅ ' : '⚠️ '}{flash.text}
+          {flash.type === 'success' && (
+            <span> — <a href="/login" style={{ color: '#155724', fontWeight: 'bold' }}>立即登录</a> 进入系统</span>
+          )}
+        </div>
+      )}
 
       {/* ==================== 导航栏 ==================== */}
       <div className="nav-bar">

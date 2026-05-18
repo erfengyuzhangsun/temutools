@@ -109,7 +109,13 @@ export default function ApiSyncPage() {
       </Row>
       <Alert
         message="客户如何绑定店铺？"
-        description="客户须先在 Temu 卖家中心对「鲸云策」授权，或由您代其完成授权。绑定前请确认客户已阅读《用户服务协议》《隐私政策》并勾选数据处理声明。"
+        description={(
+          <span>
+            全托管/半托管/Y2 绑店步骤相同。
+            <a href="/guide" target="_blank" rel="noreferrer" style={{ marginLeft: 8 }}>查看完整绑店指南</a>
+            — 须先在 Temu 卖家中心授权「鲸云策」，并勾选数据处理声明。
+          </span>
+        )}
         type="info"
         showIcon
         style={{ marginBottom: 16 }}

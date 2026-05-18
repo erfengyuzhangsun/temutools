@@ -24,6 +24,7 @@ import ApiGuidePage from './pages/ApiGuide';
 import AdminPage from './pages/Admin';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
+import GuidePage from './pages/Guide';
 import PlaceholderPage from './pages/PlaceholderPage';
 import {
   ShoppingCartOutlined, BarChartOutlined, DollarOutlined,
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/guide" element={<GuidePage />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/inventory" element={<InventoryPage />} />

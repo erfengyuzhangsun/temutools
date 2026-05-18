@@ -36,6 +36,62 @@
 - 24 个 API 端点：✅ 全部通过测试
 - 前端 16 页面：✅ 全部实现（7 个基础版可访问，9 个带 🔒 锁定）
 
+## TDD 与提交门禁（每次更新必须遵循）
+
+**原则**：每次做功能修复或新需求，必须遵循 **TDD（测试驱动开发）**；**终测全部通过后** 才允许 `git commit` 和 `git push`。禁止「先推送再补测」。
+
+### TDD 执行流程（不可跳步）
+
+```
+1. 明确需求 → 先写/补测试（覆盖正常路径 + 主要失败路径）
+2. 实现最小代码使测试通过
+3. 本地终测（见下方清单）全部 PASS
+4. git add → git commit → git push
+5. 给出服务器热更新命令（部署后按「迁移后验证」抽检）
+```
+
+### 测试编写要求
+
+| 层级 | 范围 | 要求 |
+|------|------|------|
+| 单元测试 | `internal/*` 包 | 新增/修改逻辑须补或更新对应用例（auth、middleware、temu、repository、config 等） |
+| 集成测试 | `tests/api_test.go` | 涉及 API/DB 的改动须补集成用例；本地无 MySQL 时可 SKIP，**提交前须在可连 MySQL 的环境跑通** |
+| 前端 | `web/` | 改动页面/路由后执行 `npm run build`；关键流程建议手工或 Playwright 抽检 |
+
+### 终测清单（提交与推送前必须全部通过）
+
+**本地（Windows / PowerShell）：**
+
+```powershell
+cd d:\develop\code\temu_tools_go
+go build ./...
+go test ./... -count=1
+# 若改了前端：
+cd web; npm run build
+```
+
+**有 MySQL 时额外执行（推荐，集成测试不 SKIP）：**
+
+```powershell
+cd d:\develop\code\temu_tools_go
+go test ./tests/... -count=1 -v
+```
+
+**通过标准：**
+
+- `go build`：零错误
+- `go test ./...`：无 `FAIL`（允许 `tests` 在无 DB 时 SKIP，但发布前须在服务器或本地 MySQL 跑通集成测试）
+- `npm run build`：成功（改了 `web/` 时）
+
+### 禁止事项
+
+- ❌ 未跑终测就 `git commit` / `git push`
+- ❌ 仅跑单个包测试而宣称「全量通过」
+- ❌ 集成测试长期 SKIP 仍发布涉及 DB/API 的改动
+- ❌ 跳过测试直接改 `route.go` 多次零碎替换
+
+---
+
 ## 模型行为红线（交付前必须逐条对照）
 
 - ❌ **跳过对话前文档阅读**：每次对话开始必须先完整阅读 `模型高效驱动提示词.md`，尤其是"六、教训记录"和当前状态。跳过此步骤是最高优先级错误！
@@ -50,12 +106,13 @@
 - ❌ **OAuth 流程缺回调端点**：必须实现 `GET /callback` 端点接收授权 code 并自动换 token 保存，不能只让客户手动复制粘贴
 - ❌ **跨区域共享同一 App Key**：Temu 限制每个自研应用只能一个区域，多区域需要多组 App Key 或审批后扩展
 - ❌ **改代码不同步更新 Landing 页和用户手册**：涉及前端流程变更，Landing 页演示、用户手册、代码三者必须同步更新
-- ✅ **本地必验清单（每次改代码后必须执行）**：
+- ❌ **违反 TDD 与提交门禁**：未按上文「TDD 与提交门禁」完成终测就提交/推送
+- ✅ **本地必验清单（与 TDD 终测清单一致，全部 PASS 后才可 commit/push）**：
   1. `go build ./...` — 零编译错误
-  2. `go test ./...` — 全部通过
+  2. `go test ./... -count=1` — 全部通过（发布前建议 `go test ./tests/...` 在 MySQL 环境跑通）
   3. `cd web && npm run build` — 前端构建成功（如果改了前端文件）
-  4. 以上全部通过后，再 `git add`、`git commit`、`git push`
-  5. 最后给出部署命令 `docker compose build && docker compose up -d --no-deps app`
+  4. **终测通过后** 再 `git add`、`git commit`、`git push`
+  5. 最后给出部署命令 `docker compose build --no-cache && docker compose up -d --no-deps app`
 
 ## Docker 部署三层检查清单（每次部署前逐条确认）
 

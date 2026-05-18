@@ -15,10 +15,6 @@ export default function LoginPage() {
   const { message } = App.useApp();
 
   const handleLogin = async (values) => {
-    if (!agreePrivacy || !agreeTerms) {
-      message.warning('请先阅读并同意《用户服务协议》和《隐私政策》');
-      return;
-    }
     setLoading(true);
     try {
       const resp = await login(values.email, values.password);
@@ -62,6 +58,14 @@ export default function LoginPage() {
     }
   };
 
+  const agreementLinks = (
+    <>
+      <a href="/terms" target="_blank" rel="noreferrer">《用户服务协议》</a>
+      和
+      <a href="/privacy" target="_blank" rel="noreferrer">《隐私政策》</a>
+    </>
+  );
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -90,6 +94,9 @@ export default function LoginPage() {
                 <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
                   <Input.Password prefix={<LockOutlined />} placeholder="密码" autoComplete="current-password" />
                 </Form.Item>
+                <Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 12 }}>
+                  登录即表示您仍同意{agreementLinks}
+                </Paragraph>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block style={{ borderRadius: 8 }}>
                     登录
@@ -111,6 +118,12 @@ export default function LoginPage() {
                 ]}>
                   <Input.Password prefix={<LockOutlined />} placeholder="密码（至少6位）" autoComplete="new-password" />
                 </Form.Item>
+                <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginBottom: 4, display: 'flex' }}>
+                  <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
+                </Checkbox>
+                <Checkbox checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} style={{ marginBottom: 12, display: 'flex' }}>
+                  <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
+                </Checkbox>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" loading={loading} block style={{ borderRadius: 8 }}>
                     注册
@@ -121,18 +134,15 @@ export default function LoginPage() {
           },
         ]} />
 
-        <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginBottom: 4, display: 'flex' }}>
-          <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
-        </Checkbox>
-        <Checkbox checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} style={{ marginBottom: 8, display: 'flex' }}>
-          <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
-        </Checkbox>
-
         <Divider />
         <Paragraph style={{ textAlign: 'center', margin: 0, color: '#999', fontSize: 13 }}>
+          跨境卖家绑店指南：<a href="/guide">查看操作步骤</a>
+        </Paragraph>
+        <Paragraph style={{ textAlign: 'center', margin: '8px 0 0', color: '#999', fontSize: 13 }}>
           还没有访问密码？请联系微信：<Text strong>returnHuangMuNing</Text>
         </Paragraph>
       </Card>
     </div>
   );
 }
+
