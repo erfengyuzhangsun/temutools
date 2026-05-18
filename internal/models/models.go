@@ -33,6 +33,7 @@ type ShopCredential struct {
 	EncryptedAPIKey       string `gorm:"column:encrypted_api_key;type:text"`
 	EncryptedAPISecret    string `gorm:"column:encrypted_api_secret;type:text"`
 	EncryptedAccessToken  string `gorm:"column:encrypted_access_token;type:text"`
+	Region                string `gorm:"column:region;type:varchar(20);default:'us'"`
 }
 
 func (ShopCredential) TableName() string { return "temu_shop_credentials" }

@@ -337,10 +337,16 @@ func BindShop(c *gin.Context) {
 	var req struct {
 		ShopName    string `json:"shop_name" binding:"required"`
 		AccessToken string `json:"access_token" binding:"required"`
+		Region      string `json:"region"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少必填字段")
 		return
+	}
+
+	region := req.Region
+	if region == "" {
+		region = "us"
 	}
 
 	shopID, err := repository.CreateShop(userID, req.ShopName)
@@ -350,13 +356,13 @@ func BindShop(c *gin.Context) {
 		return
 	}
 
-	if err := repository.SaveShopCredentials(shopID, req.AccessToken); err != nil {
+	if err := repository.SaveShopCredentials(shopID, req.AccessToken, region); err != nil {
 		slog.Error("failed to save shop credentials", "error", err)
 		Error(c, http.StatusInternalServerError, ErrInternal, "保存凭证失败")
 		return
 	}
 
-	slog.Info("shop bound", "user_id", userID, "shop_id", shopID, "shop_name", req.ShopName)
+	slog.Info("shop bound", "user_id", userID, "shop_id", shopID, "shop_name", req.ShopName, "region", region)
 	Success(c, gin.H{"shop_id": shopID, "message": "店铺绑定成功"})
 }
 
@@ -367,7 +373,31 @@ func GetShops(c *gin.Context) {
 		slog.Warn("failed to get shops", "error", err)
 		shops = nil
 	}
-	Success(c, gin.H{"shops": shops})
+
+	type shopResp struct {
+		ShopID       int    `json:"shop_id"`
+		ShopName     string `json:"shop_name"`
+		MainCategory string `json:"main_category"`
+		Region       string `json:"region"`
+	}
+
+	result := make([]shopResp, 0, len(shops))
+	for _, s := range shops {
+		region := "us"
+		if cred, err := repository.GetShopCredentials(s.ShopID); err == nil && cred != nil {
+			region = cred.Region
+			if region == "" {
+				region = "us"
+			}
+		}
+		result = append(result, shopResp{
+			ShopID:       s.ShopID,
+			ShopName:     s.ShopName,
+			MainCategory: s.MainCategory,
+			Region:       region,
+		})
+	}
+	Success(c, gin.H{"shops": result})
 }
 
 func DeleteShop(c *gin.Context) {
@@ -974,14 +1004,19 @@ func getTemuClient(shopID int) temu.ApiClient {
 		return temu.NewMockClient(shopID)
 	}
 
-	accessToken, err := repository.GetShopAccessToken(shopID)
-	if err != nil || accessToken == "" {
+	cred, err := repository.GetShopCredentials(shopID)
+	if err != nil || cred == nil || cred.AccessToken == "" {
 		slog.Warn("shop credentials not found, using mock", "shop_id", shopID, "error", err)
 		return temu.NewMockClient(shopID)
 	}
 
-	client := temu.NewClient(shopID, appKey, appSecret, accessToken, cfg.Temu.Region, cfg.Temu.Proxy)
-	slog.Info("created real Temu API client", "shop_id", shopID, "region", cfg.Temu.Region)
+	region := cred.Region
+	if region == "" {
+		region = cfg.Temu.Region
+	}
+
+	client := temu.NewClient(shopID, appKey, appSecret, cred.AccessToken, region, cfg.Temu.Proxy)
+	slog.Info("created real Temu API client", "shop_id", shopID, "region", region)
 	return client
 }
 

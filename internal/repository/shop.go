@@ -209,7 +209,12 @@ func DeleteShop(shopID int) error {
 	return db.Delete(&models.Shop{}, shopID).Error
 }
 
-func SaveShopCredentials(shopID int, accessToken string) error {
+type ShopCredBrief struct {
+	AccessToken string
+	Region      string
+}
+
+func SaveShopCredentials(shopID int, accessToken string, region string) error {
 	db := GetDB()
 	if db == nil {
 		return fmt.Errorf("database not initialized")
@@ -218,14 +223,45 @@ func SaveShopCredentials(shopID int, accessToken string) error {
 	var cred models.ShopCredential
 	result := db.Where("shop_id = ?", shopID).First(&cred)
 	if result.Error == nil {
-		return db.Model(&cred).Update("encrypted_access_token", accessToken).Error
+		updates := map[string]interface{}{
+			"encrypted_access_token": accessToken,
+		}
+		if region != "" {
+			updates["region"] = region
+		}
+		return db.Model(&cred).Updates(updates).Error
 	}
 
 	cred = models.ShopCredential{
 		ShopID:               shopID,
 		EncryptedAccessToken: accessToken,
+		Region:               region,
+	}
+	if cred.Region == "" {
+		cred.Region = "us"
 	}
 	return db.Create(&cred).Error
+}
+
+func GetShopCredentials(shopID int) (*ShopCredBrief, error) {
+	db := GetDB()
+	if db == nil {
+		return nil, fmt.Errorf("database not initialized")
+	}
+
+	var cred models.ShopCredential
+	result := db.Where("shop_id = ?", shopID).First(&cred)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	region := cred.Region
+	if region == "" {
+		region = "us"
+	}
+	return &ShopCredBrief{
+		AccessToken: cred.EncryptedAccessToken,
+		Region:      region,
+	}, nil
 }
 
 func GetShopAccessToken(shopID int) (string, error) {
