@@ -10,9 +10,12 @@ type User struct {
 	PlanType       string     `gorm:"column:plan_type;type:varchar(20);not null;default:'basic'"`
 	StartDate      *time.Time `gorm:"column:start_date;type:date"`
 	ExpireDate     *time.Time `gorm:"column:expire_date;type:date"`
-	IsActive       bool       `gorm:"column:is_active;default:true"`
-	CreatedAt      time.Time  `gorm:"column:created_at"`
-	UpdatedAt      time.Time  `gorm:"column:updated_at"`
+	IsActive         bool       `gorm:"column:is_active;default:true"`
+	TermsAgreedAt    *time.Time `gorm:"column:terms_agreed_at"`
+	PrivacyAgreedAt  *time.Time `gorm:"column:privacy_agreed_at"`
+	PolicyVersion    string     `gorm:"column:policy_version;type:varchar(20);not null;default:''"`
+	CreatedAt        time.Time  `gorm:"column:created_at"`
+	UpdatedAt        time.Time  `gorm:"column:updated_at"`
 }
 
 func (User) TableName() string { return "temu_users" }

@@ -102,17 +102,29 @@ func LoginHandler(c *gin.Context) {
 
 func RegisterHandler(c *gin.Context) {
 	var req struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required,min=6"`
+		Email          string `json:"email" binding:"required"`
+		Password       string `json:"password" binding:"required,min=6"`
+		AgreedTerms    bool   `json:"agreed_terms"`
+		AgreedPrivacy  bool   `json:"agreed_privacy"`
+		PolicyVersion  string `json:"policy_version"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		Error(c, http.StatusBadRequest, ErrBadRequest, "邮箱和密码不能为空（密码至少6位）")
 		return
 	}
+	if !req.AgreedTerms || !req.AgreedPrivacy {
+		Error(c, http.StatusBadRequest, ErrValidation, "注册前须同意《用户服务协议》和《隐私政策》")
+		return
+	}
 
 	slog.Info("registration attempt", "email", req.Email)
 
-	user, err := repository.CreateUser(req.Email, req.Password, "basic")
+	policyVersion := req.PolicyVersion
+	if policyVersion == "" {
+		policyVersion = "2026-05-18"
+	}
+
+	user, err := repository.CreateUser(req.Email, req.Password, "basic", policyVersion, req.AgreedTerms, req.AgreedPrivacy)
 	if err != nil {
 		slog.Warn("registration failed", "email", req.Email, "error", err)
 		if err.Error() == "email already registered" {
@@ -335,14 +347,19 @@ func SyncOrders(c *gin.Context) {
 func BindShop(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	var req struct {
-		ShopName    string `json:"shop_name" binding:"required"`
-		AccessToken string `json:"access_token" binding:"required"`
-		Region      string `json:"region"`
-		AppKey      string `json:"app_key"`
-		AppSecret   string `json:"app_secret"`
+		ShopName              string `json:"shop_name" binding:"required"`
+		AccessToken           string `json:"access_token" binding:"required"`
+		Region                string `json:"region"`
+		AppKey                string `json:"app_key"`
+		AppSecret             string `json:"app_secret"`
+		DataProcessingConsent bool   `json:"data_processing_consent"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少必填字段")
+		return
+	}
+	if !req.DataProcessingConsent {
+		Error(c, http.StatusBadRequest, ErrValidation, "绑定店铺前须确认数据处理授权声明")
 		return
 	}
 

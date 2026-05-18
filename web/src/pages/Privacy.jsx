@@ -36,7 +36,7 @@ export default function PrivacyPage() {
           <h2 style={{ fontSize: '1.15rem', marginTop: 20, marginBottom: 8, color: '#1a1a2e', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
             1. 总则
           </h2>
-          <p>1.1 感谢您使用 CloudAuto（鲸云策）（以下简称"本工具"）。我们严格遵循合法、正当、必要、诚信原则，恪守法律法规及行业规范，致力于保护您的个人信息、店铺数据及敏感信息安全。</p>
+          <p>1.1 感谢您使用鲸云策（以下简称「本工具」）。运营者为在 Temu Partner Platform 注册的个人开发者（当前未登记为公司主体）。我们严格遵循合法、正当、必要、诚信原则，保护您的个人信息与店铺数据安全。</p>
           <p>1.2 本隐私政策旨在清晰告知您，我们如何收集、使用、存储、保护、传输您的相关信息，以及您依法享有的权利、行使权利的方式，同时界定双方在数据处理过程中的责任边界。</p>
           <p>1.3 本隐私政策仅适用于本工具的全部功能及服务，不适用于第三方平台（包括但不限于 Temu 开放平台、DigitalOcean 云服务提供商等）的服务及隐私政策。</p>
           <p>1.4 您在使用本工具前，应仔细阅读并充分理解本隐私政策的全部条款；您点击"同意"、继续使用本工具，即视为您已阅读、理解并完全同意本隐私政策的全部内容；若您不同意本政策，应立即停止使用本工具。</p>
@@ -114,8 +114,9 @@ export default function PrivacyPage() {
           <p>如需行使以上权利，请联系微信：<strong>returnHuangMuNing</strong>。</p>
 
           <h2 style={{ fontSize: '1.15rem', marginTop: 20, marginBottom: 8, color: '#1a1a2e', borderBottom: '1px solid #eee', paddingBottom: 4 }}>
-            7. 第三方服务
+            7. 跨境传输与第三方服务
           </h2>
+          <p><strong>跨境传输说明</strong>：您的账号信息、店铺凭证及经营数据可能存储于 DigitalOcean 新加坡节点。我们采取加密与访问控制措施；您注册并绑定店铺即表示知悉并同意该跨境存储与处理，法律要求单独同意的从其规定。</p>
           <p><strong>Temu 开放平台</strong>：我们通过 Temu 官方 API 接口获取数据，数据使用受 Temu《开发者协议》约束</p>
           <p><strong>DigitalOcean 云服务提供商</strong>：我们使用 DigitalOcean 新加坡节点服务器存储您的信息，服务器安全保障由 DigitalOcean 负责</p>
           <p>我们不会将您的信息委托给任何其他第三方处理</p>

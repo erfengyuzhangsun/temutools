@@ -205,7 +205,7 @@ func TestCreateUser_Success(t *testing.T) {
 		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
 	})
 
-	user, err := CreateUser(email, "securePass123", "basic")
+	user, err := CreateUser(email, "securePass123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 	require.NotNil(t, user)
 	assert.Equal(t, email, user.Email)
@@ -219,7 +219,7 @@ func TestCreateUser_Success(t *testing.T) {
 func TestCreateUser_DuplicateEmail(t *testing.T) {
 	existing := createTestUser(t, "dup-email")
 
-	user, err := CreateUser(existing.Email, "anotherPass123", "pro")
+	user, err := CreateUser(existing.Email, "anotherPass123", "pro", "2026-05-18", true, true)
 	assert.Error(t, err)
 	assert.Nil(t, user)
 }
@@ -280,7 +280,7 @@ func TestSeedAdmin_UpgradesExistingPlan(t *testing.T) {
 		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
 	})
 
-	user, err := CreateUser(email, "userPassword123", "basic")
+	user, err := CreateUser(email, "userPassword123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 	assert.Equal(t, "basic", user.PlanType, "should start as basic")
 
@@ -298,7 +298,7 @@ func TestSeedAdmin_DoesNotOverwriteUserPassword(t *testing.T) {
 		GetDB().Unscoped().Delete(&models.User{}, "email = ?", email)
 	})
 
-	_, err := CreateUser(email, "myRealPassword", "basic")
+	_, err := CreateUser(email, "myRealPassword", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 
 	SeedAdmin(email, "adminEnvPassword")

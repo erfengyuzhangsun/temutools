@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Space, Tag, Spin, message, Typography, Row, Modal, Input, Select, Alert } from 'antd';
+import { Card, Table, Button, Space, Tag, Spin, message, Typography, Row, Modal, Input, Select, Alert, Checkbox } from 'antd';
 import { CloudSyncOutlined, PlusOutlined, DeleteOutlined, LinkOutlined, CopyOutlined, SafetyOutlined } from '@ant-design/icons';
 import { getApiSyncShops, bindShop, syncOrders, getTemuAuthUrl } from '../api/client';
 
@@ -20,6 +20,8 @@ export default function ApiSyncPage() {
   const [authModal, setAuthModal] = useState(false);
   const [authShopName, setAuthShopName] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [shopConsent, setShopConsent] = useState(false);
+  const [authConsent, setAuthConsent] = useState(false);
 
   const fetchShops = () => {
     setLoading(true);
@@ -30,8 +32,9 @@ export default function ApiSyncPage() {
 
   const handleBind = async () => {
     if (!shopName || !accessToken) { message.warning('请填写店铺名称和Access Token'); return; }
+    if (!shopConsent) { message.warning('请勾选店铺数据处理授权声明'); return; }
     try {
-      await bindShop(shopName, accessToken, region, appKey, appSecret);
+      await bindShop(shopName, accessToken, region, appKey, appSecret, true);
       message.success('店铺绑定成功');
       setBindModal(false);
       setShopName('');
@@ -48,6 +51,7 @@ export default function ApiSyncPage() {
 
   const handleAuthUrl = async () => {
     if (!authShopName) { message.warning('请填写店铺名称'); return; }
+    if (!authConsent) { message.warning('请勾选店铺数据处理授权声明'); return; }
     setGenerating(true);
     try {
       const res = await getTemuAuthUrl(authShopName);
@@ -105,7 +109,7 @@ export default function ApiSyncPage() {
       </Row>
       <Alert
         message="客户如何绑定店铺？"
-        description="点击「一键授权」生成授权链接发给客户，客户在Temu卖家中心点击授权后自动完成绑定。也可以手动「绑定店铺」输入Access Token。"
+        description="客户须先在 Temu 卖家中心对「鲸云策」授权，或由您代其完成授权。绑定前请确认客户已阅读《用户服务协议》《隐私政策》并勾选数据处理声明。"
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
@@ -133,6 +137,9 @@ export default function ApiSyncPage() {
               <Input.Password value={appSecret} onChange={(e) => setAppSecret(e.target.value)} placeholder="App Secret（选填，留空使用系统默认）" />
             </>
           )}
+          <Checkbox checked={shopConsent} onChange={(e) => setShopConsent(e.target.checked)}>
+            我确认：本人有权操作该 Temu 店铺；已在 Temu 卖家中心完成官方授权或自愿提供 Access Token；同意鲸云策按《隐私政策》通过官方 API 处理店铺经营数据。
+          </Checkbox>
         </Space>
       </Modal>
       <Modal title="一键授权 — 生成授权链接" open={authModal} onCancel={() => { setAuthModal(false); setAuthUrl(''); }} footer={null} width={600}>
@@ -141,6 +148,9 @@ export default function ApiSyncPage() {
             生成一个 Temu 授权链接，发给您的客户。客户点击链接后在 Temu 卖家中心授权，系统会自动完成店铺绑定。
           </p>
           <Input value={authShopName} onChange={(e) => setAuthShopName(e.target.value)} placeholder="给店铺取个名称（如：张三优选）" />
+          <Checkbox checked={authConsent} onChange={(e) => setAuthConsent(e.target.checked)}>
+            我确认：将授权链接发给有权操作该店铺的主体；对方在 Temu 完成授权后，鲸云策将按《隐私政策》处理其店铺数据。
+          </Checkbox>
           <Button type="primary" onClick={handleAuthUrl} loading={generating} block>
             生成授权链接
           </Button>

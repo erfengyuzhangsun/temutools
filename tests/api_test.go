@@ -122,7 +122,7 @@ func TestRegister_Success(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"test-reg-success@example.com","password":"securePass123"}`)
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"test-reg-success@example.com","password":"securePass123","agreed_terms":true,"agreed_privacy":true,"policy_version":"2026-05-18"}`)
 	resp := executeRequest(req)
 
 	assert.Equal(t, http.StatusOK, resp.Code)
@@ -142,7 +142,7 @@ func TestRegister_Success(t *testing.T) {
 func TestRegister_DuplicateEmail(t *testing.T) {
 	skipIfNoDB(t)
 
-	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"integ-test@example.com","password":"anotherPass123"}`)
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"integ-test@example.com","password":"anotherPass123","agreed_terms":true,"agreed_privacy":true}`)
 	resp := executeRequest(req)
 
 	assert.Equal(t, http.StatusConflict, resp.Code)
@@ -150,9 +150,15 @@ func TestRegister_DuplicateEmail(t *testing.T) {
 }
 
 func TestRegister_ShortPassword(t *testing.T) {
-	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"test-short@example.com","password":"12345"}`)
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"test-short@example.com","password":"12345","agreed_terms":true,"agreed_privacy":true}`)
 	resp := executeRequest(req)
 
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
+
+func TestRegister_WithoutConsent(t *testing.T) {
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"test-no-consent@example.com","password":"securePass123","agreed_terms":false,"agreed_privacy":true}`)
+	resp := executeRequest(req)
 	assert.Equal(t, http.StatusBadRequest, resp.Code)
 }
 
@@ -164,7 +170,7 @@ func TestRegister_BasicExpiresIn30Days(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"`+email+`","password":"securePass123"}`)
+	req := makeJSONRequest("POST", "/api/v1/auth/register", `{"email":"`+email+`","password":"securePass123","agreed_terms":true,"agreed_privacy":true}`)
 	resp := executeRequest(req)
 	assert.Equal(t, http.StatusOK, resp.Code)
 
@@ -191,7 +197,7 @@ func TestRegister_LifetimeNeverExpires(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	user, err := repository.CreateUser(email, "securePass123", "lifetime")
+	user, err := repository.CreateUser(email, "securePass123", "lifetime", "2026-05-18", true, true)
 	require.NoError(t, err)
 	require.NotNil(t, user)
 
@@ -522,7 +528,7 @@ func TestAdminUpgradePlan_Success(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	_, err := repository.CreateUser(email, "testPass123", "basic")
+	_, err := repository.CreateUser(email, "testPass123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 
 	req := makeAuthRequest("POST", "/api/v1/admin/upgrade-plan",
@@ -667,7 +673,7 @@ func TestLogin_WithOriginalPasswordAfterSeedAdmin(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	_, err := repository.CreateUser(email, "originalPass123", "basic")
+	_, err := repository.CreateUser(email, "originalPass123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err, "user should register first")
 
 	repository.SeedAdmin(email, "adminEnvPass456")
@@ -704,7 +710,7 @@ func TestAdminRenewUser(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	_, err := repository.CreateUser(email, "testPass123", "basic")
+	_, err := repository.CreateUser(email, "testPass123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 
 	req := makeAuthRequest("POST", "/api/v1/admin/users/renew",
@@ -728,7 +734,7 @@ func TestAdminToggleUser(t *testing.T) {
 		repository.GetDB().Exec("DELETE FROM temu_users WHERE email = ?", email)
 	})
 
-	_, err := repository.CreateUser(email, "testPass123", "basic")
+	_, err := repository.CreateUser(email, "testPass123", "basic", "2026-05-18", true, true)
 	require.NoError(t, err)
 
 	req := makeAuthRequest("POST", "/api/v1/admin/users/toggle",

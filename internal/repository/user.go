@@ -29,7 +29,7 @@ func FindByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func CreateUser(email, password, planType string) (*models.User, error) {
+func CreateUser(email, password, planType string, policyVersion string, termsAgreed, privacyAgreed bool) (*models.User, error) {
 	db := GetDB()
 	if db == nil {
 		return nil, fmt.Errorf("database not initialized")
@@ -56,6 +56,13 @@ func CreateUser(email, password, planType string) (*models.User, error) {
 		IsActive:     true,
 		StartDate:    &now,
 		ExpireDate:   nil,
+		PolicyVersion: policyVersion,
+	}
+	if termsAgreed {
+		user.TermsAgreedAt = &now
+	}
+	if privacyAgreed {
+		user.PrivacyAgreedAt = &now
 	}
 
 	if planType != "lifetime" {
@@ -173,7 +180,7 @@ func SeedAdmin(email, password string) {
 		}
 		return
 	}
-	user, err := CreateUser(email, password, "lifetime")
+	user, err := CreateUser(email, password, "lifetime", "", true, true)
 	if err != nil {
 		slog.Error("failed to seed admin account", "error", err)
 		return

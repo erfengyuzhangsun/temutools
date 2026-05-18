@@ -32,8 +32,14 @@ export function login(email, password) {
   return client.post('/auth/login', { email, password });
 }
 
-export function register(email, password) {
-  return client.post('/auth/register', { email, password });
+export function register(email, password, consent = {}) {
+  return client.post('/auth/register', {
+    email,
+    password,
+    agreed_terms: consent.agreed_terms === true,
+    agreed_privacy: consent.agreed_privacy === true,
+    policy_version: consent.policy_version || '2026-05-18',
+  });
 }
 
 export function getCurrentUser() {
@@ -80,13 +86,14 @@ export function getApiSyncShops() {
   return client.get('/api-sync/shops');
 }
 
-export function bindShop(shopName, accessToken, region = 'us', appKey = '', appSecret = '') {
+export function bindShop(shopName, accessToken, region = 'us', appKey = '', appSecret = '', dataProcessingConsent = false) {
   return client.post('/api-sync/bind-shop', {
     shop_name: shopName,
     access_token: accessToken,
     region,
     app_key: appKey || undefined,
     app_secret: appSecret || undefined,
+    data_processing_consent: dataProcessingConsent,
   });
 }
 

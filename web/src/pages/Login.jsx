@@ -8,13 +8,15 @@ const { Title, Text, Paragraph } = Typography;
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const [agreePolicy, setAgreePolicy] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const policyVersion = '2026-05-18';
   const navigate = useNavigate();
   const { message } = App.useApp();
 
   const handleLogin = async (values) => {
-    if (!agreePolicy) {
-      message.warning('请先阅读并同意隐私政策');
+    if (!agreePrivacy || !agreeTerms) {
+      message.warning('请先阅读并同意《用户服务协议》和《隐私政策》');
       return;
     }
     setLoading(true);
@@ -33,13 +35,17 @@ export default function LoginPage() {
   };
 
   const handleRegister = async (values) => {
-    if (!agreePolicy) {
-      message.warning('请先阅读并同意隐私政策');
+    if (!agreePrivacy || !agreeTerms) {
+      message.warning('请先阅读并同意《用户服务协议》和《隐私政策》');
       return;
     }
     setLoading(true);
     try {
-      const resp = await register(values.email, values.password);
+      const resp = await register(values.email, values.password, {
+        agreed_terms: true,
+        agreed_privacy: true,
+        policy_version: policyVersion,
+      });
       localStorage.setItem('token', resp.data.token);
       localStorage.setItem('user', JSON.stringify(resp.data.user));
       localStorage.setItem('expiry', JSON.stringify(resp.data.expiry || {}));
@@ -115,9 +121,11 @@ export default function LoginPage() {
           },
         ]} />
 
-        <Checkbox checked={agreePolicy} onChange={(e) => setAgreePolicy(e.target.checked)} style={{ marginBottom: 8 }}>
-          我已阅读并同意
-          <a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a>
+        <Checkbox checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginBottom: 4, display: 'flex' }}>
+          <span>我已阅读并同意<a href="/terms" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《用户服务协议》</a></span>
+        </Checkbox>
+        <Checkbox checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} style={{ marginBottom: 8, display: 'flex' }}>
+          <span>我已阅读并同意<a href="/privacy" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>《隐私政策》</a></span>
         </Checkbox>
 
         <Divider />

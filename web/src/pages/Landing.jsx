@@ -760,7 +760,7 @@ export default function LandingPage() {
           <h3 style={{ marginBottom: 16, fontSize: 18 }}>❓ 常见问题</h3>
           {[
             { q: 'Q: 自动化核价会不会误处理，导致我亏损？', a: 'A: 所有核价操作都按您预设的毛利规则执行，支持日常/活动双阈值，可手动干预，操作全留日志可溯源，<strong>不会误处理</strong>。' },
-            { q: 'Q: 数据安全吗？会不会泄露我的店铺数据？', a: 'A: 店铺数据本地加密存储，API密钥不上云，所有操作留日志可溯源，<strong>不会上传您的店铺隐私数据</strong>。' },
+            { q: 'Q: 数据安全吗？会不会泄露我的店铺数据？', a: 'A: 凭证经 AES 加密后存储于安全云服务器（新加坡节点），全程 HTTPS 传输，按账号隔离，操作留日志可溯源。详见<a href="/privacy">《隐私政策》</a>。' },
             { q: 'Q: 多店铺支持吗？会不会操作混乱？', a: 'A: 支持多店铺统一管理，一个后台查看所有店铺的盈亏、待办和告警，<strong>数据严格隔离，不会混乱</strong>。' },
             { q: 'Q: 我是新手，不会用怎么办？', a: 'A: 提供详细的使用教程+专属客服支持，<strong>7×12小时在线答疑</strong>，新手也能快速上手。' },
           ].map((item, i) => (
@@ -791,8 +791,13 @@ export default function LandingPage() {
       </div>
 
       <div className="footer">
-        <p style={{ margin: '4px 0', fontSize: 14 }}>© 2026 鲸云策 | 专注数据与运营管理 🐋</p>
-        <p style={{ margin: '4px 0', fontSize: 13, color: '#aaa' }}>本工具仅用于辅助商家进行数据分析和运营决策，不构成任何投资建议</p>
+        <p style={{ margin: '4px 0', fontSize: 14 }}>© 2026 鲸云策 | 跨境卖家运营辅助工具 🐋</p>
+        <p style={{ margin: '4px 0', fontSize: 13, color: '#888' }}>
+          <a href="/terms" style={{ color: '#667eea', marginRight: 12 }}>用户服务协议</a>
+          <a href="/privacy" style={{ color: '#667eea', marginRight: 12 }}>隐私政策</a>
+          <a href="/login" style={{ color: '#667eea' }}>登录系统</a>
+        </p>
+        <p style={{ margin: '4px 0', fontSize: 12, color: '#aaa' }}>运营主体：个人开发者 · 本工具不构成投资建议或 Temu 官方服务</p>
       </div>
     </div>
   );
