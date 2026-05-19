@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -90,6 +91,7 @@ func HandleTemuCallback(c *gin.Context) {
 	var tokenData struct {
 		AccessToken string `json:"accessToken"`
 		ExpiresIn   int    `json:"expires_in"`
+		ExpiredTime int64  `json:"expiredTime"`
 		ShopName    string `json:"shop_name,omitempty"`
 	}
 	if resp.Data != nil {
@@ -99,11 +101,13 @@ func HandleTemuCallback(c *gin.Context) {
 		var resultToken struct {
 			AccessToken string `json:"accessToken"`
 			ExpiresIn   int    `json:"expires_in"`
+			ExpiredTime int64  `json:"expiredTime"`
 			MallID      int    `json:"mallId"`
 		}
 		json.Unmarshal(resp.Result, &resultToken)
 		if resultToken.AccessToken != "" {
 			tokenData.AccessToken = resultToken.AccessToken
+			tokenData.ExpiredTime = resultToken.ExpiredTime
 		}
 	}
 	if tokenData.AccessToken == "" && resp.Data != nil {
@@ -131,7 +135,13 @@ func HandleTemuCallback(c *gin.Context) {
 		return
 	}
 
-	if err := repository.SaveShopCredentials(shopID, tokenData.AccessToken, region, "", ""); err != nil {
+	var tokenExpiresAt *time.Time
+	if tokenData.ExpiredTime > 0 {
+		t := time.Unix(tokenData.ExpiredTime, 0)
+		tokenExpiresAt = &t
+	}
+
+	if err := repository.SaveShopCredentialsWithExpiry(shopID, tokenData.AccessToken, region, "", "", tokenExpiresAt); err != nil {
 		slog.Error("failed to save credentials", "error", err)
 		c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", url.QueryEscape("保存凭证失败")))
 		return

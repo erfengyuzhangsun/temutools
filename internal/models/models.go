@@ -3,59 +3,62 @@ package models
 import "time"
 
 type User struct {
-	UserID         int        `gorm:"column:user_id;primaryKey;autoIncrement"`
-	Email          string     `gorm:"column:email;type:varchar(255);not null;uniqueIndex"`
-	PasswordHash   string     `gorm:"column:password_hash;type:varchar(255);not null"`
-	WechatNickname string     `gorm:"column:wechat_nickname;type:varchar(100);not null;default:''"`
-	PlanType       string     `gorm:"column:plan_type;type:varchar(20);not null;default:'basic'"`
-	StartDate      *time.Time `gorm:"column:start_date;type:date"`
-	ExpireDate     *time.Time `gorm:"column:expire_date;type:date"`
-	IsActive         bool       `gorm:"column:is_active;default:true"`
-	TermsAgreedAt    *time.Time `gorm:"column:terms_agreed_at"`
-	PrivacyAgreedAt  *time.Time `gorm:"column:privacy_agreed_at"`
-	PolicyVersion    string     `gorm:"column:policy_version;type:varchar(20);not null;default:''"`
-	CreatedAt        time.Time  `gorm:"column:created_at"`
-	UpdatedAt        time.Time  `gorm:"column:updated_at"`
+	UserID          int        `gorm:"column:user_id;primaryKey;autoIncrement"`
+	Email           string     `gorm:"column:email;type:varchar(255);not null;uniqueIndex"`
+	PasswordHash    string     `gorm:"column:password_hash;type:varchar(255);not null"`
+	WechatNickname  string     `gorm:"column:wechat_nickname;type:varchar(100);not null;default:''"`
+	PlanType        string     `gorm:"column:plan_type;type:varchar(20);not null;default:'basic'"`
+	StartDate       *time.Time `gorm:"column:start_date;type:date"`
+	ExpireDate      *time.Time `gorm:"column:expire_date;type:date"`
+	IsActive        bool       `gorm:"column:is_active;default:true"`
+	TermsAgreedAt   *time.Time `gorm:"column:terms_agreed_at"`
+	PrivacyAgreedAt *time.Time `gorm:"column:privacy_agreed_at"`
+	PolicyVersion   string     `gorm:"column:policy_version;type:varchar(20);not null;default:''"`
+	CreatedAt       time.Time  `gorm:"column:created_at"`
+	UpdatedAt       time.Time  `gorm:"column:updated_at"`
 }
 
 func (User) TableName() string { return "temu_users" }
 
 type Shop struct {
-	ShopID        int       `gorm:"column:shop_id;primaryKey;autoIncrement"`
-	UserID        int       `gorm:"column:user_id;not null"`
-	ShopName      string    `gorm:"column:shop_name;type:varchar(100);not null"`
-	MainCategory  string    `gorm:"column:main_category;type:varchar(50)"`
-	CreatedAt     time.Time `gorm:"column:created_at"`
+	ShopID       int       `gorm:"column:shop_id;primaryKey;autoIncrement"`
+	UserID       int       `gorm:"column:user_id;not null"`
+	ShopName     string    `gorm:"column:shop_name;type:varchar(100);not null"`
+	MainCategory string    `gorm:"column:main_category;type:varchar(50)"`
+	CreatedAt    time.Time `gorm:"column:created_at"`
 }
 
 func (Shop) TableName() string { return "temu_shops" }
 
 type ShopCredential struct {
-	CredID                int    `gorm:"column:cred_id;primaryKey;autoIncrement"`
-	ShopID                int    `gorm:"column:shop_id;not null"`
-	EncryptedAPIKey       string `gorm:"column:encrypted_api_key;type:text"`
-	EncryptedAPISecret    string `gorm:"column:encrypted_api_secret;type:text"`
-	EncryptedAccessToken  string `gorm:"column:encrypted_access_token;type:text"`
-	Region                string `gorm:"column:region;type:varchar(20);default:'us'"`
+	CredID               int        `gorm:"column:cred_id;primaryKey;autoIncrement"`
+	ShopID               int        `gorm:"column:shop_id;not null"`
+	EncryptedAPIKey      string     `gorm:"column:encrypted_api_key;type:text"`
+	EncryptedAPISecret   string     `gorm:"column:encrypted_api_secret;type:text"`
+	EncryptedAccessToken string     `gorm:"column:encrypted_access_token;type:text"`
+	Region               string     `gorm:"column:region;type:varchar(20);default:'us'"`
+	TokenExpiresAt       *time.Time `gorm:"column:token_expires_at"`
+	CreatedAt            time.Time  `gorm:"column:created_at"`
+	UpdatedAt            time.Time  `gorm:"column:updated_at"`
 }
 
 func (ShopCredential) TableName() string { return "temu_shop_credentials" }
 
 type ProfitStat struct {
-	StatID             int     `gorm:"column:stat_id;primaryKey;autoIncrement"`
-	UserID             int     `gorm:"column:user_id;not null"`
-	ShopID             int     `gorm:"column:shop_id;not null"`
-	StatDate           string  `gorm:"column:stat_date;type:date"`
-	TotalOrders        int     `gorm:"column:total_orders;default:0"`
-	TotalRevenue       float64 `gorm:"column:total_revenue;type:decimal(10,2);default:0"`
-	TotalCost          float64 `gorm:"column:total_cost;type:decimal(10,2);default:0"`
-	TotalCommission    float64 `gorm:"column:total_commission;type:decimal(10,2);default:0"`
-	TotalPaymentFee    float64 `gorm:"column:total_payment_fee;type:decimal(10,2);default:0"`
-	TotalPerformanceFee float64 `gorm:"column:total_performance_fee;type:decimal(10,2);default:0"`
-	TotalReturnLoss    float64 `gorm:"column:total_return_loss;type:decimal(10,2);default:0"`
+	StatID               int     `gorm:"column:stat_id;primaryKey;autoIncrement"`
+	UserID               int     `gorm:"column:user_id;not null"`
+	ShopID               int     `gorm:"column:shop_id;not null"`
+	StatDate             string  `gorm:"column:stat_date;type:date"`
+	TotalOrders          int     `gorm:"column:total_orders;default:0"`
+	TotalRevenue         float64 `gorm:"column:total_revenue;type:decimal(10,2);default:0"`
+	TotalCost            float64 `gorm:"column:total_cost;type:decimal(10,2);default:0"`
+	TotalCommission      float64 `gorm:"column:total_commission;type:decimal(10,2);default:0"`
+	TotalPaymentFee      float64 `gorm:"column:total_payment_fee;type:decimal(10,2);default:0"`
+	TotalPerformanceFee  float64 `gorm:"column:total_performance_fee;type:decimal(10,2);default:0"`
+	TotalReturnLoss      float64 `gorm:"column:total_return_loss;type:decimal(10,2);default:0"`
 	TotalShippingPenalty float64 `gorm:"column:total_shipping_penalty;type:decimal(10,2);default:0"`
-	TotalProfit        float64 `gorm:"column:total_profit;type:decimal(10,2);default:0"`
-	NetProfitRate      float64 `gorm:"column:net_profit_rate;type:decimal(5,2);default:0"`
+	TotalProfit          float64 `gorm:"column:total_profit;type:decimal(10,2);default:0"`
+	NetProfitRate        float64 `gorm:"column:net_profit_rate;type:decimal(5,2);default:0"`
 }
 
 func (ProfitStat) TableName() string { return "temu_profit_stats" }
@@ -79,34 +82,34 @@ type SkuProfit struct {
 func (SkuProfit) TableName() string { return "temu_sku_profit" }
 
 type PricingLog struct {
-	LogID        int       `gorm:"column:log_id;primaryKey;autoIncrement"`
-	UserID       int       `gorm:"column:user_id;not null"`
-	ShopID       int       `gorm:"column:shop_id;not null"`
-	NoticeID     string    `gorm:"column:notice_id;type:varchar(100)"`
-	Sku          string    `gorm:"column:sku;type:varchar(100)"`
-	Action       string    `gorm:"column:action;type:varchar(20)"`
-	SupplyPrice  float64   `gorm:"column:supply_price;type:decimal(10,2)"`
-	CostPrice    float64   `gorm:"column:cost_price;type:decimal(10,2)"`
-	GrossMargin  float64   `gorm:"column:gross_margin;type:decimal(5,2)"`
-	Reason       string    `gorm:"column:reason;type:text"`
-	IsActivity   bool      `gorm:"column:is_activity;default:false"`
-	HandledAt    time.Time `gorm:"column:handled_at"`
+	LogID       int       `gorm:"column:log_id;primaryKey;autoIncrement"`
+	UserID      int       `gorm:"column:user_id;not null"`
+	ShopID      int       `gorm:"column:shop_id;not null"`
+	NoticeID    string    `gorm:"column:notice_id;type:varchar(100)"`
+	Sku         string    `gorm:"column:sku;type:varchar(100)"`
+	Action      string    `gorm:"column:action;type:varchar(20)"`
+	SupplyPrice float64   `gorm:"column:supply_price;type:decimal(10,2)"`
+	CostPrice   float64   `gorm:"column:cost_price;type:decimal(10,2)"`
+	GrossMargin float64   `gorm:"column:gross_margin;type:decimal(5,2)"`
+	Reason      string    `gorm:"column:reason;type:text"`
+	IsActivity  bool      `gorm:"column:is_activity;default:false"`
+	HandledAt   time.Time `gorm:"column:handled_at"`
 }
 
 func (PricingLog) TableName() string { return "temu_pricing_logs" }
 
 type SyncRecord struct {
-	SyncID        int       `gorm:"column:sync_id;primaryKey;autoIncrement"`
-	UserID        int       `gorm:"column:user_id;not null"`
-	ShopID        int       `gorm:"column:shop_id;not null"`
-	SyncType      string    `gorm:"column:sync_type;type:varchar(20)"`
-	Status        string    `gorm:"column:status;type:varchar(20)"`
-	SyncedCount   int       `gorm:"column:synced_count;default:0"`
-	TotalCount    int       `gorm:"column:total_count;default:0"`
-	DurationMs    int       `gorm:"column:duration_ms;default:0"`
-	ErrorMessage  string    `gorm:"column:error_message;type:text"`
-	StartedAt     time.Time `gorm:"column:started_at"`
-	CreatedAt     time.Time `gorm:"column:created_at"`
+	SyncID       int       `gorm:"column:sync_id;primaryKey;autoIncrement"`
+	UserID       int       `gorm:"column:user_id;not null"`
+	ShopID       int       `gorm:"column:shop_id;not null"`
+	SyncType     string    `gorm:"column:sync_type;type:varchar(20)"`
+	Status       string    `gorm:"column:status;type:varchar(20)"`
+	SyncedCount  int       `gorm:"column:synced_count;default:0"`
+	TotalCount   int       `gorm:"column:total_count;default:0"`
+	DurationMs   int       `gorm:"column:duration_ms;default:0"`
+	ErrorMessage string    `gorm:"column:error_message;type:text"`
+	StartedAt    time.Time `gorm:"column:started_at"`
+	CreatedAt    time.Time `gorm:"column:created_at"`
 }
 
 func (SyncRecord) TableName() string { return "temu_sync_records" }
@@ -125,32 +128,32 @@ type TaskDefinition struct {
 func (TaskDefinition) TableName() string { return "temu_task_definitions" }
 
 type SchedulerTask struct {
-	TaskID        string     `gorm:"column:task_id;primaryKey;type:varchar(100)"`
-	Name          string     `gorm:"column:name;type:varchar(255);not null"`
-	CronExpression string    `gorm:"column:cron_expression;type:varchar(50);not null"`
-	TimeoutSeconds int       `gorm:"column:timeout_seconds;default:300"`
-	MaxRetries    int        `gorm:"column:max_retries;default:3"`
-	Enabled       bool       `gorm:"column:enabled;default:true"`
-	Description   string     `gorm:"column:description;type:text"`
-	LastRunAt     *time.Time `gorm:"column:last_run_at"`
-	NextRunAt     *time.Time `gorm:"column:next_run_at"`
-	RunCount      int        `gorm:"column:run_count;default:0"`
-	FailCount     int        `gorm:"column:fail_count;default:0"`
-	CreatedAt     time.Time  `gorm:"column:created_at"`
-	UpdatedAt     time.Time  `gorm:"column:updated_at"`
+	TaskID         string     `gorm:"column:task_id;primaryKey;type:varchar(100)"`
+	Name           string     `gorm:"column:name;type:varchar(255);not null"`
+	CronExpression string     `gorm:"column:cron_expression;type:varchar(50);not null"`
+	TimeoutSeconds int        `gorm:"column:timeout_seconds;default:300"`
+	MaxRetries     int        `gorm:"column:max_retries;default:3"`
+	Enabled        bool       `gorm:"column:enabled;default:true"`
+	Description    string     `gorm:"column:description;type:text"`
+	LastRunAt      *time.Time `gorm:"column:last_run_at"`
+	NextRunAt      *time.Time `gorm:"column:next_run_at"`
+	RunCount       int        `gorm:"column:run_count;default:0"`
+	FailCount      int        `gorm:"column:fail_count;default:0"`
+	CreatedAt      time.Time  `gorm:"column:created_at"`
+	UpdatedAt      time.Time  `gorm:"column:updated_at"`
 }
 
 func (SchedulerTask) TableName() string { return "temu_scheduler_tasks" }
 
 type SchedulerLog struct {
-	LogID          int        `gorm:"column:log_id;primaryKey;autoIncrement"`
-	TaskID         string     `gorm:"column:task_id;type:varchar(100);not null"`
-	Status         string     `gorm:"column:status;type:varchar(20);not null"`
-	StartedAt      time.Time  `gorm:"column:started_at"`
-	FinishedAt     *time.Time `gorm:"column:finished_at"`
-	DurationSeconds float64   `gorm:"column:duration_seconds;type:decimal(10,2);default:0"`
-	ErrorMessage   string     `gorm:"column:error_message;type:text"`
-	RetryCount     int        `gorm:"column:retry_count;default:0"`
+	LogID           int        `gorm:"column:log_id;primaryKey;autoIncrement"`
+	TaskID          string     `gorm:"column:task_id;type:varchar(100);not null"`
+	Status          string     `gorm:"column:status;type:varchar(20);not null"`
+	StartedAt       time.Time  `gorm:"column:started_at"`
+	FinishedAt      *time.Time `gorm:"column:finished_at"`
+	DurationSeconds float64    `gorm:"column:duration_seconds;type:decimal(10,2);default:0"`
+	ErrorMessage    string     `gorm:"column:error_message;type:text"`
+	RetryCount      int        `gorm:"column:retry_count;default:0"`
 }
 
 func (SchedulerLog) TableName() string { return "temu_scheduler_logs" }

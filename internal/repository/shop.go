@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/erfengyuzhangsun/temutools/internal/crypto"
 	"github.com/erfengyuzhangsun/temutools/internal/models"
@@ -264,6 +265,10 @@ type ShopCredBrief struct {
 }
 
 func SaveShopCredentials(shopID int, accessToken string, region string, appKey string, appSecret string) error {
+	return SaveShopCredentialsWithExpiry(shopID, accessToken, region, appKey, appSecret, nil)
+}
+
+func SaveShopCredentialsWithExpiry(shopID int, accessToken string, region string, appKey string, appSecret string, tokenExpiresAt *time.Time) error {
 	db := GetDB()
 	if db == nil {
 		return fmt.Errorf("database not initialized")
@@ -284,6 +289,9 @@ func SaveShopCredentials(shopID int, accessToken string, region string, appKey s
 		if region != "" {
 			updates["region"] = region
 		}
+		if tokenExpiresAt != nil {
+			updates["token_expires_at"] = tokenExpiresAt
+		}
 		return db.Model(&cred).Updates(updates).Error
 	}
 
@@ -293,6 +301,7 @@ func SaveShopCredentials(shopID int, accessToken string, region string, appKey s
 		Region:               region,
 		EncryptedAPIKey:      encryptedKey,
 		EncryptedAPISecret:   encryptedSecret,
+		TokenExpiresAt:       tokenExpiresAt,
 	}
 	if cred.Region == "" {
 		cred.Region = "us"
