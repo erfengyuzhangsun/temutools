@@ -29,6 +29,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 		apiGroup.POST("/auth/login", LoginHandler)
 		apiGroup.POST("/auth/register", RegisterHandler)
 		apiGroup.POST("/submit-order", SubmitOrder)
+		apiGroup.POST("/refund", RequestRefund)
 		apiGroup.GET("/temu/callback", HandleTemuCallback)
 
 		protected := apiGroup.Group("")
@@ -45,6 +46,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			pricing := protected.Group("/pricing")
 			pricing.Use(middleware.PlanGuardMiddleware("pricing"))
 			pricing.POST("/auto-handle", HandleAutoPricing)
+			pricing.POST("/auto-adjust", HandleAutoAdjustPrices)
 			pricing.GET("/logs", GetPricingLogs)
 			pricing.PUT("/threshold", UpdatePricingThreshold)
 

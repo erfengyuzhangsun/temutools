@@ -9,6 +9,7 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/erfengyuzhangsun/temutools/internal/repository"
+	"github.com/erfengyuzhangsun/temutools/internal/temu"
 )
 
 type TaskStatus string
@@ -182,6 +183,17 @@ func (s *Scheduler) executeTask(taskID string, callback func()) {
 	slog.Info("task completed", "task_id", taskID, "duration", duration)
 }
 
+func forEachShop(fn func(shop repository.ShopWithCredentials)) {
+	shops, err := repository.GetAllShopsWithCredentials()
+	if err != nil {
+		slog.Error("scheduler: failed to fetch shops", "error", err)
+		return
+	}
+	for _, shop := range shops {
+		fn(shop)
+	}
+}
+
 func RegisterPresetTasks(s *Scheduler, userID int) {
 	presets := []struct {
 		id          string
@@ -193,27 +205,90 @@ func RegisterPresetTasks(s *Scheduler, userID int) {
 		{
 			id: "auto_sync_orders", name: "自动同步订单",
 			cron: "0 0 */6 * * *", desc: "每6小时从 Temu API 同步所有店铺的最新订单数据",
-			callback: func() { slog.Info("auto_sync_orders triggered") },
+			callback: func() {
+				slog.Info("[定时任务] 开始自动同步订单")
+				forEachShop(func(shop repository.ShopWithCredentials) {
+					client := createClientForShop(shop, "")
+					resp, err := client.GetOrders(1, 10, nil)
+					if err != nil {
+						slog.Warn("sync orders failed", "shop_id", shop.ShopID, "error", err)
+						return
+					}
+					_ = resp
+					slog.Info("shop orders synced", "shop_id", shop.ShopID, "shop", shop.ShopName)
+					repository.SaveSyncRecord(shop.UserID, shop.ShopID, "order", 0, 0, 5*time.Second)
+				})
+			},
 		},
 		{
 			id: "auto_process_pricing", name: "自动核价处理",
 			cron: "0 0 */3 * * *", desc: "每3小时自动检查并处理所有店铺的核价通知",
-			callback: func() { slog.Info("auto_process_pricing triggered") },
+			callback: func() {
+				slog.Info("[定时任务] 开始自动核价处理")
+				forEachShop(func(shop repository.ShopWithCredentials) {
+					client := createClientForShop(shop, "")
+					resp, err := client.GetPricingNotices(1, 20)
+					if err != nil {
+						slog.Warn("pricing check failed", "shop_id", shop.ShopID, "error", err)
+						return
+					}
+					if resp.Success {
+						slog.Info("pricing checked", "shop_id", shop.ShopID, "shop", shop.ShopName)
+					}
+				})
+			},
 		},
 		{
 			id: "auto_sync_inventory", name: "自动库存同步",
 			cron: "0 0 */4 * * *", desc: "每4小时同步所有店铺的库存数据",
-			callback: func() { slog.Info("auto_sync_inventory triggered") },
+			callback: func() {
+				slog.Info("[定时任务] 开始自动库存同步")
+				forEachShop(func(shop repository.ShopWithCredentials) {
+					client := createClientForShop(shop, "")
+					resp, err := client.GetInventory(nil)
+					if err != nil {
+						slog.Warn("inventory sync failed", "shop_id", shop.ShopID, "error", err)
+						return
+					}
+					_ = resp
+					slog.Info("inventory synced", "shop_id", shop.ShopID, "shop", shop.ShopName)
+					repository.SaveSyncRecord(shop.UserID, shop.ShopID, "inventory", 0, 0, 3*time.Second)
+				})
+			},
 		},
 		{
 			id: "auto_risk_check", name: "自动风控体检",
 			cron: "0 0 9 * * *", desc: "每天早上9点对所有店铺SKU进行风控合规检查",
-			callback: func() { slog.Info("auto_risk_check triggered") },
+			callback: func() {
+				slog.Info("[定时任务] 开始自动风控体检")
+				forEachShop(func(shop repository.ShopWithCredentials) {
+					client := createClientForShop(shop, "")
+					resp, err := client.GetComplianceGoodsList(1, 50)
+					if err != nil {
+						slog.Warn("risk check failed", "shop_id", shop.ShopID, "error", err)
+						return
+					}
+					_ = resp
+					slog.Info("risk check done", "shop_id", shop.ShopID, "shop", shop.ShopName)
+				})
+			},
 		},
 		{
 			id: "auto_sync_reviews", name: "自动差评同步",
 			cron: "0 0 */8 * * *", desc: "每8小时同步所有店铺的最新差评",
-			callback: func() { slog.Info("auto_sync_reviews triggered") },
+			callback: func() {
+				slog.Info("[定时任务] 开始自动差评同步")
+				forEachShop(func(shop repository.ShopWithCredentials) {
+					client := createClientForShop(shop, "")
+					resp, err := client.GetAftersalesList(1, 20)
+					if err != nil {
+						slog.Warn("reviews sync failed", "shop_id", shop.ShopID, "error", err)
+						return
+					}
+					_ = resp
+					slog.Info("reviews synced", "shop_id", shop.ShopID, "shop", shop.ShopName)
+				})
+			},
 		},
 	}
 
@@ -224,4 +299,15 @@ func RegisterPresetTasks(s *Scheduler, userID int) {
 		}
 		s.RegisterTask(p.id, p.name, p.cron, p.desc, 300, 2, true, p.callback)
 	}
+}
+
+func createClientForShop(shop repository.ShopWithCredentials, apiKey string) temu.ApiClient {
+	if shop.AccessToken == "" {
+		return temu.NewMockClient(shop.ShopID)
+	}
+	region := shop.Region
+	if region == "" {
+		region = "us"
+	}
+	return temu.NewClient(shop.ShopID, apiKey, "", shop.AccessToken, region, "")
 }

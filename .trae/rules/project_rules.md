@@ -12,7 +12,7 @@
 - **远程**：`origin https://github.com/erfengyuzhangsun/temutools.git`（master 分支）
 - **访问地址**：https://www.jinpuhuang.com
 
-## 当前系统状态（2026-05-18 多密钥+OAuth+多区域）
+## 当前系统状态（2026-05-19 PII加密+订单修复+Temu审核重新提交）
 
 - Go 服务：✅ Healthy，DB 连接成功，AutoMigrate 完成
 - Nginx：✅ 正常运行（80 + 443 → Go 8080）
@@ -26,7 +26,10 @@
 - **多密钥支持**：✅ 每个店铺可自定义 App Key/Secret，优先使用店铺级密钥，无则 fallback 到 `.env`
 - **OAuth 回调**：✅ `GET /temu/callback` 接收授权 code 自动换 token 并绑定店铺；`GET /temu/auth` 生成授权链接
 - **Temu API请求**：✅ URL 对齐官方规范
-- **Temu 自研应用审批**：⏳ 已提交 US 区"鲸云策"，等待审核（Server: DO Singapore）
+- **Temu 自研应用审批**：⏳ 已提交 US 区"鲸云策"，Compliance & Security Assessment 已重新提交 PII 加密截图，等待审核结果
+- **PII AES-256-GCM 加密**：✅ contact_name/phone/wechat/AccessToken/AppKey/AppSecret 均加密存储
+- **Order json tag 修复**：✅ Order 结构体已添加 `json:"snake_case"` tag，管理员后台订单数据正常显示
+- **订单状态业务逻辑**：✅ 基础版提交即自动完成，非基础版保持待处理需管理员手动操作
 - **OAuth 回调地址**：⏳ 审核通过后需在 Temu Partner Platform 配置 `https://www.jinpuhuang.com/api/v1/temu/callback`
 - **消费者操作流程**：管理员配好密钥 → 系统生成授权链接 → 发给客户 → 客户点链接授权 → 自动完成绑定
 - **服务器**：✅ DigitalOcean（新加坡，152.42.226.188）
@@ -100,6 +103,7 @@ go test ./tests/... -count=1 -v
 - ❌ **不查文件内容就改**：改文件前完整阅读目标代码段确认上下文
 - ❌ **给复杂方案代替简单方案**：优先最小改动
 - ❌ **不检查就交付**：命令发出去前逐字检查路径、分支名、参数
+- ❌ **热更新命令拆分成多条让用户逐条执行**：必须一次性给出完整命令 `git stash && git pull origin master && git stash pop && docker compose build --no-cache && docker compose up -d --no-deps app`，用户只需复制粘贴一次
 - ❌ **改 route.go 用 SearchReplace 多次修改**：route.go 的大括号嵌套复杂，多次 SearchReplace 会导致闭括号失衡。必须一次重写完整文件或只做 1 次精确替换后立即 `go build` 验证
 - ❌ **已知问题不查教训记录**：每次遇到问题先查"六、教训记录"和"踩坑复盘"中有无同类问题，禁止重复踩坑
 - ❌ **自研应用当成第三方应用设计**：Temu 自研应用是一套 App Key 服务所有店铺，不是每个客户一套密钥。每个客户通过 OAuth 授权拿自己的 Access Token
@@ -111,7 +115,7 @@ go test ./tests/... -count=1 -v
   1. `go build ./...` — 零编译错误
   2. `go test ./... -count=1` — 全部通过（发布前建议 `go test ./tests/...` 在 MySQL 环境跑通）
   3. `cd web && npm run build` — 前端构建成功（如果改了前端文件）
-  4. **终测通过后** 再 `git add`、`git commit`、`git push`
+  4. **终测通过后** 再 `git add`、`git commit`、`git push origin master`
   5. 最后给出部署命令 `docker compose build --no-cache && docker compose up -d --no-deps app`
 
 ## Docker 部署三层检查清单（每次部署前逐条确认）
@@ -186,6 +190,9 @@ chmod +x /etc/letsencrypt/renewal-hooks/post/start-nginx.sh
 - ⚠️ root 用户直接执行 certbot，不要加 sudo（DO 默认 root）
 - ⚠️ docker-compose.yml 必须挂载 `/etc/letsencrypt:/etc/letsencrypt:ro` 才能让 Nginx 容器读到证书
 - ✅ 续期 pre-hook/post-hook 用 `/usr/bin/docker compose` 绝对路径，避免 PATH 问题
+- ⚠️ AES-256-GCM 加密后的 base64 比原文长 4-5 倍，`varchar(50)`/`varchar(100)` 不够存，PII 字段统一用 `varchar(255)`
+- ⚠️ Go Model 必须有 `json:"snake_case"` tag，否则 Gin 输出 PascalCase 字段名，前端 Ant Design Table 匹配不上
+- ⚠️ Temu 审核截图必须用原始英文字段名，不能用别名或中文标注
 
 ## 架构规范
 
@@ -207,11 +214,9 @@ nano .env   # 设置 DB_PASSWORD, JWT_SECRET, DB_HOST=host.docker.internal
 docker compose build && docker compose up -d
 ```
 
-### 热更新
+### 热更新（单条命令，不可拆分）
 ```bash
-cd /opt/temu_tools_go
-git pull origin master
-docker compose build && docker compose up -d --no-deps app
+cd /opt/temu_tools_go && git pull origin master && docker compose build --no-cache && docker compose up -d --no-deps app
 ```
 
 ### 查看状态

@@ -185,6 +185,52 @@ func GetShopSKUsByCodes(userID, shopID int, skuCodes []string) ([]models.SkuProf
 	return skus, result.Error
 }
 
+type ShopWithCredentials struct {
+	ShopID      int
+	UserID      int
+	ShopName    string
+	AppKey      string
+	AccessToken string
+	Region      string
+}
+
+func GetAllShopsWithCredentials() ([]ShopWithCredentials, error) {
+	db := GetDB()
+	if db == nil {
+		return nil, nil
+	}
+
+	var results []struct {
+		models.Shop
+		EncryptedAccessToken string `gorm:"column:encrypted_access_token"`
+		Region               string `gorm:"column:region"`
+	}
+	err := db.Table("temu_shops").
+		Select("temu_shops.*, temu_shop_credentials.encrypted_access_token, temu_shop_credentials.region").
+		Joins("LEFT JOIN temu_shop_credentials ON temu_shops.shop_id = temu_shop_credentials.shop_id").
+		Where("temu_shop_credentials.encrypted_access_token IS NOT NULL AND temu_shop_credentials.encrypted_access_token != ''").
+		Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+
+	shops := make([]ShopWithCredentials, 0, len(results))
+	for _, r := range results {
+		token := r.EncryptedAccessToken
+		if decrypted, err := crypto.DecryptPII(r.EncryptedAccessToken); err == nil {
+			token = decrypted
+		}
+		shops = append(shops, ShopWithCredentials{
+			ShopID:      r.Shop.ShopID,
+			UserID:      r.UserID,
+			ShopName:    r.ShopName,
+			AccessToken: token,
+			Region:      r.Region,
+		})
+	}
+	return shops, nil
+}
+
 func CreateShop(userID int, shopName string) (int, error) {
 	db := GetDB()
 	if db == nil {

@@ -208,6 +208,35 @@ func HandleAutoPricing(c *gin.Context) {
 	})
 }
 
+func HandleAutoAdjustPrices(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		ShopID       int     `json:"shop_id" binding:"required"`
+		TargetMargin float64 `json:"target_margin"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 shop_id")
+		return
+	}
+
+	svc := service.NewPricingService(userID)
+	client := getTemuClient(req.ShopID)
+	result, err := svc.AutoAdjustPrices(req.ShopID, client, req.TargetMargin)
+	if err != nil {
+		slog.Error("auto adjust prices failed", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+
+	Success(c, gin.H{
+		"total_checked":    result.TotalChecked,
+		"needs_adjustment": result.NeedsAdjustment,
+		"executed":         result.Executed,
+		"items":            result.Items,
+		"message":          fmt.Sprintf("调价完成: 检查%d个SKU, 调整%d个", result.TotalChecked, result.Executed),
+	})
+}
+
 func GetPricingLogs(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
@@ -1056,6 +1085,69 @@ func SubmitOrder(c *gin.Context) {
 
 	slog.Info("order submitted", "order_id", order.OrderID, "plan", req.PlanName)
 	Success(c, gin.H{"message": "订单提交成功, 我们将在10分钟内联系您", "order_id": order.OrderID})
+}
+
+func RequestRefund(c *gin.Context) {
+	var req struct {
+		OrderID    int    `json:"order_id" binding:"required"`
+		Reason     string `json:"reason" binding:"required"`
+		ContactWay string `json:"contact_way"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "请提供订单ID和退款原因")
+		return
+	}
+
+	orders, err := repository.ListOrders()
+	if err != nil {
+		Error(c, http.StatusInternalServerError, ErrInternal, "查询订单失败")
+		return
+	}
+
+	var found *models.Order
+	for i, o := range orders {
+		if o.OrderID == req.OrderID {
+			found = &orders[i]
+			break
+		}
+	}
+
+	if found == nil {
+		Error(c, http.StatusNotFound, ErrNotFound, "订单不存在")
+		return
+	}
+
+	if found.Status == "refunded" || found.Status == "refund_requested" {
+		Error(c, http.StatusBadRequest, ErrConflict, "该订单已申请退款或已退款")
+		return
+	}
+
+	updatedNotes := fmt.Sprintf("退款原因: %s", req.Reason)
+	if req.ContactWay != "" {
+		updatedNotes += fmt.Sprintf(" | 联系方式: %s", req.ContactWay)
+	}
+	if found.Notes != "" {
+		updatedNotes = found.Notes + "\n" + updatedNotes
+	}
+
+	db := repository.GetDB()
+	if db == nil {
+		Error(c, http.StatusInternalServerError, ErrInternal, "数据库未连接")
+		return
+	}
+
+	result := db.Model(&models.Order{}).Where("order_id = ?", req.OrderID).
+		Updates(map[string]interface{}{
+			"status": "refund_requested",
+			"notes":  updatedNotes,
+		})
+	if result.Error != nil {
+		Error(c, http.StatusInternalServerError, ErrInternal, "退款申请提交失败")
+		return
+	}
+
+	slog.Info("refund requested", "order_id", req.OrderID, "reason", req.Reason)
+	Success(c, gin.H{"message": "退款申请已提交，客服将在24小时内联系您"})
 }
 
 func getScheduler(c *gin.Context) *scheduler.Scheduler {

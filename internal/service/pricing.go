@@ -188,3 +188,143 @@ func (s *PricingService) GetPricingLogs(shopID int, limit int) ([]PricingLogItem
 	}
 	return items, nil
 }
+
+type PriceAdjustmentItem struct {
+	Sku              string  `json:"sku"`
+	SkuName          string  `json:"sku_name"`
+	CurrentPrice     float64 `json:"current_price"`
+	CostPrice        float64 `json:"cost_price"`
+	CurrentMargin    float64 `json:"current_margin"`
+	TargetMargin     float64 `json:"target_margin"`
+	TargetPrice      float64 `json:"target_price"`
+	SuggestedAction  string  `json:"suggested_action"`
+	RiskCheckPassed  bool    `json:"risk_check_passed"`
+	RiskCheckMessage string  `json:"risk_check_message,omitempty"`
+	Executed         bool    `json:"executed"`
+	ExecutedMessage  string  `json:"executed_message,omitempty"`
+}
+
+type PriceAdjustmentResult struct {
+	TotalChecked    int                    `json:"total_checked"`
+	NeedsAdjustment int                   `json:"needs_adjustment"`
+	Executed        int                   `json:"executed"`
+	Items           []PriceAdjustmentItem `json:"items"`
+}
+
+func (s *PricingService) AutoAdjustPrices(shopID int, client temu.ApiClient, targetMargin float64) (*PriceAdjustmentResult, error) {
+	slog.Info("starting auto price adjustment", "user_id", s.UserID, "shop_id", shopID, "target_margin", targetMargin)
+	if targetMargin <= 0 {
+		targetMargin = 20.0
+	}
+
+	skus, err := repository.GetShopSKUs(s.UserID, shopID)
+	if err != nil {
+		return nil, fmt.Errorf("获取SKU列表失败: %w", err)
+	}
+	if len(skus) == 0 {
+		return &PriceAdjustmentResult{}, nil
+	}
+
+	skuCodes := make([]string, len(skus))
+	for i, sku := range skus {
+		skuCodes[i] = sku.SkuCode
+	}
+
+	resp, err := client.GetSkuPriceList(skuCodes)
+	if err != nil {
+		return nil, fmt.Errorf("获取SKU价格失败: %w", err)
+	}
+
+	var pricePayload struct {
+		Prices []struct {
+			Sku          string  `json:"sku"`
+			CurrentPrice float64 `json:"currentPrice"`
+		} `json:"prices"`
+	}
+	if resp.Success {
+		parseJSON(resp.Result, &pricePayload)
+		parseJSON(resp.Data, &pricePayload)
+	}
+
+	priceMap := make(map[string]float64)
+	for _, p := range pricePayload.Prices {
+		priceMap[p.Sku] = p.CurrentPrice
+	}
+
+	items := make([]PriceAdjustmentItem, 0)
+	needsAdj := 0
+	executed := 0
+
+	for _, sku := range skus {
+		currentPrice, hasPrice := priceMap[sku.SkuCode]
+		if !hasPrice || sku.CostPrice <= 0 {
+			continue
+		}
+
+		currentMargin := ((currentPrice - sku.CostPrice) / sku.CostPrice) * 100
+		targetPrice := sku.CostPrice * (1 + targetMargin/100)
+
+		item := PriceAdjustmentItem{
+			Sku:           sku.SkuCode,
+			SkuName:       sku.SkuName,
+			CurrentPrice:  currentPrice,
+			CostPrice:     sku.CostPrice,
+			CurrentMargin: round2(currentMargin),
+			TargetMargin:  targetMargin,
+			TargetPrice:   round2(targetPrice),
+		}
+
+		diff := targetPrice - currentPrice
+		changePercent := (diff / currentPrice) * 100
+
+		if changePercent < 1 && changePercent > -1 {
+			item.SuggestedAction = "skip"
+			item.RiskCheckPassed = true
+			item.RiskCheckMessage = "当前价格已在目标区间内"
+			items = append(items, item)
+			continue
+		}
+
+		needsAdj++
+
+		if changePercent < -5 {
+			item.SuggestedAction = "warn"
+			item.RiskCheckPassed = false
+			item.RiskCheckMessage = fmt.Sprintf("降价幅度%.1f%%超过安全阈值5%%，需人工审核", changePercent)
+			items = append(items, item)
+			continue
+		}
+
+		item.SuggestedAction = "adjust"
+		item.RiskCheckPassed = true
+		item.RiskCheckMessage = fmt.Sprintf("建议调价%.1f%% (%.2f→%.2f)", changePercent, currentPrice, targetPrice)
+
+		negoResp, negoErr := client.NegotiatePricing("", fmt.Sprintf("%.2f", targetPrice))
+		if negoErr != nil {
+			item.Executed = false
+			item.ExecutedMessage = fmt.Sprintf("调价失败: %s", negoErr.Error())
+		} else if negoResp != nil && negoResp.Success {
+			item.Executed = true
+			executed++
+			item.ExecutedMessage = fmt.Sprintf("已发起调价: %.2f→%.2f (目标毛利率%.0f%%)", currentPrice, targetPrice, targetMargin)
+			repository.SavePricingLog(s.UserID, shopID, "", sku.SkuCode,
+				"adjust", targetPrice, sku.CostPrice, round2(targetMargin), item.ExecutedMessage, false)
+		} else {
+			item.Executed = false
+			errMsg := "调价被平台拒绝"
+			if negoResp != nil {
+				errMsg = negoResp.Error
+			}
+			item.ExecutedMessage = fmt.Sprintf("调价失败: %s", errMsg)
+		}
+
+		items = append(items, item)
+	}
+
+	return &PriceAdjustmentResult{
+		TotalChecked:    len(items),
+		NeedsAdjustment: needsAdj,
+		Executed:        executed,
+		Items:           items,
+	}, nil
+}
