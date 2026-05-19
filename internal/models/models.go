@@ -191,15 +191,15 @@ type Supplier struct {
 func (Supplier) TableName() string { return "temu_suppliers" }
 
 type Order struct {
-	OrderID     int       `gorm:"column:order_id;primaryKey;autoIncrement"`
-	ContactName string    `gorm:"column:contact_name;type:varchar(255);not null"`
-	Phone       string    `gorm:"column:phone;type:varchar(255);not null"`
-	Wechat      string    `gorm:"column:wechat;type:varchar(255);default:''"`
-	PlanName    string    `gorm:"column:plan_name;type:varchar(100);not null"`
-	Amount      float64   `gorm:"column:amount;type:decimal(10,2);default:0"`
-	Notes       string    `gorm:"column:notes;type:text"`
-	Status      string    `gorm:"column:status;type:varchar(20);default:'pending'"`
-	CreatedAt   time.Time `gorm:"column:created_at"`
+	OrderID     int       `gorm:"column:order_id;primaryKey;autoIncrement" json:"order_id"`
+	ContactName string    `gorm:"column:contact_name;type:varchar(255);not null" json:"contact_name"`
+	Phone       string    `gorm:"column:phone;type:varchar(255);not null" json:"phone"`
+	Wechat      string    `gorm:"column:wechat;type:varchar(255);default:''" json:"wechat"`
+	PlanName    string    `gorm:"column:plan_name;type:varchar(100);not null" json:"plan_name"`
+	Amount      float64   `gorm:"column:amount;type:decimal(10,2);default:0" json:"amount"`
+	Notes       string    `gorm:"column:notes;type:text" json:"notes"`
+	Status      string    `gorm:"column:status;type:varchar(20);default:'pending'" json:"status"`
+	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at"`
 }
 
 func (Order) TableName() string { return "temu_orders" }
