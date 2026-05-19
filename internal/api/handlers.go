@@ -335,9 +335,38 @@ func GetAnalysisReport(c *gin.Context) {
 
 func SyncSettlement(c *gin.Context) {
 	userID := middleware.GetUserID(c)
+	var req struct {
+		ShopID int `json:"shop_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 shop_id")
+		return
+	}
+
 	svc := service.NewFinanceService(userID)
-	result := svc.SyncSettlement()
-	Success(c, gin.H(result))
+	client := getTemuClient(req.ShopID)
+	result := svc.SyncSettlement(req.ShopID, client)
+	Success(c, gin.H{
+		"synced_count":  result.SyncedCount,
+		"skipped_count": result.SkippedCount,
+		"items":         result.Items,
+		"message":       result.Message,
+	})
+}
+
+func GetSettlementHistory(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	svc := service.NewFinanceService(userID)
+	records, err := svc.GetSettlementHistory(shopID, limit)
+	if err != nil {
+		slog.Error("failed to get settlement history", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"records": records, "total": len(records)})
 }
 
 func GetMonthlySummary(c *gin.Context) {
@@ -352,6 +381,44 @@ func GetForecast(c *gin.Context) {
 	svc := service.NewFinanceService(userID)
 	forecast := svc.GetForecast()
 	Success(c, gin.H{"forecast": forecast})
+}
+
+var exchangeService = service.NewExchangeService()
+
+func GetExchangeRates(c *gin.Context) {
+	base := c.DefaultQuery("base", "USD")
+	rates, err := exchangeService.GetAllRates(base)
+	if err != nil {
+		slog.Error("failed to get exchange rates", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, "获取汇率失败，请稍后重试")
+		return
+	}
+	Success(c, gin.H{"base": base, "rates": rates, "total": len(rates)})
+}
+
+func ConvertCurrency(c *gin.Context) {
+	from := strings.ToUpper(c.DefaultQuery("from", "USD"))
+	to := strings.ToUpper(c.DefaultQuery("to", "CNY"))
+	amountStr := c.DefaultQuery("amount", "1")
+
+	amount, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil || amount <= 0 {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "无效的金额参数")
+		return
+	}
+
+	result, err := exchangeService.Convert(from, to, amount)
+	if err != nil {
+		slog.Error("currency conversion failed", "from", from, "to", to, "error", err)
+		Error(c, http.StatusBadRequest, ErrBadRequest, fmt.Sprintf("汇率转换失败: %s", err.Error()))
+		return
+	}
+	Success(c, gin.H{"conversion": result})
+}
+
+func GetSupportedCurrencies(c *gin.Context) {
+	currencies := exchangeService.GetSupportedCurrencies()
+	Success(c, gin.H{"currencies": currencies, "total": len(currencies)})
 }
 
 func SyncOrders(c *gin.Context) {
@@ -542,14 +609,151 @@ func ReplyMessage(c *gin.Context) {
 }
 
 func GetShippingOrders(c *gin.Context) {
-	userID := middleware.GetUserID(c)
-	svc := service.NewMiscService(userID)
-	orders, _ := svc.GetShippingOrders(getTemuClient(0))
-	Success(c, gin.H{"orders": orders, "total": len(orders)})
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+	client := getTemuClient(shopID)
+	resp, err := client.GetOrders(page, pageSize, nil)
+	if err != nil {
+		slog.Error("failed to get orders for shipping", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"orders": resp, "total": 0})
 }
 
 func GenerateLabel(c *gin.Context) {
-	Success(c, gin.H{"message": "面单生成成功"})
+	userID := middleware.GetUserID(c)
+	var req struct {
+		ShipmentID string `json:"shipment_id" binding:"required"`
+		ShopID     int    `json:"shop_id"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 shipment_id")
+		return
+	}
+
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(req.ShopID)
+	doc, err := svc.GetDocument(client, req.ShipmentID)
+	if err != nil {
+		slog.Error("failed to get shipment document", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"label": doc, "message": "面单获取成功"})
+}
+
+func CreateShipment(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		ShopID      int    `json:"shop_id" binding:"required"`
+		OrderSn     string `json:"order_sn" binding:"required"`
+		LogisticsID string `json:"logistics_id" binding:"required"`
+		TrackingNo  string `json:"tracking_no" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少发货参数")
+		return
+	}
+
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(req.ShopID)
+	result, err := svc.CreateShipment(client, req.OrderSn, req.LogisticsID, req.TrackingNo)
+	if err != nil {
+		slog.Error("failed to create shipment", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"shipment": result, "message": "发货单已创建"})
+}
+
+func ConfirmShipment(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		ShopID     int    `json:"shop_id"`
+		ShipmentID string `json:"shipment_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 shipment_id")
+		return
+	}
+
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(req.ShopID)
+	if err := svc.ConfirmShipment(client, req.ShipmentID); err != nil {
+		slog.Error("failed to confirm shipment", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"message": "发货已确认"})
+}
+
+func GetLogisticsCompanies(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(shopID)
+	companies, err := svc.GetCompanies(client)
+	if err != nil {
+		slog.Error("failed to get logistics companies", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"companies": companies, "total": len(companies)})
+}
+
+func GetLogisticsWarehouses(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(shopID)
+	warehouses, err := svc.GetWarehouses(client)
+	if err != nil {
+		slog.Error("failed to get warehouses", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"warehouses": warehouses, "total": len(warehouses)})
+}
+
+func GetLogisticsShippingServices(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	warehouseID := c.DefaultQuery("warehouse_id", "")
+
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(shopID)
+	services, err := svc.GetShippingServices(client, warehouseID)
+	if err != nil {
+		slog.Error("failed to get shipping services", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"services": services, "total": len(services)})
+}
+
+func GetShipmentResult(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	var req struct {
+		ShopID     int    `json:"shop_id"`
+		ShipmentID string `json:"shipment_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 shipment_id")
+		return
+	}
+
+	svc := service.NewLogisticsService(userID)
+	client := getTemuClient(req.ShopID)
+	result, err := svc.GetShipmentResult(client, req.ShipmentID)
+	if err != nil {
+		slog.Error("failed to get shipment result", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"result": result})
 }
 
 func GetActivities(c *gin.Context) {
@@ -604,6 +808,65 @@ func GetReviews(c *gin.Context) {
 
 func ReplyReview(c *gin.Context) {
 	Success(c, gin.H{"message": "回复成功"})
+}
+
+func ListAftersales(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+	svc := service.NewAftersaleService(userID)
+	client := getTemuClient(shopID)
+	items, err := svc.ListAftersales(client, page, pageSize)
+	if err != nil {
+		slog.Error("failed to list aftersales", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"aftersales": items, "total": len(items)})
+}
+
+func ListParentAftersales(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	statusGroup, _ := strconv.Atoi(c.DefaultQuery("status_group", "0"))
+
+	svc := service.NewAftersaleService(userID)
+	client := getTemuClient(shopID)
+	items, err := svc.ListParentAftersales(client, page, pageSize, statusGroup, 0, 0)
+	if err != nil {
+		slog.Error("failed to list parent aftersales", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	Success(c, gin.H{"parent_aftersales": items, "total": len(items)})
+}
+
+func GetParentReturnOrder(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	parentAfterSalesSn := c.DefaultQuery("parent_after_sales_sn", "")
+	if parentAfterSalesSn == "" {
+		Error(c, http.StatusBadRequest, ErrBadRequest, "缺少 parent_after_sales_sn 参数")
+		return
+	}
+
+	svc := service.NewAftersaleService(userID)
+	client := getTemuClient(shopID)
+	item, err := svc.GetParentReturnOrder(client, parentAfterSalesSn)
+	if err != nil {
+		slog.Error("failed to get parent return order", "error", err)
+		Error(c, http.StatusInternalServerError, ErrInternal, err.Error())
+		return
+	}
+	if item == nil {
+		Error(c, http.StatusNotFound, ErrNotFound, "未找到该退货单")
+		return
+	}
+	Success(c, gin.H{"return_order": item})
 }
 
 func RunRiskGuardCheck(c *gin.Context) {

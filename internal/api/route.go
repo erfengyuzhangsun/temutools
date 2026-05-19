@@ -31,6 +31,7 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 		apiGroup.POST("/submit-order", SubmitOrder)
 		apiGroup.POST("/refund", RequestRefund)
 		apiGroup.GET("/temu/callback", HandleTemuCallback)
+		apiGroup.POST("/temu/webhook", HandleTemuWebhook)
 
 		protected := apiGroup.Group("")
 		protected.Use(middleware.AuthMiddleware(authService))
@@ -65,8 +66,15 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			finance := protected.Group("/finance")
 			finance.Use(middleware.PlanGuardMiddleware("finance"))
 			finance.POST("/sync", SyncSettlement)
+			finance.GET("/history", GetSettlementHistory)
 			finance.GET("/monthly", GetMonthlySummary)
 			finance.GET("/forecast", GetForecast)
+
+			exchange := protected.Group("/exchange")
+			exchange.Use(middleware.PlanGuardMiddleware("exchange"))
+			exchange.GET("/rates", GetExchangeRates)
+			exchange.GET("/convert", ConvertCurrency)
+			exchange.GET("/currencies", GetSupportedCurrencies)
 
 			apiSync := protected.Group("/api-sync")
 			apiSync.Use(middleware.PlanGuardMiddleware("api_sync"))
@@ -92,6 +100,12 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			shipping.Use(middleware.PlanGuardMiddleware("shipping"))
 			shipping.GET("/orders", GetShippingOrders)
 			shipping.POST("/label", GenerateLabel)
+			shipping.POST("/create", CreateShipment)
+			shipping.POST("/confirm", ConfirmShipment)
+			shipping.GET("/companies", GetLogisticsCompanies)
+			shipping.GET("/warehouses", GetLogisticsWarehouses)
+			shipping.GET("/services", GetLogisticsShippingServices)
+			shipping.POST("/result", GetShipmentResult)
 
 			activity := protected.Group("/activity")
 			activity.Use(middleware.PlanGuardMiddleware("activity"))
@@ -111,6 +125,12 @@ func SetupRouter(authService *auth.AuthService) *gin.Engine {
 			reviewMonitor.Use(middleware.PlanGuardMiddleware("review_monitor"))
 			reviewMonitor.GET("/reviews", GetReviews)
 			reviewMonitor.POST("/reply", ReplyReview)
+
+			aftersale := protected.Group("/aftersale")
+			aftersale.Use(middleware.PlanGuardMiddleware("aftersale"))
+			aftersale.GET("/list", ListAftersales)
+			aftersale.GET("/parent-list", ListParentAftersales)
+			aftersale.GET("/parent-return-order", GetParentReturnOrder)
 
 			productResearch := protected.Group("/product-research")
 			productResearch.Use(middleware.PlanGuardMiddleware("product_research"))

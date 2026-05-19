@@ -84,6 +84,7 @@ func AutoMigrate() error {
 		&models.FactoryProduct{},
 		&models.Supplier{},
 		&models.Order{},
+		&models.SettlementRecord{},
 	); err != nil {
 		db.Exec("SET FOREIGN_KEY_CHECKS = 1")
 		return err

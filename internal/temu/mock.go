@@ -8,8 +8,8 @@ import (
 )
 
 type MockClient struct {
-	shopID      int
-	mu          sync.RWMutex
+	shopID int
+	mu     sync.RWMutex
 }
 
 var mockSkus = []string{
@@ -142,14 +142,6 @@ func (m *MockClient) RejectPricing(priceOrderID, reason string) (*ApiResponse, e
 	}), nil
 }
 
-func (m *MockClient) GetSettlements(dateFrom, dateTo string, page int) (*ApiResponse, error) {
-	return nil, fmt.Errorf("结算查询API未在Temu开放平台公开接口中提供")
-}
-
-func (m *MockClient) GetShopMetrics(dateFrom, dateTo string) (*ApiResponse, error) {
-	return nil, fmt.Errorf("店铺指标API未在Temu开放平台公开接口中提供")
-}
-
 func (m *MockClient) GetMessages(page, pageSize int) (*ApiResponse, error) {
 	return nil, fmt.Errorf("消息列表API未在Temu开放平台公开接口中提供")
 }
@@ -172,8 +164,8 @@ func (m *MockClient) GetActivities(page int) (*ApiResponse, error) {
 
 func (m *MockClient) GetAccessToken(code string) (*ApiResponse, error) {
 	return m.mockSuccess(map[string]interface{}{
-		"access_token": "MOCK_ACCESS_TOKEN_" + code,
-		"expires_in":   7776000,
+		"accessToken": "MOCK_ACCESS_TOKEN_" + code,
+		"expires_in":  7776000,
 	}), nil
 }
 
@@ -193,13 +185,13 @@ func (m *MockClient) GetGoodsList(page, pageSize int) (*ApiResponse, error) {
 			break
 		}
 		goods = append(goods, map[string]interface{}{
-			"goodsId":      fmt.Sprintf("G_%d", idx+1),
-			"sku":          mockSkus[idx],
-			"goodsName":    mockProductNames[idx],
-			"category":     mockCategories[idx%len(mockCategories)],
-			"price":        29.9 + rand.Float64()*200.0,
-			"stock":        rand.Intn(1000),
-			"status":       "ONLINE",
+			"goodsId":   fmt.Sprintf("G_%d", idx+1),
+			"sku":       mockSkus[idx],
+			"goodsName": mockProductNames[idx],
+			"category":  mockCategories[idx%len(mockCategories)],
+			"price":     29.9 + rand.Float64()*200.0,
+			"stock":     rand.Intn(1000),
+			"status":    "ONLINE",
 		})
 	}
 	return m.mockSuccess(map[string]interface{}{
@@ -211,12 +203,12 @@ func (m *MockClient) GetGoodsList(page, pageSize int) (*ApiResponse, error) {
 func (m *MockClient) GetOrderShippingInfo(orderSn string) (*ApiResponse, error) {
 	return m.mockSuccess(map[string]interface{}{
 		"shippingAddress": map[string]interface{}{
-			"receiverName":    "张三",
-			"receiverPhone":   "138****1234",
-			"province":        "广东省",
-			"city":            "深圳市",
-			"district":        "南山区",
-			"detailAddress":   "科技园南区A栋1001",
+			"receiverName":  "张三",
+			"receiverPhone": "138****1234",
+			"province":      "广东省",
+			"city":          "深圳市",
+			"district":      "南山区",
+			"detailAddress": "科技园南区A栋1001",
 		},
 		"shippingMethod": "STANDARD",
 		"trackingNumber": "SF" + fmt.Sprintf("%012d", rand.Intn(999999999999)),
@@ -225,8 +217,8 @@ func (m *MockClient) GetOrderShippingInfo(orderSn string) (*ApiResponse, error) 
 
 func (m *MockClient) GetOrderAmount(orderSn string) (*ApiResponse, error) {
 	return m.mockSuccess(map[string]interface{}{
-		"totalAmount":     299.00,
-		"platformFee":     35.88,
+		"totalAmount":      299.00,
+		"platformFee":      35.88,
 		"settlementAmount": 263.12,
 	}), nil
 }
@@ -287,8 +279,126 @@ func (m *MockClient) GetComplianceGoodsList(page, pageSize int) (*ApiResponse, e
 }
 
 func (m *MockClient) GetAftersalesList(page, pageSize int) (*ApiResponse, error) {
+	items := make([]map[string]interface{}, 0)
+	for i := 0; i < pageSize; i++ {
+		idx := (page-1)*pageSize + i
+		if idx >= 10 {
+			break
+		}
+		statuses := []string{"PENDING", "APPROVED", "REJECTED", "COMPLETED"}
+		items = append(items, map[string]interface{}{
+			"aftersaleId": fmt.Sprintf("AS-%012d", 600000000+idx),
+			"orderSn":     fmt.Sprintf("PO-%012d", 500000000+idx),
+			"sku":         mockSkus[idx%len(mockSkus)],
+			"goodsName":   mockProductNames[idx%len(mockProductNames)],
+			"status":      statuses[idx%len(statuses)],
+			"reason":      "商品与描述不符",
+			"amount":      29.9 + float64(idx)*10,
+			"createdAt":   time.Now().Add(-time.Duration(idx) * 24 * time.Hour).Format(time.RFC3339),
+		})
+	}
 	return m.mockSuccess(map[string]interface{}{
-		"aftersales": []map[string]interface{}{},
-		"total":      0,
+		"aftersales": items,
+		"total":      10,
+	}), nil
+}
+
+func (m *MockClient) GetParentAftersalesList(page, pageSize int, statusGroup int, updateAtStart, updateAtEnd int64) (*ApiResponse, error) {
+	items := make([]map[string]interface{}, 0)
+	for i := 0; i < pageSize && i < 5; i++ {
+		items = append(items, map[string]interface{}{
+			"parentAfterSalesSn":     fmt.Sprintf("PO-076-%012d-D01", 300000000+i),
+			"afterSalesStatusGroup":  statusGroup,
+			"parentAfterSalesStatus": statusGroup,
+			"parentOrderSn":          fmt.Sprintf("PO-076-%012d", 100000000+i),
+			"afterSalesType":         2,
+			"createAt":               time.Now().Add(-time.Duration(i+1) * 24 * time.Hour).Unix(),
+			"updateAt":               time.Now().Add(-time.Duration(i) * 24 * time.Hour).Unix(),
+		})
+	}
+	return m.mockSuccess(map[string]interface{}{
+		"data":       items,
+		"total":      len(items),
+		"pageNumber": page,
+	}), nil
+}
+
+func (m *MockClient) GetParentReturnOrder(parentAfterSalesSn string) (*ApiResponse, error) {
+	return m.mockSuccess(map[string]interface{}{
+		"parentAfterSalesSn": parentAfterSalesSn,
+		"returnReason":       "商品与描述不符",
+		"returnQuantity":     1,
+		"returnAmount":       29.90,
+		"returnStatus":       "REFUNDED",
+		"returnType":         1,
+		"createAt":           time.Now().Add(-24 * time.Hour).Unix(),
+		"updateAt":           time.Now().Unix(),
+	}), nil
+}
+
+func (m *MockClient) GetLogisticsCompanies() (*ApiResponse, error) {
+	companies := []map[string]interface{}{
+		{"id": "SF", "name": "顺丰速运"},
+		{"id": "EMS", "name": "EMS"},
+		{"id": "YTO", "name": "圆通速递"},
+		{"id": "ZTO", "name": "中通快递"},
+		{"id": "STO", "name": "申通快递"},
+		{"id": "YUNDA", "name": "韵达快递"},
+	}
+	return m.mockSuccess(map[string]interface{}{
+		"companies": companies,
+	}), nil
+}
+
+func (m *MockClient) CreateLogisticsShipment(orderSn, logisticsID, trackingNo string) (*ApiResponse, error) {
+	return m.mockSuccess(map[string]interface{}{
+		"shipmentId": fmt.Sprintf("SHIP-%d", time.Now().Unix()),
+		"orderSn":    orderSn,
+		"status":     "created",
+		"trackingNo": trackingNo,
+	}), nil
+}
+
+func (m *MockClient) ConfirmLogisticsShipment(shipmentID string) (*ApiResponse, error) {
+	return m.mockSuccess(map[string]interface{}{
+		"shipmentId": shipmentID,
+		"status":     "confirmed",
+	}), nil
+}
+
+func (m *MockClient) GetLogisticsShipmentDocument(shipmentID string) (*ApiResponse, error) {
+	return m.mockSuccess(map[string]interface{}{
+		"shipmentId":  shipmentID,
+		"labelUrl":    "https://example.com/label.pdf",
+		"labelBase64": "JVBERi0xLjQK...",
+	}), nil
+}
+
+func (m *MockClient) GetLogisticsShipmentResult(shipmentID string) (*ApiResponse, error) {
+	return m.mockSuccess(map[string]interface{}{
+		"shipmentId":  shipmentID,
+		"status":      "shipped",
+		"trackingNo":  "SF1234567890",
+		"logisticsId": "SF",
+	}), nil
+}
+
+func (m *MockClient) GetLogisticsWarehouses() (*ApiResponse, error) {
+	warehouses := []map[string]interface{}{
+		{"warehouseId": "WH_CN_001", "name": "中国深圳仓", "region": "CN"},
+		{"warehouseId": "WH_US_001", "name": "美国洛杉矶仓", "region": "US"},
+	}
+	return m.mockSuccess(map[string]interface{}{
+		"warehouses": warehouses,
+	}), nil
+}
+
+func (m *MockClient) GetLogisticsShippingServices(warehouseID string) (*ApiResponse, error) {
+	services := []map[string]interface{}{
+		{"logisticsId": "SF", "name": "顺丰速运", "serviceType": "STANDARD"},
+		{"logisticsId": "EMS", "name": "EMS", "serviceType": "STANDARD"},
+	}
+	return m.mockSuccess(map[string]interface{}{
+		"services": services,
 	}), nil
 }

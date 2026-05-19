@@ -115,8 +115,8 @@ go test ./tests/... -count=1 -v
   1. `go build ./...` — 零编译错误
   2. `go test ./... -count=1` — 全部通过（发布前建议 `go test ./tests/...` 在 MySQL 环境跑通）
   3. `cd web && npm run build` — 前端构建成功（如果改了前端文件）
-  4. **终测通过后** 再 `git add`、`git commit`、`git push origin master`
-  5. 最后给出部署命令 `docker compose build --no-cache && docker compose up -d --no-deps app`
+  4. `git add`、`git commit`、`git push origin master`
+  5. 最后给出完整部署命令 `cd /opt/temu_tools_go && git stash && git pull origin master && git stash pop && docker compose build --no-cache && docker compose up -d --no-deps app`
 
 ## Docker 部署三层检查清单（每次部署前逐条确认）
 
@@ -216,7 +216,7 @@ docker compose build && docker compose up -d
 
 ### 热更新（单条命令，不可拆分）
 ```bash
-cd /opt/temu_tools_go && git pull origin master && docker compose build --no-cache && docker compose up -d --no-deps app
+cd /opt/temu_tools_go && git stash && git pull origin master && git stash pop && docker compose build --no-cache && docker compose up -d --no-deps app
 ```
 
 ### 查看状态

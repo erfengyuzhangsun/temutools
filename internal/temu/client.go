@@ -39,8 +39,6 @@ type ApiClient interface {
 	GetPricingNotices(page, pageSize int) (*ApiResponse, error)
 	AcceptPricing(priceOrderID string) (*ApiResponse, error)
 	RejectPricing(priceOrderID, reason string) (*ApiResponse, error)
-	GetSettlements(dateFrom, dateTo string, page int) (*ApiResponse, error)
-	GetShopMetrics(dateFrom, dateTo string) (*ApiResponse, error)
 	GetMessages(page, pageSize int) (*ApiResponse, error)
 	GetActivities(page int) (*ApiResponse, error)
 	GetAccessToken(code string) (*ApiResponse, error)
@@ -56,12 +54,21 @@ type ApiClient interface {
 	GetFreightTemplates() (*ApiResponse, error)
 	GetComplianceGoodsList(page, pageSize int) (*ApiResponse, error)
 	GetAftersalesList(page, pageSize int) (*ApiResponse, error)
+	GetParentAftersalesList(page, pageSize int, statusGroup int, updateAtStart, updateAtEnd int64) (*ApiResponse, error)
+	GetParentReturnOrder(parentAfterSalesSn string) (*ApiResponse, error)
+	GetLogisticsCompanies() (*ApiResponse, error)
+	CreateLogisticsShipment(orderSn, logisticsID, trackingNo string) (*ApiResponse, error)
+	ConfirmLogisticsShipment(shipmentID string) (*ApiResponse, error)
+	GetLogisticsShipmentDocument(shipmentID string) (*ApiResponse, error)
+	GetLogisticsShipmentResult(shipmentID string) (*ApiResponse, error)
+	GetLogisticsWarehouses() (*ApiResponse, error)
+	GetLogisticsShippingServices(warehouseID string) (*ApiResponse, error)
 	Close() error
 }
 
 type SkuStock struct {
-	SkuID    string `json:"skuId"`
-	Stock    int    `json:"stockTarget"`
+	SkuID string `json:"skuId"`
+	Stock int    `json:"stockTarget"`
 }
 
 type RealClient struct {
@@ -277,14 +284,6 @@ func (c *RealClient) RejectPricing(priceOrderID, reason string) (*ApiResponse, e
 	})
 }
 
-func (c *RealClient) GetSettlements(dateFrom, dateTo string, page int) (*ApiResponse, error) {
-	return nil, fmt.Errorf("结算查询API未在Temu开放平台公开接口中提供")
-}
-
-func (c *RealClient) GetShopMetrics(dateFrom, dateTo string) (*ApiResponse, error) {
-	return nil, fmt.Errorf("店铺指标API未在Temu开放平台公开接口中提供")
-}
-
 func (c *RealClient) GetMessages(page, pageSize int) (*ApiResponse, error) {
 	return nil, fmt.Errorf("消息列表API未在Temu开放平台公开接口中提供")
 }
@@ -337,7 +336,7 @@ func (c *RealClient) GetSkuPriceList(skuCodes []string) (*ApiResponse, error) {
 
 func (c *RealClient) UpdateStock(goodsID string, skuStockList []SkuStock) (*ApiResponse, error) {
 	return c.request("bg.local.goods.stock.edit", map[string]interface{}{
-		"goodsId":          goodsID,
+		"goodsId":            goodsID,
 		"skuStockTargetList": skuStockList,
 	})
 }
@@ -371,6 +370,69 @@ func (c *RealClient) GetAftersalesList(page, pageSize int) (*ApiResponse, error)
 	return c.request("bg.aftersales.aftersales.list.get", map[string]interface{}{
 		"pageNo":   page,
 		"pageSize": pageSize,
+	})
+}
+
+func (c *RealClient) GetParentAftersalesList(page, pageSize int, statusGroup int, updateAtStart, updateAtEnd int64) (*ApiResponse, error) {
+	params := map[string]interface{}{
+		"pageNo":   page,
+		"pageSize": pageSize,
+	}
+	if statusGroup > 0 {
+		params["afterSalesStatusGroup"] = statusGroup
+	}
+	if updateAtStart > 0 {
+		params["updateAtStart"] = updateAtStart
+	}
+	if updateAtEnd > 0 {
+		params["updateAtEnd"] = updateAtEnd
+	}
+	return c.request("bg.aftersales.parentaftersales.list.get", params)
+}
+
+func (c *RealClient) GetParentReturnOrder(parentAfterSalesSn string) (*ApiResponse, error) {
+	return c.request("bg.aftersales.parentreturnorder.get", map[string]interface{}{
+		"parentAfterSalesSn": parentAfterSalesSn,
+	})
+}
+
+func (c *RealClient) GetLogisticsCompanies() (*ApiResponse, error) {
+	return c.request("bg.logistics.companies.get", nil)
+}
+
+func (c *RealClient) CreateLogisticsShipment(orderSn, logisticsID, trackingNo string) (*ApiResponse, error) {
+	return c.request("bg.logistics.shipment.create", map[string]interface{}{
+		"parentOrderSn": orderSn,
+		"logisticsId":   logisticsID,
+		"trackingNo":    trackingNo,
+	})
+}
+
+func (c *RealClient) ConfirmLogisticsShipment(shipmentID string) (*ApiResponse, error) {
+	return c.request("bg.logistics.shipment.confirm", map[string]interface{}{
+		"shipmentId": shipmentID,
+	})
+}
+
+func (c *RealClient) GetLogisticsShipmentDocument(shipmentID string) (*ApiResponse, error) {
+	return c.request("bg.logistics.shipment.document.get", map[string]interface{}{
+		"shipmentId": shipmentID,
+	})
+}
+
+func (c *RealClient) GetLogisticsShipmentResult(shipmentID string) (*ApiResponse, error) {
+	return c.request("bg.logistics.shipment.result.get", map[string]interface{}{
+		"shipmentId": shipmentID,
+	})
+}
+
+func (c *RealClient) GetLogisticsWarehouses() (*ApiResponse, error) {
+	return c.request("bg.logistics.warehouse.list.get", nil)
+}
+
+func (c *RealClient) GetLogisticsShippingServices(warehouseID string) (*ApiResponse, error) {
+	return c.request("bg.logistics.shippingservices.get", map[string]interface{}{
+		"warehouseId": warehouseID,
 	})
 }
 

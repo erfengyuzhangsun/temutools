@@ -203,3 +203,19 @@ type Order struct {
 }
 
 func (Order) TableName() string { return "temu_orders" }
+
+type SettlementRecord struct {
+	SettlementID     int       `gorm:"column:settlement_id;primaryKey;autoIncrement" json:"settlement_id"`
+	UserID           int       `gorm:"column:user_id;not null" json:"user_id"`
+	ShopID           int       `gorm:"column:shop_id;not null" json:"shop_id"`
+	OrderSn          string    `gorm:"column:order_sn;type:varchar(100);not null" json:"order_sn"`
+	TotalAmount      float64   `gorm:"column:total_amount;type:decimal(12,2);default:0" json:"total_amount"`
+	PlatformFee      float64   `gorm:"column:platform_fee;type:decimal(10,2);default:0" json:"platform_fee"`
+	SettlementAmount float64   `gorm:"column:settlement_amount;type:decimal(12,2);default:0" json:"settlement_amount"`
+	CostPrice        float64   `gorm:"column:cost_price;type:decimal(10,2);default:0" json:"cost_price"`
+	Profit           float64   `gorm:"column:profit;type:decimal(10,2);default:0" json:"profit"`
+	StatDate         string    `gorm:"column:stat_date;type:date" json:"stat_date"`
+	CreatedAt        time.Time `gorm:"column:created_at" json:"created_at"`
+}
+
+func (SettlementRecord) TableName() string { return "temu_settlement_records" }

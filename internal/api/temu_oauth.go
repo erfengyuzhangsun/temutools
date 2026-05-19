@@ -13,6 +13,7 @@ import (
 	"github.com/erfengyuzhangsun/temutools/internal/api/middleware"
 	"github.com/erfengyuzhangsun/temutools/internal/config"
 	"github.com/erfengyuzhangsun/temutools/internal/repository"
+	"github.com/erfengyuzhangsun/temutools/internal/service"
 	"github.com/erfengyuzhangsun/temutools/internal/temu"
 )
 
@@ -28,55 +29,44 @@ func HandleGetAuthURL(c *gin.Context) {
 	cfg := config.Cfg
 	appKey := cfg.Temu.AppKey
 	if appKey == "" {
-		Error(c, http.StatusBadRequest, ErrValidation, "系统未配置 TEMU_APP_KEY，请联系管理员")
+		Error(c, http.StatusBadRequest, ErrBadRequest, "系统未配置 App Key")
 		return
 	}
 
-	region := cfg.Temu.Region
-	baseURL := temu.GetRegionBaseURL(region)
+	state := base64.StdEncoding.EncodeToString([]byte(
+		fmt.Sprintf(`{"uid":%d,"shop":"%s"}`, userID, shopName),
+	))
 
-	state := authState{
-		UserID:   userID,
-		ShopName: shopName,
-	}
-	stateData, _ := json.Marshal(state)
-	stateEncoded := base64.URLEncoding.EncodeToString(stateData)
+	redirectURL := fmt.Sprintf("%s?appKey=%s&state=%s&redirectUrl=%s",
+		"https://partner.temu.com/auth/authorize",
+		appKey,
+		url.QueryEscape(state),
+		url.QueryEscape("https://www.jinpuhuang.com/api/v1/temu/callback"),
+	)
 
-	redirectURL := fmt.Sprintf("https://www.jinpuhuang.com/api/v1/temu/callback")
-
-	authURL := fmt.Sprintf("%s/openapi/oauth?app_key=%s&redirect_url=%s&state=%s",
-		baseURL, appKey, url.QueryEscape(redirectURL), url.QueryEscape(stateEncoded))
-
-	Success(c, gin.H{
-		"auth_url":    authURL,
-		"description": "将此链接发给Temu卖家，卖家点击后在卖家中心授权即可自动绑定店铺",
-	})
+	Success(c, gin.H{"auth_url": redirectURL})
 }
 
 func HandleTemuCallback(c *gin.Context) {
-	code := c.Query("code")
-	stateEncoded := c.Query("state")
+	code := c.DefaultQuery("code", "")
+	stateEncoded := c.DefaultQuery("state", "")
 
 	if code == "" || stateEncoded == "" {
-		Error(c, http.StatusBadRequest, ErrValidation, "缺少 code 或 state 参数")
+		c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", url.QueryEscape("缺少授权code或state参数")))
 		return
 	}
 
-	stateData, err := base64.URLEncoding.DecodeString(stateEncoded)
+	stateBytes, err := base64.StdEncoding.DecodeString(stateEncoded)
 	if err != nil {
-		slog.Error("failed to decode state", "error", err)
-		Error(c, http.StatusBadRequest, ErrValidation, "无效的 state 参数")
+		c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", url.QueryEscape("state参数无效")))
 		return
 	}
 
 	var state authState
-	if err := json.Unmarshal(stateData, &state); err != nil {
-		slog.Error("failed to unmarshal state", "error", err)
-		Error(c, http.StatusBadRequest, ErrValidation, "无效的 state 数据")
+	if err := json.Unmarshal(stateBytes, &state); err != nil {
+		c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", url.QueryEscape("state参数解析失败")))
 		return
 	}
-
-	slog.Info("temu oauth callback received", "user_id", state.UserID, "shop_name", state.ShopName)
 
 	cfg := config.Cfg
 	appKey := cfg.Temu.AppKey
@@ -98,15 +88,33 @@ func HandleTemuCallback(c *gin.Context) {
 	}
 
 	var tokenData struct {
-		AccessToken string `json:"access_token"`
+		AccessToken string `json:"accessToken"`
 		ExpiresIn   int    `json:"expires_in"`
 		ShopName    string `json:"shop_name,omitempty"`
 	}
 	if resp.Data != nil {
 		json.Unmarshal(resp.Data, &tokenData)
 	}
+	if tokenData.AccessToken == "" && resp.Result != nil {
+		var resultToken struct {
+			AccessToken string `json:"accessToken"`
+			ExpiresIn   int    `json:"expires_in"`
+			MallID      int    `json:"mallId"`
+		}
+		json.Unmarshal(resp.Result, &resultToken)
+		if resultToken.AccessToken != "" {
+			tokenData.AccessToken = resultToken.AccessToken
+		}
+	}
+	if tokenData.AccessToken == "" && resp.Data != nil {
+		var altToken struct {
+			AccessToken string `json:"access_token"`
+		}
+		json.Unmarshal(resp.Data, &altToken)
+		tokenData.AccessToken = altToken.AccessToken
+	}
 	if tokenData.AccessToken == "" {
-		slog.Error("access token is empty in response", "resp", string(resp.Data))
+		slog.Error("access token is empty in response", "data", string(resp.Data), "result", string(resp.Result))
 		c.Redirect(http.StatusFound, fmt.Sprintf("/?error=%s", url.QueryEscape("返回的Access Token为空")))
 		return
 	}
@@ -132,4 +140,41 @@ func HandleTemuCallback(c *gin.Context) {
 	slog.Info("shop bound via oauth", "user_id", state.UserID, "shop_id", shopID, "shop_name", shopName, "region", region)
 
 	c.Redirect(http.StatusFound, fmt.Sprintf("/?success=%s", url.QueryEscape(fmt.Sprintf("店铺「%s」绑定成功！", shopName))))
+}
+
+func HandleTemuWebhook(c *gin.Context) {
+	var request struct {
+		MessageID   string          `json:"message_id"`
+		MessageType string          `json:"message_type"`
+		ShopID      int             `json:"shop_id"`
+		Timestamp   int64           `json:"timestamp"`
+		Data        json.RawMessage `json:"data"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		slog.Warn("webhook: invalid request body", "error", err)
+		Success(c, gin.H{"code": 0, "message": "ok"})
+		return
+	}
+
+	if request.MessageID == "" || request.MessageType == "" {
+		slog.Warn("webhook: missing message_id or message_type")
+		Success(c, gin.H{"code": 0, "message": "ok"})
+		return
+	}
+
+	svc := service.NewWebhookService(0)
+	msg := &service.WebhookMessage{
+		MessageID:   request.MessageID,
+		MessageType: request.MessageType,
+		ShopID:      request.ShopID,
+		Timestamp:   request.Timestamp,
+		Data:        request.Data,
+	}
+
+	result := svc.ProcessWebhook(msg)
+	slog.Info("webhook processed", "message_id", result.MessageID,
+		"type", result.MessageType, "action", result.Action)
+
+	Success(c, gin.H{"code": 0, "message": "ok"})
 }
