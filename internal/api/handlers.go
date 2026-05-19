@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -102,11 +103,11 @@ func LoginHandler(c *gin.Context) {
 
 func RegisterHandler(c *gin.Context) {
 	var req struct {
-		Email          string `json:"email" binding:"required"`
-		Password       string `json:"password" binding:"required,min=6"`
-		AgreedTerms    bool   `json:"agreed_terms"`
-		AgreedPrivacy  bool   `json:"agreed_privacy"`
-		PolicyVersion  string `json:"policy_version"`
+		Email         string `json:"email" binding:"required"`
+		Password      string `json:"password" binding:"required,min=6"`
+		AgreedTerms   bool   `json:"agreed_terms"`
+		AgreedPrivacy bool   `json:"agreed_privacy"`
+		PolicyVersion string `json:"policy_version"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		Error(c, http.StatusBadRequest, ErrBadRequest, "邮箱和密码不能为空（密码至少6位）")
@@ -1038,10 +1039,19 @@ func SubmitOrder(c *gin.Context) {
 		Status:      "pending",
 	}
 
+	isBasic := strings.Contains(req.PlanName, "基础版")
+	if isBasic {
+		order.Status = "completed"
+	}
+
 	if err := repository.CreateOrder(order); err != nil {
 		slog.Error("failed to submit order", "error", err)
 		Error(c, http.StatusInternalServerError, ErrInternal, "订单提交失败")
 		return
+	}
+
+	if isBasic {
+		slog.Info("basic plan order auto-completed", "order_id", order.OrderID)
 	}
 
 	slog.Info("order submitted", "order_id", order.OrderID, "plan", req.PlanName)
