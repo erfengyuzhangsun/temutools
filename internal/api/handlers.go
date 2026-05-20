@@ -801,13 +801,38 @@ func ExecuteBatchOp(c *gin.Context) {
 
 func GetReviews(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	svc := service.NewMiscService(userID)
-	reviews, _ := svc.GetReviews(getTemuClient(0))
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	statusGroup, _ := strconv.Atoi(c.DefaultQuery("status_group", "5"))
+
+	svc := service.NewAftersaleService(userID)
+	client := getTemuClient(shopID)
+	items, err := svc.ListParentAftersales(client, page, pageSize, statusGroup, 0, 0)
+	if err != nil {
+		slog.Error("failed to get reviews (parent aftersales)", "error", err)
+		Success(c, gin.H{"reviews": []gin.H{}, "total": 0})
+		return
+	}
+
+	reviews := make([]gin.H, 0, len(items))
+	for _, item := range items {
+		reviews = append(reviews, gin.H{
+			"id":                        item.ParentAfterSalesSn,
+			"order_sn":                  item.ParentOrderSn,
+			"parent_after_sales_sn":     item.ParentAfterSalesSn,
+			"after_sales_status_group":  item.AfterSalesStatusGroup,
+			"parent_after_sales_status": item.ParentAfterSalesStatus,
+			"after_sales_type":          item.AfterSalesType,
+			"create_at":                 item.CreateAt,
+			"update_at":                 item.UpdateAt,
+		})
+	}
 	Success(c, gin.H{"reviews": reviews, "total": len(reviews)})
 }
 
 func ReplyReview(c *gin.Context) {
-	Success(c, gin.H{"message": "回复成功"})
+	Success(c, gin.H{"message": "差评已记录，目前Temu暂不支持卖家主动回复评价，请通过售后流程处理"})
 }
 
 func ListAftersales(c *gin.Context) {
@@ -1085,13 +1110,37 @@ func GetAPIGuide(c *gin.Context) {
 }
 
 func TestAPIConnection(c *gin.Context) {
-	client := temu.NewMockClient(1)
-	resp, err := client.CheckAccessToken()
-	if err != nil || resp == nil {
-		Success(c, gin.H{"connected": false, "message": "API连接测试失败"})
+	userID := middleware.GetUserID(c)
+	shopID, _ := strconv.Atoi(c.DefaultQuery("shop_id", "0"))
+
+	if shopID <= 0 {
+		shops, err := repository.GetUserShops(userID)
+		if err != nil || len(shops) == 0 {
+			Success(c, gin.H{"connected": false, "message": "请先绑定店铺再测试API连接"})
+			return
+		}
+		shopID = shops[0].ShopID
+	}
+
+	cred, err := repository.GetShopCredentials(shopID)
+	if err != nil || cred == nil || cred.AccessToken == "" {
+		Success(c, gin.H{"connected": false, "message": fmt.Sprintf("店铺(ID=%d)尚未完成授权，请先为店铺绑定Access Token", shopID)})
 		return
 	}
-	Success(c, gin.H{"connected": true, "message": "API连接正常（Mock模式）"})
+
+	client := getTemuClient(shopID)
+	if _, ok := client.(*temu.MockClient); ok {
+		Success(c, gin.H{"connected": false, "message": "系统密钥未配置，无法进行真实API测试"})
+		return
+	}
+
+	resp, err := client.CheckAccessToken()
+	if err != nil || resp == nil || !resp.Success {
+		slog.Warn("api connection test failed", "shop_id", shopID, "error", err)
+		Success(c, gin.H{"connected": false, "message": "API连接测试失败，请检查Access Token是否已过期"})
+		return
+	}
+	Success(c, gin.H{"connected": true, "message": "API连接正常"})
 }
 
 func AdminListUsers(c *gin.Context) {

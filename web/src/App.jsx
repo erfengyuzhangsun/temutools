@@ -20,6 +20,8 @@ import MessagePage from './pages/Message';
 import ActivityPage from './pages/Activity';
 import RiskGuardPage from './pages/RiskGuard';
 import ShippingPage from './pages/Shipping';
+import AfterSalePage from './pages/AfterSale';
+import ExchangePage from './pages/Exchange';
 import ApiGuidePage from './pages/ApiGuide';
 import AdminPage from './pages/Admin';
 import PrivacyPage from './pages/Privacy';
@@ -76,6 +78,8 @@ export default function App() {
               <Route path="/activity" element={<ActivityPage />} />
               <Route path="/risk-guard" element={<RiskGuardPage />} />
               <Route path="/shipping" element={<ShippingPage />} />
+              <Route path="/aftersale" element={<AfterSalePage />} />
+              <Route path="/exchange" element={<ExchangePage />} />
               <Route path="/api-guide" element={<ApiGuidePage />} />
               <Route path="/admin" element={<AdminPage />} />
               {placeholderModules.map((m) => (
