@@ -56,7 +56,7 @@ P0 → P1 → P2
 | 2026-05-20 | `89540a9` | Token过期时间字段 |
 | 2026-05-20 | `3d32222` | P0:TestAPIConnection修复 + P1:AfterSale页+Exchange页+差评监控修复 ⚠️ 未推送(GitHub不可达) |
 | 2026-05-20 | `a139937` | P2:结算页面新增结算记录Tab ⚠️ 未推送(GitHub不可达) |
-| 2026-05-20 | _(待提交)_ | P2:优化侧栏(移除batch-ops/product-research) + ReviewMonitor真实页面 ⚠️ 未推送(GitHub不可达) |
+| 2026-05-20 | `30de1a9` | P2:优化侧栏(移除batch-ops/product-research) + ReviewMonitor真实页面 ⚠️ 未推送(GitHub不可达) |
 
 ---
 
@@ -64,4 +64,5 @@ P0 → P1 → P2
 
 | 日期 | go build | go test | npm run build | 备注 |
 |:----:|:--------:|:-------:|:-------------:|:-----|
+| 2026-05-20 | ✅ | ✅ | ✅ | go build + go test + npm run build 全部通过 |
 | — | — | — | — | 待填写 |
