@@ -40,8 +40,8 @@ P0 → P1 → P2
 
 | # | 任务 | 类型 | 当前问题 | 修复方案 | 状态 |
 |:-:|:-----|:----|:---------|:---------|:----:|
-| 5 | **HTTP→HTTPS强制跳转** | 基础运维 | Nginx已配301但不生效 | 验证 Docker Nginx 是否读到完整配置 | ❌ 待处理 |
-| 6 | **结算页面前端适配** | 前端 | 后端 `SyncSettlement` + `GET /finance/history` 已实现，前端无结算界面 | 在 Finance.jsx 新增同步按钮+结算记录表格 | ❌ 待处理 |
+| 5 | **HTTP→HTTPS强制跳转** | 基础运维 | Nginx conf已配301，需在服务器验证是否生效 | ⏳ 需服务器验证 |
+| 6 | **结算页面前端适配** | 前端 | 后端 `SyncSettlement` + `GET /finance/history` 已实现，前端需要结算子页面 | ❌ 待处理 |
 | 7 | **batch-ops 批量操作** | 优化 | 后端 stub + 前端 Placeholder，白名单占用 | 从导航中移除或改成可用提示 | ❌ 待处理 |
 | 8 | **product-research 选品分析** | 优化 | 后端空数据 + 前端 Placeholder | 同上 | ❌ 待处理 |
 | 9 | **补齐22个缺失API** | 后端 | 商品18个+物流4个未实现 | 按需补充 | ⏳ 暂缓 |
@@ -53,7 +53,7 @@ P0 → P1 → P2
 | 日期 | Commit | 完成的任务 |
 |:----:|:------|:-----------|
 | 2026-05-20 | `89540a9` | Token过期时间字段 |
-| 2026-05-20 | _(待提交)_ | P0:TestAPIConnection修复 + P1:AfterSale页+Exchange页+差评监控修复 |
+| 2026-05-20 | `3d32222` | P0:TestAPIConnection修复 + P1:AfterSale页+Exchange页+差评监控修复 ⚠️ 未推送(GitHub不可达) |
 
 ---
 
