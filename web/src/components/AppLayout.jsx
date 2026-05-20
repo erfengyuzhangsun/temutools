@@ -44,7 +44,6 @@ const menuItems = [
   { type: 'divider' },
   { key: 'factory-cost', icon: <ToolOutlined />, label: '工厂成本', plan: 'enterprise' },
   { key: 'supplier', icon: <TeamOutlined />, label: '供应商', plan: 'enterprise' },
-  { key: 'product-research', icon: <SearchOutlined />, label: '选品分析', plan: 'enterprise' },
   { type: 'divider' },
   { key: 'admin', icon: <CrownOutlined />, label: '管理后台', plan: 'lifetime' },
 ];

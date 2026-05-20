@@ -22,6 +22,7 @@ import RiskGuardPage from './pages/RiskGuard';
 import ShippingPage from './pages/Shipping';
 import AfterSalePage from './pages/AfterSale';
 import ExchangePage from './pages/Exchange';
+import ReviewMonitorPage from './pages/ReviewMonitor';
 import ApiGuidePage from './pages/ApiGuide';
 import AdminPage from './pages/Admin';
 import PrivacyPage from './pages/Privacy';
@@ -33,7 +34,7 @@ import {
   SettingOutlined, CloudSyncOutlined, ClockCircleOutlined,
   SafetyOutlined, ToolOutlined, TeamOutlined,
   ExperimentOutlined, MessageOutlined, GiftOutlined,
-  SearchOutlined, AppstoreOutlined, FileTextOutlined,
+  AppstoreOutlined,
   TruckOutlined,
 } from '@ant-design/icons';
 
@@ -44,9 +45,7 @@ function ProtectedRoute({ children }) {
 }
 
 const placeholderModules = [
-  { path: 'review-monitor', label: '差评监控', icon: <FileTextOutlined /> },
   { path: 'batch-ops', label: '批量操作', icon: <AppstoreOutlined /> },
-  { path: 'product-research', label: '选品分析', icon: <SearchOutlined /> },
 ];
 
 export default function App() {
@@ -79,6 +78,7 @@ export default function App() {
               <Route path="/risk-guard" element={<RiskGuardPage />} />
               <Route path="/shipping" element={<ShippingPage />} />
               <Route path="/aftersale" element={<AfterSalePage />} />
+              <Route path="/review-monitor" element={<ReviewMonitorPage />} />
               <Route path="/exchange" element={<ExchangePage />} />
               <Route path="/api-guide" element={<ApiGuidePage />} />
               <Route path="/admin" element={<AdminPage />} />
